@@ -43,7 +43,19 @@ export default [
       // Indentation rules
       'indent': ['error', 2, { SwitchCase: 1 }],
       // React rules
-      'react/self-closing-comp': 'error'
+      'react/self-closing-comp': 'error',
+      // Disallow multiple spaces in JSX props and in general
+      'react/jsx-props-no-multi-spaces': 'error',
+      'no-multi-spaces': ['error', { ignoreEOLComments: false }],
+      // Enforce closing tag location and consistent JSX indentation
+      'react/jsx-closing-tag-location': 'error',
+      'react/jsx-closing-bracket-location': ['error', { nonEmpty: 'line-aligned' }],
+      'react/jsx-indent': ['error', 2],
+      'react/jsx-indent-props': ['error', 2],
+      'react/jsx-first-prop-new-line': ['error', 'multiline']
+      ,
+      // Enforce single quotes in JSX attributes
+      'jsx-quotes': ['error', 'prefer-single']
     }
   }
 ]
