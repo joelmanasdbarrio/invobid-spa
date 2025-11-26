@@ -9,12 +9,20 @@ import {
 export function AppSidebar () {
   return (
     <Sidebar>
-      <SidebarHeader />
+      <SidebarHeader>
+        Header
+      </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup />
-        <SidebarGroup />
+        <SidebarGroup>
+          Group 1
+        </SidebarGroup>
+        <SidebarGroup>
+          Group 2
+        </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter />
+      <SidebarFooter>
+        Footer
+      </SidebarFooter>
     </Sidebar>
   )
 }
