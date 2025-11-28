@@ -1,8 +1,8 @@
 import { Route, Routes } from 'react-router'
 import MainLayout from './layouts/layout'
 import Home from './pages/Home'
-import Login from './pages/login'
-import Register from './pages/register'
+import Login from './pages/login/page'
+import Register from './pages/register/page'
 
 function App () {
 
