@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { createAdmin } from '@/services/admin.api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -34,22 +35,8 @@ export default function AdminForm () {
   })
 
   function onSubmit (data: z.infer<typeof formSchema>) {
-    fetch('http://localhost:3000/api/v1/admins', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    }).then(async (response) => {
-      if (response.ok) {
-        console.log('Registro completado con éxito')
-      } else {
-        const errorData = await response.json()
-        console.error(`Error: ${errorData.message || 'Error desconocido'}`)
-      }
-    }).catch((error) => {
-      console.error(`Error de red: ${error.message}`)
-    })
+    const body = JSON.stringify(data)
+    createAdmin(body)
   }
 
   return (

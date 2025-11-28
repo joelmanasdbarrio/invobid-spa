@@ -4,6 +4,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSepar
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { createSupplier } from '@/services/supplier.api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -71,19 +72,7 @@ export default function SupplierForm () {
     formData.append('document', data.document)
     formData.append('logo', data.logo)
 
-    fetch('http://localhost:3000/api/v1/suppliers', {
-      method: 'POST',
-      body: formData
-    }).then(async (response) => {
-      if (response.ok) {
-        console.log('Registro completado con éxito')
-      } else {
-        const errorData = await response.json()
-        console.error(`Error: ${errorData.message || 'Error desconocido'}`)
-      }
-    }).catch((error) => {
-      console.error(`Error de red: ${error.message}`)
-    })
+    createSupplier(formData)
   }
 
   return (

@@ -5,6 +5,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { createInvestor } from '@/services/investor.api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
@@ -74,19 +75,7 @@ export default function InvestorForm () {
     formData.append('documentValue', data.documentValue)
     formData.append('document', data.document)
 
-    fetch('http://localhost:3000/api/v1/investor', {
-      method: 'POST',
-      body: formData
-    }).then(async (response) => {
-      if (response.ok) {
-        alert('Registro completado con éxito')
-      } else {
-        const errorData = await response.json()
-        alert(`Error: ${errorData.message || 'Error desconocido'}`)
-      }
-    }).catch((error) => {
-      alert(`Error de red: ${error.message}`)
-    })
+    createInvestor(formData)
   }
 
   return (
