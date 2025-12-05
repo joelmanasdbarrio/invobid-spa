@@ -6,6 +6,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { createAdmin } from '@/services/admin.api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router'
 import { z } from 'zod'
 
 const formSchema = z.object({
@@ -23,6 +24,7 @@ const formSchema = z.object({
 })
 
 export default function AdminForm () {
+  const navigate = useNavigate()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
@@ -36,7 +38,7 @@ export default function AdminForm () {
 
   function onSubmit (data: z.infer<typeof formSchema>) {
     const body = JSON.stringify(data)
-    createAdmin(body)
+    createAdmin(body, () => navigate('/'))
   }
 
   return (
