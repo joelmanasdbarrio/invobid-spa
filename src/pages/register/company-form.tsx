@@ -4,18 +4,21 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSepar
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { createSupplier } from '@/services/supplier.api'
+import { createInvestor } from '@/services/investor.api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router'
 import { z } from 'zod'
 
 const formSchema = z.object({
+  investorType: z.enum(['individual', 'company'], {
+    required_error: 'El tipo de inversor es obligatorio'
+  }),
   name: z.string()
-    .min(1, 'El nombre de la empresa es obligatorio'),
+    .min(2, 'El nombre debe tener al menos 2 caracteres'),
   companyName: z.string()
     .min(1, 'La razón social es obligatoria'),
-  email: z.string()
-    .email('Correo electrónico no válido'),
+  email: z.email('Correo electrónico no válido'),
   phoneNumber: z.string()
     .min(6, 'El número de teléfono es obligatorio'),
   password: z.string()
@@ -28,22 +31,19 @@ const formSchema = z.object({
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
     .transform((files) => files[0]),
-  website: z.string()
-    .url('La página web no es válida'),
-  logo: z.custom<FileList>()
-    .refine((files) => files && files.length > 0, 'El logo es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El logo no puede estar vacío')
-    .transform((files) => files[0])
+  investorType: z.enum(['company']).default('company')
 }).refine((data) => data.password === data.passwordRepeat, {
   message: 'Las contraseñas no coinciden',
   path: ['passwordRepeat']
 })
 
-export default function SupplierForm () {
+export default function CompanyForm () {
+  const navigate = useNavigate()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
+      investorType: 'company',
       name: '',
       companyName: '',
       email: '',
@@ -51,15 +51,14 @@ export default function SupplierForm () {
       password: '',
       passwordRepeat: '',
       documentValue: '',
-      document: undefined,
-      website: '',
-      logo: undefined
+      document: undefined
     }
   })
 
   function onSubmit (data: z.infer<typeof formSchema>) {
     const formData = new FormData()
 
+    formData.append('investorType', data.investorType)
     formData.append('name', data.name)
     formData.append('companyName', data.companyName)
     formData.append('email', data.email)
@@ -67,20 +66,17 @@ export default function SupplierForm () {
     formData.append('password', data.password)
     formData.append('passwordRepeat', data.passwordRepeat)
     formData.append('documentValue', data.documentValue)
-    formData.append('website', data.website)
-
     formData.append('document', data.document)
-    formData.append('logo', data.logo)
 
-    createSupplier(formData)
+    createInvestor(formData, () => navigate('/'))
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Emisor</CardTitle>
+        <CardTitle>Empresa</CardTitle>
         <CardDescription>
-          PYMES y autónomos que buscan financiamiento rápido y desean publicar sus facturas para subasta.
+          Subasta, invierte e intercanvia facturas con otras empresas e inversores.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -94,7 +90,7 @@ export default function SupplierForm () {
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Nombre de la empresa</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='ACME' required />
+                      <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder={'ACME'} required />
                       <InputGroupAddon>
                         <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0' /><path d='M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2' /></svg>
                       </InputGroupAddon>
@@ -228,7 +224,7 @@ export default function SupplierForm () {
                             <svg xmlns='http://www.w3.org/2000/svg' className='w-4 h-4' viewBox='0 0 24 24' fill='currentColor'><path d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 15H13V17H11V15ZM13 13.3551V14H11V12.5C11 11.9477 11.4477 11.5 12 11.5C12.8284 11.5 13.5 10.8284 13.5 10C13.5 9.17157 12.8284 8.5 12 8.5C11.2723 8.5 10.6656 9.01823 10.5288 9.70577L8.56731 9.31346C8.88637 7.70919 10.302 6.5 12 6.5C13.933 6.5 15.5 8.067 15.5 10C15.5 11.5855 14.4457 12.9248 13 13.3551Z' /></svg>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p className='text-center'>Valor documento CIF/NIF (número + letras)</p>
+                            <p className='text-center'>Valor del documento CIF/NIF (número + letras)</p>
                           </TooltipContent>
                         </Tooltip>
                       </InputGroupAddon>
@@ -253,10 +249,10 @@ export default function SupplierForm () {
                         onBlur={field.onBlur}
                         ref={field.ref}
                         type='file'
+                        required
                         className='pt-1.5'
                         accept='image/jpeg,image/png,.pdf'
                         aria-description='Fotocopia que permita visualizar el documento completo'
-                        required
                       />
                       <InputGroupAddon>
                         <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M3 4m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v10a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z' /><path d='M9 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0' /><path d='M15 8l2 0' /><path d='M15 12l2 0' /><path d='M7 16l10 0' /></svg>
@@ -270,53 +266,6 @@ export default function SupplierForm () {
                             <p className='text-center'>Fotocopia que permita visualizar el documento CIF/NIF completo</p>
                           </TooltipContent>
                         </Tooltip>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-            </FieldGroup>
-            <FieldGroup className='flex flex-col gap-4 sm:grid sm:grid-cols-2'>
-              <Controller
-                name='website'
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Página web</FieldLabel>
-                    <InputGroup>
-                      <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='url' placeholder='https://miempresa.com' required/>
-                      <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0' /><path d='M3.6 9h16.8' /><path d='M3.6 15h16.8' /><path d='M11.5 3a17 17 0 0 0 0 18' /><path d='M12.5 3a17 17 0 0 1 0 18' /></svg>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Controller
-                name='logo'
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Logo</FieldLabel>
-                    <InputGroup>
-                      <InputGroupInput
-                        aria-invalid={fieldState.invalid}
-                        id={field.name}
-                        onChange={(e) => field.onChange(e.target.files)}
-                        onBlur={field.onBlur}
-                        ref={field.ref}
-                        type='file'
-                        required className='pt-1.5'
-                        accept='image/jpeg,image/png'
-                      />
-                      <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M15 8h.01' /><path d='M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z' /><path d='M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5' /><path d='M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3' /></svg>
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
