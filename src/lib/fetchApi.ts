@@ -4,12 +4,14 @@ export default function fetchApi<T = Record<string, unknown>> (
   url: string,
   options: RequestInit,
   notification?: {
-  promise: string,
-  resolve: string,
-  reject: string
-}
-): Promise<T> {
-  const fetchRequest = async (): Promise<T> => {
+    promise: string,
+    resolve: string,
+    reject: string
+  },
+  onResolve?: () => void,
+  onReject?: () => void
+) {
+  const fetchRequest = async () => {
     const response = await fetch(url, {
       credentials: 'include',
       ...options
@@ -31,13 +33,12 @@ export default function fetchApi<T = Record<string, unknown>> (
     fetchRequest(),
     {
       loading: promise,
-      success: (data) => {
-        if (typeof resolve === 'function') {
-          return resolve(data)
-        }
+      success: () => {
+        if (onResolve) onResolve()
         return resolve
       },
       error: (error) => {
+        if (onReject) onReject()
         return `${reject}: ${error.message}`
       }
     }
