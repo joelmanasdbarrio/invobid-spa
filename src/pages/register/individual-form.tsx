@@ -82,7 +82,7 @@ export default function IndividualForm () {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Individual</CardTitle>
+        <CardTitle>Particular</CardTitle>
         <CardDescription>
           Invierte en facturas comerciales y accede a oportunidades de inversión únicas.
         </CardDescription>
