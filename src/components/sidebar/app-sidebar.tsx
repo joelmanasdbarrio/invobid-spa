@@ -15,7 +15,7 @@ import {InvestorSidebarContent} from './investor-sidebar-content'
 import {AdminSidebarContent} from './admin-sidebar-content'
 import CommonSidebarContent from '@/components/sidebar/common-sidebar-content.tsx'
 import UserSidebarDropdown from '@/components/sidebar/user-sidebar-dropdown.tsx'
-import {useLocation} from 'react-router'
+import {Link, useLocation} from 'react-router'
 
 export function AppSidebar () {
   const appName = import.meta.env.VITE_APP_NAME
@@ -39,9 +39,11 @@ export function AppSidebar () {
             <SidebarGroupLabel>General</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton isActive={location.pathname === '/'}>
-                  Dashboard
-                </SidebarMenuButton>
+                <Link to='/'>
+                  <SidebarMenuButton isActive={location.pathname === '/'} className='hover:cursor-pointer'>
+                    Dashboard
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

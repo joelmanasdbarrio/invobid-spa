@@ -1,9 +1,10 @@
-import { Route, Routes } from 'react-router'
-import { ThemeProvider } from './components/dark-mode/theme-provider'
+import {Route, Routes} from 'react-router'
+import {ThemeProvider} from './components/dark-mode/theme-provider'
 import MainLayout from './layouts/layout'
 import DashboardPage from './pages/dashboard/page'
 import Login from './pages/login/page'
 import Register from './pages/register/page'
+import AdminUsersPage from '@/pages/dashboard/admin/users/page.tsx'
 
 function App () {
 
@@ -15,6 +16,8 @@ function App () {
           <Route path='/register' element={<Register /> }/>
 
           <Route path='/' element={<MainLayout header='Dashboard'><DashboardPage /></MainLayout>} />
+
+          <Route path='/admin/users' element={<MainLayout header='Gestión de usuarios'><AdminUsersPage /></MainLayout>} />
         </Routes>
       </main>
     </ThemeProvider>

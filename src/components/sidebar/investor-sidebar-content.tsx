@@ -26,7 +26,7 @@ export function InvestorSidebarContent () {
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub>
+                <SidebarMenuSub className={'m-0 pe-0'}>
                   <SidebarMenuSubItem>
                     <SidebarMenuButton>
                       Disponibles
@@ -57,7 +57,7 @@ export function InvestorSidebarContent () {
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub>
+                <SidebarMenuSub className={'m-0 pe-0'}>
                   <SidebarMenuSubItem>
                     <SidebarMenuButton>
                       Publicadas
