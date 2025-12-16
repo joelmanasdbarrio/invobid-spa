@@ -1,19 +1,19 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
-import { Form } from '@/components/ui/form'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { createInvestor } from '@/services/investor.api'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Controller, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
-import { z } from 'zod'
+import {Button} from '@/components/ui/button'
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
+import {Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator} from '@/components/ui/field'
+import {Form} from '@/components/ui/form'
+import {InputGroup, InputGroupAddon, InputGroupInput} from '@/components/ui/input-group'
+import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
+import {createInvestor} from '@/services/investor.api'
+import {zodResolver} from '@hookform/resolvers/zod'
+import {Controller, useForm} from 'react-hook-form'
+import {useNavigate} from 'react-router'
+import {z} from 'zod'
+import {useContext} from 'react'
+import {AuthContext} from '@/contexts/auth.context.ts'
+import Cookies from 'js-cookie'
 
 const formSchema = z.object({
-  investorType: z.enum(['individual', 'company'], {
-    required_error: 'El tipo de inversor es obligatorio'
-  }),
   name: z.string()
     .min(2, 'El nombre debe tener al menos 2 caracteres'),
   companyName: z.string()
@@ -43,7 +43,6 @@ export default function CompanyForm () {
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
-      investorType: 'company',
       name: '',
       companyName: '',
       email: '',
@@ -51,10 +50,16 @@ export default function CompanyForm () {
       password: '',
       passwordRepeat: '',
       documentValue: '',
-      document: undefined
+      document: undefined,
+      investorType: 'company'
     }
   })
 
+  const authContext = useContext(AuthContext)
+  if (!authContext) {
+    throw new Error('AuthContext must be used within AuthProvider')
+  }
+  const { setLoggedInUser } = authContext
   function onSubmit (data: z.infer<typeof formSchema>) {
     const formData = new FormData()
 
@@ -68,7 +73,12 @@ export default function CompanyForm () {
     formData.append('documentValue', data.documentValue)
     formData.append('document', data.document)
 
-    createInvestor(formData, () => navigate('/'))
+    createInvestor(formData, (res) => {
+      Cookies.set('logged-in-user', JSON.stringify(res.data), { expires: 1 })
+      setLoggedInUser(res.data)
+
+      navigate('/')
+    })
   }
 
   return (

@@ -1,7 +1,24 @@
 import fetchApi from '@/lib/fetchApi'
 
-export const createInvestor = (body: string, onSuccess?: () => void, onReject?: () => void) => {
-  return fetchApi('http://localhost:3000/api/v1/auth/register/investor', {
+interface CreateInvestorResponse {
+  status: string
+  data: {
+    id: string,
+    email: string,
+    name: string,
+    type: string,
+    phoneNumber: number,
+    companyName: string,
+    investorType: string,
+    status: string,
+    isOptedInNotificationsEmail: boolean,
+    isOptedInNotificationsSMS: boolean
+  }
+  access_token: string
+}
+
+export const createInvestor = (body: FormData, onSuccess?: (response: CreateInvestorResponse) => void, onReject?: (error: Error) => void) => {
+  return fetchApi<CreateInvestorResponse>('http://localhost:3000/api/v1/auth/register/investor', {
     method: 'POST',
     body
   }, {
@@ -12,4 +29,10 @@ export const createInvestor = (body: string, onSuccess?: () => void, onReject?: 
   onSuccess,
   onReject
   )
+}
+
+export const countPendingInvestors = async () => {
+  return fetchApi('http://localhost:3000/api/v1/investors/lookup/countPending', {
+    method: 'GET'
+  })
 }

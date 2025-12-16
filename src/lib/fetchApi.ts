@@ -1,4 +1,4 @@
-import { toast } from 'sonner'
+import {toast} from 'sonner'
 
 export default function fetchApi<T = Record<string, unknown>> (
   url: string,
@@ -8,8 +8,8 @@ export default function fetchApi<T = Record<string, unknown>> (
     resolve: string,
     reject: string
   },
-  onResolve?: () => void,
-  onReject?: () => void
+  onResolve?: (response: T) => void,
+  onReject?: (error: Error) => void
 ) {
   const fetchRequest = async () => {
     const response = await fetch(url, {
@@ -33,12 +33,12 @@ export default function fetchApi<T = Record<string, unknown>> (
     fetchRequest(),
     {
       loading: promise,
-      success: () => {
-        if (onResolve) onResolve()
+      success: (data) => {
+        if (onResolve) onResolve(data)
         return resolve
       },
       error: (error) => {
-        if (onReject) onReject()
+        if (onReject) onReject(error)
         return `${reject}: ${error.message}`
       }
     }

@@ -1,13 +1,16 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
-import { Form } from '@/components/ui/form'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { createAdmin } from '@/services/admin.api'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Controller, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
-import { z } from 'zod'
+import {Button} from '@/components/ui/button'
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
+import {Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator} from '@/components/ui/field'
+import {Form} from '@/components/ui/form'
+import {InputGroup, InputGroupAddon, InputGroupInput} from '@/components/ui/input-group'
+import {createAdmin} from '@/services/admin.api'
+import {zodResolver} from '@hookform/resolvers/zod'
+import {Controller, useForm} from 'react-hook-form'
+import {useNavigate} from 'react-router'
+import {z} from 'zod'
+import Cookies from 'js-cookie'
+import {AuthContext} from '@/contexts/auth.context.ts'
+import {useContext} from 'react'
 
 const formSchema = z.object({
   name: z.string()
@@ -36,9 +39,19 @@ export default function AdminForm () {
     }
   })
 
+  const authContext = useContext(AuthContext)
+  if (!authContext) {
+    throw new Error('AuthContext must be used within AuthProvider')
+  }
+  const { setLoggedInUser } = authContext
   function onSubmit (data: z.infer<typeof formSchema>) {
     const body = JSON.stringify(data)
-    createAdmin(body, () => navigate('/'))
+    createAdmin(body, (res) => {
+      Cookies.set('logged-in-user', JSON.stringify(res.data), { expires: 1 })
+      setLoggedInUser(res.data)
+
+      navigate('/')
+    })
   }
 
   return (
