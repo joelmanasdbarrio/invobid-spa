@@ -4,9 +4,9 @@ export default function fetchApi<T = Record<string, unknown>> (
   url: string,
   options: RequestInit,
   notification?: {
-    promise: string,
-    resolve: string,
-    reject: string
+    promise?: string,
+    resolve?: string,
+    reject?: string
   },
   onResolve?: (response: T) => void,
   onReject?: (error: Error) => void
@@ -28,19 +28,22 @@ export default function fetchApi<T = Record<string, unknown>> (
   }
 
   const { promise, resolve, reject } = notification
+  const dataPromise = fetchRequest()
 
-  return toast.promise<T>(
-    fetchRequest(),
+  toast.promise<T>(
+    dataPromise,
     {
       loading: promise,
-      success: (data) => {
+      success: resolve && ((data) => {
         if (onResolve) onResolve(data)
-        return resolve
-      },
-      error: (error) => {
+        return resolve || undefined
+      }),
+      error: reject && ((error) => {
         if (onReject) onReject(error)
         return `${reject}: ${error.message}`
-      }
+      })
     }
   )
+
+  return dataPromise
 }
