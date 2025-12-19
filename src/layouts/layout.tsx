@@ -9,15 +9,15 @@ export default function MainLayout ({
   children: React.ReactNode;
 }>) {
   return (
-    <SidebarProvider>
+    <SidebarProvider className='w-dvw! h-dvh!'>
       <AppSidebar />
-      <div className='grow bg-background text-foreground md:m-2 md:rounded-lg md:shadow-md'>
+      <div className='grow flex flex-col bg-background text-foreground md:m-2 md:rounded-lg md:shadow-md overflow-scroll'>
         <div className='flex items-center gap-2 border-b p-2'>
           <SidebarTrigger className='p-2' />
           <span className='h-8 border-s'/>
           <h1 className='text-2xl font-bold'>{header}</h1>
         </div>
-        <section className='p-4'>
+        <section className='grow p-4 overflow-scroll'>
           {children}
         </section>
       </div>

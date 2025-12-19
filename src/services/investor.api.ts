@@ -31,6 +31,17 @@ export const createInvestor = (body: FormData, onSuccess?: (response: CreateInve
   )
 }
 
+export const getInvestors = async (queryParams?: Record<string, any>) => {
+  const queryString = new URLSearchParams(queryParams).toString()
+  return fetchApi(`http://localhost:3000/api/v1/investors?${queryString}`, {
+    method: 'GET'
+  }, {
+    reject: 'Error al cargar los inversores'
+  })
+}
+
+// Lookup service
+
 export const countPendingInvestors = async () => {
   return fetchApi('http://localhost:3000/api/v1/investors/lookup/countPending', {
     method: 'GET'

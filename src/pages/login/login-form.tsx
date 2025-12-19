@@ -1,17 +1,18 @@
 import {Button} from '@/components/ui/button'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import {Checkbox} from '@/components/ui/checkbox.tsx'
 import {Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator} from '@/components/ui/field'
 import {Form} from '@/components/ui/form'
 import {InputGroup, InputGroupAddon, InputGroupInput} from '@/components/ui/input-group'
+import {AuthContext} from '@/contexts/auth.context'
 import {login} from '@/services/auth.api'
 import {zodResolver} from '@hookform/resolvers/zod'
+import Cookies from 'js-cookie'
+import {EllipsisIcon, MailIcon} from 'lucide-react'
+import {useContext} from 'react'
 import {Controller, useForm} from 'react-hook-form'
 import {useNavigate} from 'react-router'
 import {z} from 'zod'
-import {useContext} from 'react'
-import {AuthContext} from '@/contexts/auth.context'
-import Cookies from 'js-cookie'
-import {Checkbox} from '@/components/ui/checkbox.tsx'
 
 const formSchema = z.object({
   email: z.email(),
@@ -20,7 +21,6 @@ const formSchema = z.object({
 })
 
 export default function LoginForm () {
-  const navigate = useNavigate()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
@@ -36,10 +36,11 @@ export default function LoginForm () {
     throw new Error('AuthContext must be used within AuthProvider')
   }
   const { setLoggedInUser } = authContext
-  function onSubmit (data: z.infer<typeof formSchema>) {
-    const body = JSON.stringify(data)
+  const navigate = useNavigate()
+  function onSubmit (formData: z.infer<typeof formSchema>) {
+    const body = JSON.stringify(formData)
     login(body, (res) => {
-      Cookies.set('logged-in-user', JSON.stringify(res.data), { expires: data.rememberMe ? 30 : 1 })
+      Cookies.set('logged-in-user', JSON.stringify(res.data), { expires: formData.rememberMe ? 30 : 1 })
       setLoggedInUser(res.data)
 
       return navigate('/')
@@ -64,7 +65,7 @@ export default function LoginForm () {
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='email' placeholder='m@example.com' required />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10z' /><path d='M3 7l9 6l9 -6' /></svg>
+                        <MailIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
@@ -82,10 +83,9 @@ export default function LoginForm () {
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='password' required />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M12 10v4' /><path d='M10 13l4 -2' /><path d='M10 11l4 2' /><path d='M5 10v4' /><path d='M3 13l4 -2' /><path d='M3 11l4 2' /><path d='M19 10v4' /><path d='M17 13l4 -2' /><path d='M17 11l4 2' /></svg>
+                        <EllipsisIcon />
                       </InputGroupAddon>
                     </InputGroup>
-
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}

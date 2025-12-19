@@ -7,7 +7,7 @@ export default function Login () {
     <div className='grow flex flex-col sm:items-center sm:justify-center p-4'>
       <div className='flex flex-col gap-4 w-full max-w-2xl'>
         <div className='flex flex-col items-center gap-1 text-center'>
-          <h1 className='text-2xl font-bold'>Iniciar sesión en {appName?.toUpperCase()}</h1>
+          <h1 className='text-2xl font-bold'>Iniciar sesión en {appName}</h1>
         </div>
         <LoginForm />
       </div>

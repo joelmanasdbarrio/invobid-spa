@@ -1,3 +1,4 @@
+import {Badge} from '@/components/ui/badge.tsx'
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from '@/components/ui/collapsible.tsx'
 import {
   SidebarGroup,
@@ -9,22 +10,19 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem
 } from '@/components/ui/sidebar.tsx'
-import {ChevronRight, FileText, Gavel, User} from 'lucide-react'
-import {Badge} from '@/components/ui/badge.tsx'
-import {Link, useLocation} from 'react-router'
-import {useEffect, useState} from 'react'
 import {countPendingInvestors} from '@/services/investor.api.ts'
+import {ChevronRight, FileText, Gavel, User} from 'lucide-react'
+import {useEffect, useState} from 'react'
+import {Link, useLocation} from 'react-router'
 
 export function AdminSidebarContent () {
   const location = useLocation()
 
   const [pendingInvestorsCount, setPendingInvestorsCount] = useState(0)
   useEffect(() => {
-    async function fetchPendingInvestors () {
-      const res = await countPendingInvestors()
+    countPendingInvestors().then(res => {
       setPendingInvestorsCount(res.data)
-    }
-    fetchPendingInvestors()
+    })
   }, [])
 
   const pendingAuctionsCount = 0 // TODO: fetch pending auctions count
@@ -35,7 +33,7 @@ export function AdminSidebarContent () {
       <SidebarGroupContent>
         <SidebarGroupLabel>Administración</SidebarGroupLabel>
         <SidebarMenu>
-          <Collapsible className='group/collapsible'>
+          <Collapsible className='group/collapsible' open={location.pathname.startsWith('/admin/users')}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild className={'group/collapsible'}>
                 <SidebarMenuButton isActive={location.pathname.startsWith('/admin/users')}>
@@ -50,20 +48,22 @@ export function AdminSidebarContent () {
                 <SidebarMenuSub className={'m-0 pe-0'}>
                   <SidebarMenuSubItem>
                     <Link to='/admin/users'>
-                      <SidebarMenuButton className='hover:cursor-pointer'>
+                      <SidebarMenuButton>
                         Todos los usuarios
                       </SidebarMenuButton>
                     </Link>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Usuarios para validar
-                      {pendingInvestorsCount > 0 && (
-                        <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
-                          {pendingInvestorsCount > 99 ? '+99' : pendingInvestorsCount}
-                        </Badge>
-                      )}
-                    </SidebarMenuButton>
+                    <Link to='/admin/users?status=pending'>
+                      <SidebarMenuButton>
+                        Usuarios para validar
+                        {pendingInvestorsCount > 0 && (
+                          <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
+                            {pendingInvestorsCount > 99 ? '+99' : pendingInvestorsCount}
+                          </Badge>
+                        )}
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>
               </CollapsibleContent>
