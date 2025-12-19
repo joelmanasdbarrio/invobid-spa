@@ -4,14 +4,24 @@ import {Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSepara
 import {Form} from '@/components/ui/form'
 import {InputGroup, InputGroupAddon, InputGroupInput} from '@/components/ui/input-group'
 import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
+import {AuthContext} from '@/contexts/auth.context.ts'
 import {createInvestor} from '@/services/investor.api'
 import {zodResolver} from '@hookform/resolvers/zod'
+import Cookies from 'js-cookie'
+import {
+  BuildingIcon,
+  CircleQuestionMarkIcon,
+  EllipsisIcon,
+  IdCardIcon,
+  MailIcon,
+  PhoneIcon,
+  UserIcon,
+  UsersIcon
+} from 'lucide-react'
+import {useContext} from 'react'
 import {Controller, useForm, useWatch} from 'react-hook-form'
 import {useNavigate} from 'react-router'
 import {z} from 'zod'
-import {useContext} from 'react'
-import {AuthContext} from '@/contexts/auth.context.ts'
-import Cookies from 'js-cookie'
 
 const formSchema = z.object({
   name: z.string()
@@ -31,13 +41,13 @@ const formSchema = z.object({
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
     .transform((files) => files[0]),
-  investorType: z.enum(['individual']).default('individual')
+  investorType: z.enum(['company', 'individual'])
 }).refine((data) => data.password === data.passwordRepeat, {
   message: 'Las contraseñas no coinciden',
   path: ['passwordRepeat']
 })
 
-export default function IndividualForm () {
+export default function InvestorForm ({ investorType }: { investorType: 'company' | 'individual' }) {
   const navigate = useNavigate()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,12 +61,12 @@ export default function IndividualForm () {
       passwordRepeat: '',
       documentValue: '',
       document: undefined,
-      investorType: 'individual'
+      investorType: undefined
     }
   })
 
   const name = useWatch({ control: form.control, name: 'name' })
-  if (name !== form.getValues('companyName')) {
+  if (investorType !== 'company' && name !== form.getValues('companyName')) {
     form.setValue('companyName', name, { shouldValidate: false })
   }
 
@@ -89,9 +99,15 @@ export default function IndividualForm () {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Particular</CardTitle>
-        <CardDescription>
-          Invierte en facturas comerciales y accede a oportunidades de inversión únicas.
+        <CardTitle>{
+          investorType === 'company'
+            ? 'Empresa'
+            : 'Particular'}
+        </CardTitle>
+        <CardDescription>{
+          investorType === 'company'
+            ? 'Subasta, invierte e intercanvia facturas con otras empresas e inversores.'
+            : 'Invierte en facturas comerciales y accede a oportunidades de inversión únicas.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -99,26 +115,46 @@ export default function IndividualForm () {
           <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
             <FieldGroup className='flex flex-col gap-4 sm:grid sm:grid-cols-2'>
               <Controller
+                name='investorType'
+                control={form.control}
+                render={({ field }) => (
+                  <Field className='hidden'>
+                    <FieldLabel htmlFor={field.name}>Tipo de empresa</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput {...field} id={field.name} required value={investorType} />
+                    </InputGroup>
+                  </Field>
+                )}
+              />
+              <Controller
                 name='name'
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Nombre completo</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{
+                      investorType === 'company'
+                        ? 'Nombre de la empresa'
+                        : 'Nombre completo'}
+                    </FieldLabel>
                     <InputGroup>
-                      <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='John Doe' required />
-                      <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0' /><path d='M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2' /></svg>
+                      <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder={'ACME'} required />
+                      <InputGroupAddon>{
+                        investorType === 'company'
+                          ? <UsersIcon />
+                          : <UserIcon />}
                       </InputGroupAddon>
-                      <InputGroupAddon align={'inline-end'}>
-                        <Tooltip>
-                          <TooltipTrigger className='leading-1'>
-                            <svg xmlns='http://www.w3.org/2000/svg' className='w-4 h-4' viewBox='0 0 24 24' fill='currentColor'><path d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 15H13V17H11V15ZM13 13.3551V14H11V12.5C11 11.9477 11.4477 11.5 12 11.5C12.8284 11.5 13.5 10.8284 13.5 10C13.5 9.17157 12.8284 8.5 12 8.5C11.2723 8.5 10.6656 9.01823 10.5288 9.70577L8.56731 9.31346C8.88637 7.70919 10.302 6.5 12 6.5C13.933 6.5 15.5 8.067 15.5 10C15.5 11.5855 14.4457 12.9248 13 13.3551Z' /></svg>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className='text-center'>Nombre y apellidos según <br /> documento de identificación</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </InputGroupAddon>
+                      {investorType === 'individual' && (
+                        <InputGroupAddon align={'inline-end'}>
+                          <Tooltip>
+                            <TooltipTrigger className='leading-1'>
+                              <CircleQuestionMarkIcon className='w-4 h-4'/>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className='text-center'>Nombre y apellidos según <br /> documento de identificación</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </InputGroupAddon>
+                      )}
                     </InputGroup>
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -126,6 +162,36 @@ export default function IndividualForm () {
                   </Field>
                 )}
               />
+              {investorType === 'company' && (
+                <Controller
+                  name='companyName'
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Razón social</FieldLabel>
+                      <InputGroup>
+                        <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='ACME S.L.' required />
+                        <InputGroupAddon>
+                          <BuildingIcon />
+                        </InputGroupAddon>
+                        <InputGroupAddon align={'inline-end'}>
+                          <Tooltip>
+                            <TooltipTrigger className='leading-1'>
+                              <CircleQuestionMarkIcon className='w-4 h-4'/>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className='text-center'>Nombre legal de tu empresa <br /> tal como figura en el registro</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </InputGroupAddon>
+                      </InputGroup>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              )}
             </FieldGroup>
             <FieldGroup className='flex flex-col gap-4 sm:grid sm:grid-cols-2'>
               <Controller
@@ -137,7 +203,7 @@ export default function IndividualForm () {
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='email' placeholder='m@example.com' required />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10z' /><path d='M3 7l9 6l9 -6' /></svg>
+                        <MailIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
@@ -155,7 +221,7 @@ export default function IndividualForm () {
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='tel' placeholder='654987321' required />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2' /></svg>
+                        <PhoneIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
@@ -175,7 +241,7 @@ export default function IndividualForm () {
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='password' required />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M12 10v4' /><path d='M10 13l4 -2' /><path d='M10 11l4 2' /><path d='M5 10v4' /><path d='M3 13l4 -2' /><path d='M3 11l4 2' /><path d='M19 10v4' /><path d='M17 13l4 -2' /><path d='M17 11l4 2' /></svg>
+                        <EllipsisIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
@@ -193,7 +259,7 @@ export default function IndividualForm () {
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='password' required />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M12 10v4' /><path d='M10 13l4 -2' /><path d='M10 11l4 2' /><path d='M5 10v4' /><path d='M3 13l4 -2' /><path d='M3 11l4 2' /><path d='M19 10v4' /><path d='M17 13l4 -2' /><path d='M17 11l4 2' /></svg>
+                        <EllipsisIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
@@ -213,15 +279,15 @@ export default function IndividualForm () {
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='A12345678' required />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M3 4m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v10a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z' /><path d='M9 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0' /><path d='M15 8l2 0' /><path d='M15 12l2 0' /><path d='M7 16l10 0' /></svg>
+                        <IdCardIcon/>
                       </InputGroupAddon>
                       <InputGroupAddon align={'inline-end'}>
                         <Tooltip>
                           <TooltipTrigger className='leading-1'>
-                            <svg xmlns='http://www.w3.org/2000/svg' className='w-4 h-4' viewBox='0 0 24 24' fill='currentColor'><path d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 15H13V17H11V15ZM13 13.3551V14H11V12.5C11 11.9477 11.4477 11.5 12 11.5C12.8284 11.5 13.5 10.8284 13.5 10C13.5 9.17157 12.8284 8.5 12 8.5C11.2723 8.5 10.6656 9.01823 10.5288 9.70577L8.56731 9.31346C8.88637 7.70919 10.302 6.5 12 6.5C13.933 6.5 15.5 8.067 15.5 10C15.5 11.5855 14.4457 12.9248 13 13.3551Z' /></svg>
+                            <CircleQuestionMarkIcon className='w-4 h-4'/>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p className='text-center'>Valor documento CIF/NIF (número + letras)</p>
+                            <p className='text-center'>Valor del documento CIF/NIF (número + letras)</p>
                           </TooltipContent>
                         </Tooltip>
                       </InputGroupAddon>
@@ -252,12 +318,12 @@ export default function IndividualForm () {
                         aria-description='Fotocopia que permita visualizar el documento completo'
                       />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M3 4m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v10a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z' /><path d='M9 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0' /><path d='M15 8l2 0' /><path d='M15 12l2 0' /><path d='M7 16l10 0' /></svg>
+                        <IdCardIcon/>
                       </InputGroupAddon>
                       <InputGroupAddon align={'inline-end'}>
                         <Tooltip>
                           <TooltipTrigger className='leading-1'>
-                            <svg xmlns='http://www.w3.org/2000/svg' className='w-4 h-4' viewBox='0 0 24 24' fill='currentColor'><path d='M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 15H13V17H11V15ZM13 13.3551V14H11V12.5C11 11.9477 11.4477 11.5 12 11.5C12.8284 11.5 13.5 10.8284 13.5 10C13.5 9.17157 12.8284 8.5 12 8.5C11.2723 8.5 10.6656 9.01823 10.5288 9.70577L8.56731 9.31346C8.88637 7.70919 10.302 6.5 12 6.5C13.933 6.5 15.5 8.067 15.5 10C15.5 11.5855 14.4457 12.9248 13 13.3551Z' /></svg>
+                            <CircleQuestionMarkIcon className='w-4 h-4'/>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className='text-center'>Fotocopia que permita visualizar el documento CIF/NIF completo</p>
