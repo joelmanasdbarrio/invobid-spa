@@ -17,8 +17,10 @@ interface CreateInvestorResponse {
   access_token: string
 }
 
+const base_url = import.meta.env.VITE_BASE_URL
+
 export const createInvestor = (body: FormData, onSuccess?: (response: CreateInvestorResponse) => void, onReject?: (error: Error) => void) => {
-  return fetchApi<CreateInvestorResponse>('http://localhost:3000/api/v1/auth/register/investor', {
+  return fetchApi<CreateInvestorResponse>(`${base_url}/auth/register/investor`, {
     method: 'POST',
     body
   }, {
@@ -33,17 +35,25 @@ export const createInvestor = (body: FormData, onSuccess?: (response: CreateInve
 
 export const getInvestors = async (queryParams?: Record<string, any>) => {
   const queryString = new URLSearchParams(queryParams).toString()
-  return fetchApi(`http://localhost:3000/api/v1/investors?${queryString}`, {
+  return fetchApi(`${base_url}/investors?${queryString}`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar los inversores'
   })
 }
 
+export const getInvestorById = async (investorId: string) => {
+  return fetchApi(`${base_url}/investors/${investorId}`, {
+    method: 'GET'
+  }, {
+    reject: 'Error al cargar el inversor'
+  })
+}
+
 // Lookup service
 
 export const countPendingInvestors = async () => {
-  return fetchApi('http://localhost:3000/api/v1/investors/lookup/countPending', {
+  return fetchApi(`${base_url}/investors/lookup/countPending`, {
     method: 'GET'
   })
 }

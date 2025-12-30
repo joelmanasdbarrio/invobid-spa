@@ -22,6 +22,7 @@ import {useContext} from 'react'
 import {Controller, useForm, useWatch} from 'react-hook-form'
 import {useNavigate} from 'react-router'
 import {z} from 'zod'
+import {InvestorType} from '@/types/Investor.ts'
 
 const formSchema = z.object({
   name: z.string()
@@ -41,7 +42,7 @@ const formSchema = z.object({
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
     .transform((files) => files[0]),
-  investorType: z.enum(['company', 'individual'])
+  investorType: z.enum(InvestorType)
 }).refine((data) => data.password === data.passwordRepeat, {
   message: 'Las contraseñas no coinciden',
   path: ['passwordRepeat']
@@ -100,12 +101,12 @@ export default function InvestorForm ({ investorType }: { investorType: 'company
     <Card>
       <CardHeader>
         <CardTitle>{
-          investorType === 'company'
+          investorType === InvestorType.COMPANY
             ? 'Empresa'
             : 'Particular'}
         </CardTitle>
         <CardDescription>{
-          investorType === 'company'
+          investorType === InvestorType.COMPANY
             ? 'Subasta, invierte e intercanvia facturas con otras empresas e inversores.'
             : 'Invierte en facturas comerciales y accede a oportunidades de inversión únicas.'}
         </CardDescription>
@@ -132,18 +133,18 @@ export default function InvestorForm ({ investorType }: { investorType: 'company
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>{
-                      investorType === 'company'
+                      investorType === InvestorType.COMPANY
                         ? 'Nombre de la empresa'
                         : 'Nombre completo'}
                     </FieldLabel>
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder={'ACME'} required />
                       <InputGroupAddon>{
-                        investorType === 'company'
+                        investorType === InvestorType.COMPANY
                           ? <UsersIcon />
                           : <UserIcon />}
                       </InputGroupAddon>
-                      {investorType === 'individual' && (
+                      {investorType === InvestorType.INDIVIDUAL && (
                         <InputGroupAddon align={'inline-end'}>
                           <Tooltip>
                             <TooltipTrigger className='leading-1'>
@@ -162,7 +163,7 @@ export default function InvestorForm ({ investorType }: { investorType: 'company
                   </Field>
                 )}
               />
-              {investorType === 'company' && (
+              {investorType === InvestorType.COMPANY && (
                 <Controller
                   name='companyName'
                   control={form.control}
@@ -314,7 +315,7 @@ export default function InvestorForm ({ investorType }: { investorType: 'company
                         type='file'
                         required
                         className='pt-1.5'
-                        accept='image/jpeg,image/png,.pdf'
+                        accept='image/jpg,image/jpeg,image/png,.pdf'
                         aria-description='Fotocopia que permita visualizar el documento completo'
                       />
                       <InputGroupAddon>
