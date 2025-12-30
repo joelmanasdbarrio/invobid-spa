@@ -1,15 +1,9 @@
-import {Button} from '@/components/ui/button.tsx'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu.tsx'
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table.tsx'
-import {type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState} from '@tanstack/react-table'
-import {ChevronDownIcon, ListFilterIcon} from 'lucide-react'
-import {useState} from 'react'
-import {DialogTrigger} from '@/components/ui/dialog.tsx'
+import { Button } from '@/components/ui/button.tsx'
+import { DialogTrigger } from '@/components/ui/dialog.tsx'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
+import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
+import { ListFilterIcon } from 'lucide-react'
+import { useState } from 'react'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -34,45 +28,14 @@ export function DataTable<TData, TValue> ({
 
   return (
     <>
-      <div className='w-full flex flex-col md:flex-row md:items-center justify-between gap-2'>
+      <div className='w-full flex flex-col sm:flex-row md:items-center justify-between gap-2'>
         <h3 className='text-lg'>Resultados de la búsqueda</h3>
-        <div className='flex items-center justify-end md:justify-center gap-2'>
-          <DialogTrigger className='md:hidden'>
-            <Button variant='outline'>
-              Filtrar
-              <ListFilterIcon />
-            </Button>
-          </DialogTrigger>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='outline'>
-                Mostrar columnas
-                <ChevronDownIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='end'>
-              {table
-                .getAllColumns()
-                .filter(
-                  (column) => column.getCanHide()
-                )
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className='capitalize'
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(value)
-                      }
-                    >
-                      {column.columnDef.header as string}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <DialogTrigger asChild className='md:hidden ms-auto'>
+          <Button variant='outline'>
+            Filtrar
+            <ListFilterIcon />
+          </Button>
+        </DialogTrigger>
       </div>
       <div className='overflow-x-scroll rounded-md border shadow-sm'>
         <Table>
@@ -111,7 +74,7 @@ export function DataTable<TData, TValue> ({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className='h-24 text-center'>
-                  No results.
+                  No hay resultados.
                 </TableCell>
               </TableRow>
             )}

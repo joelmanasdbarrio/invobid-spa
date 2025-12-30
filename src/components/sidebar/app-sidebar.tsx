@@ -58,8 +58,8 @@ export function AppSidebar () {
       <SidebarFooter>
         <UserSidebarDropdown
           user={{
-            name: loggedInUser.name,
-            email: loggedInUser.email
+            name: loggedInUser?.name,
+            email: loggedInUser?.email
           }}
         />
         <ModeToggle />

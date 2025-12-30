@@ -1,5 +1,5 @@
-import {Badge} from '@/components/ui/badge.tsx'
-import {Collapsible, CollapsibleContent, CollapsibleTrigger} from '@/components/ui/collapsible.tsx'
+import { Badge } from '@/components/ui/badge.tsx'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible.tsx'
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -10,10 +10,10 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem
 } from '@/components/ui/sidebar.tsx'
-import {countPendingInvestors} from '@/services/investor.api.ts'
-import {ChevronRight, FileText, Gavel, User} from 'lucide-react'
-import {useEffect, useState} from 'react'
-import {Link, useLocation} from 'react-router'
+import { countPendingInvestors } from '@/services/investor.api.ts'
+import { ChevronRight, FileText, Gavel, User } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router'
 
 export function AdminSidebarContent () {
   const location = useLocation()
@@ -33,7 +33,7 @@ export function AdminSidebarContent () {
       <SidebarGroupContent>
         <SidebarGroupLabel>Administración</SidebarGroupLabel>
         <SidebarMenu>
-          <Collapsible className='group/collapsible' open={location.pathname.startsWith('/admin/users')}>
+          <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/admin/users')}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild className={'group/collapsible'}>
                 <SidebarMenuButton isActive={location.pathname.startsWith('/admin/users')}>

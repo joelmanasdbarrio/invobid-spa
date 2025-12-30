@@ -16,8 +16,9 @@ import {
 } from 'lucide-react'
 import {Select, SelectContent, SelectItem, SelectTrigger} from '@/components/ui/select.tsx'
 import {Button} from '@/components/ui/button.tsx'
+import {InvestorStatus, InvestorType} from '@/types/Investor.ts'
 
-export default function UsersFilters (
+export default function UserFilters (
   { form, onSubmit, handleClear }:
   {
     form: UseFormReturn<{
@@ -26,8 +27,8 @@ export default function UsersFilters (
       companyName?: string | undefined
       phoneNumber?: string | undefined
       documentValue?: string | undefined
-      investorType?: 'individual' | 'company' | undefined
-      status?: 'pending' | 'verified' | 'correction' | 'denied' | undefined
+      investorType?: InvestorType | undefined
+      status?: InvestorStatus | undefined
     }>,
     onSubmit: (data: {
       email?: string | undefined
@@ -35,8 +36,8 @@ export default function UsersFilters (
       companyName?: string | undefined
       phoneNumber?: string | undefined
       documentValue?: string | undefined
-      investorType?: 'individual' | 'company' | undefined
-      status?: 'pending' | 'verified' | 'correction' | 'denied' | undefined
+      investorType?: InvestorType | undefined
+      status?: InvestorStatus | undefined
     }) => void,
     handleClear: () => void
   }) {
@@ -129,16 +130,16 @@ export default function UsersFilters (
                     <FieldLabel htmlFor={field.name}>Tipo de inversor</FieldLabel>
                     <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''}>
                       <SelectTrigger>
-                        {field.value ? (field.value === 'individual' ? 'Particular' : 'Empresa') : 'Selecciona un tipo'}
+                        {field.value ? (field.value === InvestorType.INDIVIDUAL ? InvestorType.INDIVIDUAL : InvestorType.COMPANY) : 'Selecciona un tipo'}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value='individual'>
+                        <SelectItem value={InvestorType.INDIVIDUAL}>
                           <span className='flex items-center gap-2'>
                             <UserIcon className='w-4 h-4' />
                             Particular
                           </span>
                         </SelectItem>
-                        <SelectItem value='company'>
+                        <SelectItem value={InvestorType.COMPANY}>
                           <span className='flex items-center gap-2'>
                             <BuildingIcon className='w-4 h-4' />
                             Empresa
@@ -160,25 +161,25 @@ export default function UsersFilters (
                         {field.value ? field.value.charAt(0).toUpperCase() + field.value.slice(1) : 'Selecciona un estado'}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value='pending'>
+                        <SelectItem value={InvestorStatus.PENDING}>
                           <span className='flex items-center gap-1'>
                             <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
                             Por verificar
                           </span>
                         </SelectItem>
-                        <SelectItem value='verified'>
+                        <SelectItem value={InvestorStatus.VERIFIED}>
                           <span className='flex items-center gap-2'>
                             <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
                             Verificado
                           </span>
                         </SelectItem>
-                        <SelectItem value='correction'>
+                        <SelectItem value={InvestorStatus.CORRECTION}>
                           <span className='flex items-center gap-2'>
                             <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
                             Corrección requerida
                           </span>
                         </SelectItem>
-                        <SelectItem value='denied'>
+                        <SelectItem value={InvestorStatus.DENIED}>
                           <span className='flex items-center gap-2'>
                             <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
                             Denegado

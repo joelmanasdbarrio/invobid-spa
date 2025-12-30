@@ -1,10 +1,11 @@
+import AdminUsersPage from '@/pages/dashboard/admin/users/page.tsx'
 import {Route, Routes} from 'react-router'
 import {ThemeProvider} from './components/dark-mode/theme-provider'
 import MainLayout from './layouts/layout'
+import AdminUserPage from './pages/dashboard/admin/users/user/page'
 import DashboardPage from './pages/dashboard/page'
 import Login from './pages/login/page'
 import Register from './pages/register/page'
-import AdminUsersPage from '@/pages/dashboard/admin/users/page.tsx'
 
 function App () {
 
@@ -17,7 +18,10 @@ function App () {
 
           <Route path='/' element={<MainLayout header='Dashboard'><DashboardPage /></MainLayout>} />
 
-          <Route path='/admin/users' element={<MainLayout header='Gestión de usuarios'><AdminUsersPage /></MainLayout>} />
+          <Route path='/admin/users'>
+            <Route index element={<MainLayout header='Gestión de usuarios'><AdminUsersPage /></MainLayout>} />
+            <Route path=':investorId' element={<MainLayout header='Gestionar usuario'><AdminUserPage /></MainLayout>} />
+          </Route>
         </Routes>
       </main>
     </ThemeProvider>

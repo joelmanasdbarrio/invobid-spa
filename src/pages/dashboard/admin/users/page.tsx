@@ -8,8 +8,9 @@ import {useEffect, useMemo, useState} from 'react'
 import {useForm} from 'react-hook-form'
 import {useSearchParams} from 'react-router'
 import {z} from 'zod'
-import UsersFilters from '@/pages/dashboard/admin/users/filters.tsx'
+import UserFilters from '@/pages/dashboard/admin/users/filters.tsx'
 import {Dialog, DialogContent, DialogHeader} from '@/components/ui/dialog.tsx'
+import {InvestorStatus, InvestorType} from '@/types/Investor.ts'
 
 const formSchema = z.object({
   email: z.string().optional(),
@@ -17,8 +18,8 @@ const formSchema = z.object({
   companyName: z.string().optional(),
   phoneNumber: z.string().optional(),
   documentValue: z.string().optional(),
-  investorType: z.enum(['individual', 'company']).optional(),
-  status: z.enum(['pending', 'verified', 'correction', 'denied']).optional()
+  investorType: z.enum(InvestorType).optional(),
+  status: z.enum(InvestorStatus).optional()
 })
 
 export default function AdminUsersPage () {
@@ -30,8 +31,8 @@ export default function AdminUsersPage () {
     companyName: searchParams.get('companyName') || '',
     phoneNumber: searchParams.get('phoneNumber') || '',
     documentValue: searchParams.get('documentValue') || '',
-    investorType: searchParams.has('investorType') ? (searchParams.get('investorType') as 'individual' | 'company') : undefined,
-    status: searchParams.has('status') ? (searchParams.get('status') as 'pending' | 'verified' | 'correction' | 'denied') : undefined
+    investorType: searchParams.has('investorType') ? (searchParams.get('investorType') as InvestorType) : undefined,
+    status: searchParams.has('status') ? (searchParams.get('status') as InvestorStatus) : undefined
   }), [searchParams])
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -47,8 +48,8 @@ export default function AdminUsersPage () {
   const [data, setData] = useState([])
   const [totalItems, setTotalItems] = useState(0)
 
-  const currentPage = parseInt(searchParams.get('page') || '1', 10)
-  const currentLimit = parseInt(searchParams.get('limit') || '10', 10)
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10))
+  const [currentLimit, setCurrentLimit] = useState(parseInt(searchParams.get('limit') || '10', 10))
 
   function onSubmit (data: z.infer<typeof formSchema>) {
     const formData = Object.fromEntries(
@@ -96,6 +97,7 @@ export default function AdminUsersPage () {
   function handlePageChange (newPage: number) {
     const newParams = new URLSearchParams(searchParams)
     newParams.set('page', newPage.toString())
+    setCurrentPage(newPage)
     setSearchParams(newParams)
   }
 
@@ -103,6 +105,8 @@ export default function AdminUsersPage () {
     const newParams = new URLSearchParams(searchParams)
     newParams.set('limit', newLimit.toString())
     newParams.set('page', '1')
+    setCurrentLimit(newLimit)
+    setCurrentPage(1)
     setSearchParams(newParams)
   }
 
@@ -110,14 +114,14 @@ export default function AdminUsersPage () {
     <div className='flex flex-col gap-4'>
       <Dialog>
         <div className='hidden md:block'>
-          <UsersFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
+          <UserFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
         </div>
 
         <DialogContent>
           <DialogHeader className='font-bold text-lg'>
             Filtrar usuarios
           </DialogHeader>
-          <UsersFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
+          <UserFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
         </DialogContent>
 
         <DataTable columns={investorColumns} data={data} />
