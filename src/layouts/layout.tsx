@@ -61,7 +61,7 @@ export default function MainLayout ({
         </section>
       </div>
       {(
-        loggedInUser?.type === UserType.INVESTOR && (loggedInUser as Investor)?.status !== InvestorStatus.VERIFIED
+        (loggedInUser?.type === UserType.INVESTOR && (loggedInUser as Investor)?.status !== InvestorStatus.VERIFIED)
       ) && (
         <AlertDialog defaultOpen>
           <AlertDialogContent>

@@ -50,11 +50,19 @@ export const getInvestorById = async (investorId: string) => {
   })
 }
 
-export const updateInvestorById = async (investorId: string, body: FormData) => {
-  return fetchApi(`${base_url}/investors/${investorId}`, {
-    method: 'PATCH',
-    body
-  }, {
+export const updateInvestorById = async (investorId: string, body: FormData | string) => {
+  const fetchOptions: RequestInit = {
+    method: 'PATCH'
+  }
+
+  if (body instanceof FormData) {
+    fetchOptions.body = body
+  } else {
+    fetchOptions.body = body
+    fetchOptions.headers = { 'Content-Type': 'application/json' }
+  }
+
+  return fetchApi(`${base_url}/investors/${investorId}`, fetchOptions, {
     promise: 'Actualizando inversor...',
     resolve: 'Inversor actualizado con éxito',
     reject: 'Error al actualizar el inversor'
