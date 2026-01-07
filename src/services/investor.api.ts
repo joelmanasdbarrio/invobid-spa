@@ -50,6 +50,27 @@ export const getInvestorById = async (investorId: string) => {
   })
 }
 
+export const updateInvestorById = async (investorId: string, body: FormData) => {
+  return fetchApi(`${base_url}/investors/${investorId}`, {
+    method: 'PATCH',
+    body
+  }, {
+    promise: 'Actualizando inversor...',
+    resolve: 'Inversor actualizado con éxito',
+    reject: 'Error al actualizar el inversor'
+  })
+}
+
+export const deleteInvestorById = async (investorId: string) => {
+  return fetchApi(`${base_url}/investors/${investorId}`, {
+    method: 'DELETE'
+  }, {
+    promise: 'Eliminando inversor...',
+    resolve: 'Inversor eliminado con éxito',
+    reject: 'Error al eliminar el inversor'
+  })
+}
+
 // Lookup service
 
 export const countPendingInvestors = async () => {

@@ -1,5 +1,19 @@
-import { AppSidebar } from '@/components/sidebar/app-sidebar.tsx'
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import {AppSidebar} from '@/components/sidebar/app-sidebar.tsx'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader
+} from '@/components/ui/alert-dialog'
+import {Item, ItemContent, ItemDescription, ItemMedia, ItemTitle} from '@/components/ui/item'
+import {SidebarProvider, SidebarTrigger} from '@/components/ui/sidebar'
+import {AuthContext} from '@/contexts/auth.context'
+import {type Investor, InvestorStatus, UserType} from '@/types/User'
+import {AlertDialogTitle} from '@radix-ui/react-alert-dialog'
+import {CircleAlertIcon, ClockIcon, OctagonXIcon} from 'lucide-react'
+import {useContext} from 'react'
 
 export default function MainLayout ({
   header,
@@ -8,6 +22,31 @@ export default function MainLayout ({
   header: string;
   children: React.ReactNode;
 }>) {
+  const authContext = useContext(AuthContext)
+  if (!authContext) {
+    throw new Error('AuthContext must be used within AuthProvider')
+  }
+  const { loggedInUser } = authContext
+
+  const investorStatusTextMap: {
+    pending: { title: string; icon: React.JSX.Element };
+    correction: { title: string; icon: React.JSX.Element };
+    denied: { title: string; icon: React.JSX.Element }
+  } = {
+    pending: {
+      title: 'Pendiente de verificación',
+      icon: <ClockIcon className='w-full h-full rounded-full text-yellow-600 bg-yellow-300/25 p-2'/>
+    },
+    correction: {
+      title: 'Corrección requerida',
+      icon: <CircleAlertIcon className='w-full h-full rounded-full text-red-600 bg-red-300/25 p-2'/>
+    },
+    denied: {
+      title: 'Cuenta denegada',
+      icon: <OctagonXIcon className='w-full h-full rounded-full text-zinc-600 bg-zinc-300/25 p-2'/>
+    }
+  }
+
   return (
     <SidebarProvider className='w-dvw! h-dvh!'>
       <AppSidebar />
@@ -21,6 +60,34 @@ export default function MainLayout ({
           {children}
         </section>
       </div>
+      {(
+        loggedInUser?.type === UserType.INVESTOR && (loggedInUser as Investor)?.status !== InvestorStatus.VERIFIED
+      ) && (
+        <AlertDialog defaultOpen>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Actualización de la cuenta</AlertDialogTitle>
+              <AlertDialogDescription>
+                Comprueba el estado de tu cuenta y ejecuta las acciones necesarias:
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <Item variant='muted' className='gap-2'>
+              <ItemMedia className='self-center! w-10 h-10'>
+                {investorStatusTextMap[(loggedInUser as Investor)?.status].icon}
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{investorStatusTextMap[(loggedInUser as Investor)?.status].title}</ItemTitle>
+                <ItemDescription>
+                  {(loggedInUser as Investor)?.lastCommunication}
+                </ItemDescription>
+              </ItemContent>
+            </Item>
+            <AlertDialogFooter>
+              <AlertDialogAction>Aceptar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </SidebarProvider>
   )
 }

@@ -1,17 +1,17 @@
-import {Button} from '@/components/ui/button'
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
-import {Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator} from '@/components/ui/field'
-import {Form} from '@/components/ui/form'
-import {InputGroup, InputGroupAddon, InputGroupInput} from '@/components/ui/input-group'
-import {AuthContext} from '@/contexts/auth.context.ts'
-import {createAdmin} from '@/services/admin.api'
-import {zodResolver} from '@hookform/resolvers/zod'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { Form } from '@/components/ui/form'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { AuthContext } from '@/contexts/auth.context.ts'
+import { createAdmin } from '@/services/admin.api'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Cookies from 'js-cookie'
-import {EllipsisIcon, MailIcon, UserIcon} from 'lucide-react'
-import {useContext} from 'react'
-import {Controller, useForm} from 'react-hook-form'
-import {useNavigate} from 'react-router'
-import {z} from 'zod'
+import { EllipsisIcon, MailIcon, UserIcon } from 'lucide-react'
+import { useContext } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { Link, useNavigate } from 'react-router'
+import { z } from 'zod'
 
 const formSchema = z.object({
   name: z.string()
@@ -148,9 +148,9 @@ export default function AdminForm () {
                 <FieldSeparator />
                 <FieldDescription className='text-center'>
                   ¿Ya tienes cuenta?{' '}
-                  <a href='/login' className='underline underline-offset-4'>
+                  <Link to='/login' className='underline underline-offset-4'>
                     Inicia sesión
-                  </a>
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

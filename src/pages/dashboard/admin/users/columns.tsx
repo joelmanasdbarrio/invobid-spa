@@ -1,4 +1,5 @@
-import {type ColumnDef} from '@tanstack/react-table'
+import { type Investor, InvestorStatus, InvestorType } from '@/types/User'
+import { type ColumnDef } from '@tanstack/react-table'
 import {
   BuildingIcon,
   CheckCheckIcon,
@@ -8,8 +9,7 @@ import {
   OctagonXIcon,
   UserIcon
 } from 'lucide-react'
-import {Link} from 'react-router'
-import {type Investor, InvestorStatus, InvestorType} from '@/types/Investor.ts'
+import { Link } from 'react-router'
 
 export const investorColumns: ColumnDef<Investor>[] = [
   {

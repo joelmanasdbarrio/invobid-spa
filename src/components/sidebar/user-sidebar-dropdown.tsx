@@ -1,4 +1,4 @@
-import {Avatar, AvatarFallback} from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,8 +8,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import {SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar} from '@/components/ui/sidebar'
-import {CircleUser, EllipsisVertical, LogOut, Settings} from 'lucide-react'
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
+import { useLogout } from '@/hooks/use-logout'
+import { CircleUserIcon, EllipsisVerticalIcon, LogOutIcon, SettingsIcon } from 'lucide-react'
+import { Link } from 'react-router'
 
 export default function UserSidebarDropdown ({
   user
@@ -20,6 +22,7 @@ export default function UserSidebarDropdown ({
     }
 }) {
   const { isMobile } = useSidebar()
+  const logout = useLogout()
 
   return (
     <SidebarMenu>
@@ -39,7 +42,7 @@ export default function UserSidebarDropdown ({
                   {user?.email}
                 </span>
               </div>
-              <EllipsisVertical className='ml-auto size-4' />
+              <EllipsisVerticalIcon className='ml-auto size-4' />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -63,16 +66,19 @@ export default function UserSidebarDropdown ({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <CircleUser /> Perfil
+              <DropdownMenuItem asChild>
+                <Link to='/profile' className='hover:cursor-pointer'>
+                  <CircleUserIcon />
+                  Perfil
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Settings /> Configuración
+                <SettingsIcon /> Configuración
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
+            <DropdownMenuItem onClick={logout}>
+              <LogOutIcon />
               Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuContent>

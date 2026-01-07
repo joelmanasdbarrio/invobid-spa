@@ -1,4 +1,4 @@
-import { toast } from 'sonner'
+import {toast} from 'sonner'
 
 export async function downloadFile (
   url: string,
@@ -72,7 +72,7 @@ export default function fetchApi<T = Record<string, unknown>> (
     })
     if (!response.ok) {
       const errorData = await response.json()
-      throw new Error(errorData.message || 'Unknown error occurred')
+      throw errorData
     }
     return response.json()
   }

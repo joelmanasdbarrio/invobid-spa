@@ -1,10 +1,12 @@
 import AdminUsersPage from '@/pages/dashboard/admin/users/page.tsx'
-import {Route, Routes} from 'react-router'
-import {ThemeProvider} from './components/dark-mode/theme-provider'
+import { Route, Routes } from 'react-router'
+import { ThemeProvider } from './components/dark-mode/theme-provider'
+import { ProtectedRoute } from './components/protected-route'
 import MainLayout from './layouts/layout'
 import AdminUserPage from './pages/dashboard/admin/users/user/page'
 import DashboardPage from './pages/dashboard/page'
 import Login from './pages/login/page'
+import ProfilePage from './pages/profile/page'
 import Register from './pages/register/page'
 
 function App () {
@@ -13,14 +15,17 @@ function App () {
     <ThemeProvider defaultTheme='light' storageKey='dark-theme'>
       <main className='antialiased w-dvw h-dvh flex flex-col p-0!'>
         <Routes>
-          <Route path='/login' element={<Login />}/>
+          {/* Public Routes */}
           <Route path='/register' element={<Register /> }/>
+          <Route path='/login' element={<Login />}/>
 
-          <Route path='/' element={<MainLayout header='Dashboard'><DashboardPage /></MainLayout>} />
+          {/* Protected Routes */}
+          <Route path='/' element={<ProtectedRoute><MainLayout header='Dashboard'><DashboardPage /></MainLayout></ProtectedRoute>} />
+          <Route path='/profile' element={<ProtectedRoute><MainLayout header='Perfil'><ProfilePage /></MainLayout></ProtectedRoute>} />
 
           <Route path='/admin/users'>
-            <Route index element={<MainLayout header='Gestión de usuarios'><AdminUsersPage /></MainLayout>} />
-            <Route path=':investorId' element={<MainLayout header='Gestionar usuario'><AdminUserPage /></MainLayout>} />
+            <Route index element={<ProtectedRoute><MainLayout header='Gestión de usuarios'><AdminUsersPage /></MainLayout></ProtectedRoute>} />
+            <Route path=':investorId' element={<ProtectedRoute><MainLayout header='Gestionar usuario'><AdminUserPage /></MainLayout></ProtectedRoute>} />
           </Route>
         </Routes>
       </main>
