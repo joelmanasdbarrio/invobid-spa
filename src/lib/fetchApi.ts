@@ -71,8 +71,7 @@ export default function fetchApi<T = Record<string, unknown>> (
       ...options
     })
     if (!response.ok) {
-      const errorData = await response.json()
-      throw errorData
+      throw await response.json()
     }
     return response.json()
   }

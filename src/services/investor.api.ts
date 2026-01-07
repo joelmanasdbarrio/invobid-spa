@@ -33,7 +33,7 @@ export const createInvestor = (body: FormData, onSuccess?: (response: CreateInve
   )
 }
 
-export const getInvestors = async (queryParams?: Record<string, any>) => {
+export const getInvestors = async (queryParams?: Record<string, string>) => {
   const queryString = new URLSearchParams(queryParams).toString()
   return fetchApi(`${base_url}/investors?${queryString}`, {
     method: 'GET'
