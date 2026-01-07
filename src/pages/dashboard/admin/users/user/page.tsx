@@ -1,6 +1,6 @@
-import {Badge} from '@/components/ui/badge'
-import {ButtonGroup} from '@/components/ui/button-group.tsx'
-import {Button} from '@/components/ui/button.tsx'
+import { Badge } from '@/components/ui/badge'
+import { ButtonGroup } from '@/components/ui/button-group.tsx'
+import { Button } from '@/components/ui/button.tsx'
 import {
   Dialog,
   DialogClose,
@@ -11,18 +11,18 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog.tsx'
-import {Field, FieldDescription, FieldError, FieldGroup, FieldLabel} from '@/components/ui/field.tsx'
-import {Form} from '@/components/ui/form.tsx'
-import {InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea} from '@/components/ui/input-group.tsx'
-import {Select, SelectContent, SelectItem, SelectTrigger} from '@/components/ui/select.tsx'
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs.tsx'
-import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip.tsx'
-import {UserChangeHistory} from '@/pages/dashboard/admin/users/user/user-change-history.tsx'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field.tsx'
+import { Form } from '@/components/ui/form.tsx'
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group.tsx'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip.tsx'
+import { UserChangeHistory } from '@/pages/dashboard/admin/users/user/user-change-history.tsx'
 import UserDocuments from '@/pages/dashboard/admin/users/user/user-documents/user-documents.tsx'
-import {getInvestorById, updateInvestorById} from '@/services/investor.api.ts'
-import {DocumentType} from '@/types/Document.ts'
-import {type Investor, InvestorStatus, InvestorType, UserType} from '@/types/User'
-import {zodResolver} from '@hookform/resolvers/zod'
+import { getInvestorById, updateInvestorById } from '@/services/investor.api.ts'
+import { DocumentType } from '@/types/Document.ts'
+import { type Investor, InvestorStatus, InvestorType, UserType } from '@/types/User'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   BuildingIcon,
   CheckCheckIcon,
@@ -38,10 +38,10 @@ import {
   UserIcon,
   UsersIcon
 } from 'lucide-react'
-import {useEffect, useState} from 'react'
-import {Controller, useForm, useWatch} from 'react-hook-form'
-import {useNavigate, useParams} from 'react-router'
-import {z} from 'zod'
+import { useEffect, useState } from 'react'
+import { Controller, useForm, useWatch } from 'react-hook-form'
+import { useNavigate, useParams } from 'react-router'
+import { z } from 'zod'
 
 const formSchema = z.object({
   name: z.string()
@@ -123,18 +123,17 @@ export default function AdminUserPage () {
   const investorType = useWatch({ control: form.control, name: 'investorType' })
 
   function onSubmit (data: z.infer<typeof formSchema>) {
-    const formData = new FormData()
-    formData.append('name', data.name)
-    formData.append('companyName', data.companyName)
-    formData.append('email', data.email)
-    formData.append('phoneNumber', data.phoneNumber)
-    formData.append('investorType', data.investorType)
-    formData.append('status', investor.status)
-    if (data.lastCommunication) {
-      formData.append('lastCommunication', data.lastCommunication)
+    const updateData = {
+      name: data.name,
+      companyName: data.companyName,
+      email: data.email,
+      phoneNumber: data.phoneNumber,
+      investorType: data.investorType,
+      status: investor.status,
+      ...(data.lastCommunication && { lastCommunication: data.lastCommunication })
     }
 
-    updateInvestorById(investor.id, formData)
+    updateInvestorById(investor.id, JSON.stringify(updateData))
       .then(res => res.data)
       .then(updatedInvestor => {
         setInvestor(updatedInvestor)

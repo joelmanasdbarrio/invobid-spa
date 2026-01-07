@@ -54,3 +54,13 @@ export const updateAdminById = async (adminId: string, body: string) => {
     reject: 'Error al actualizar el administrador'
   })
 }
+
+export const deleteAdminById = async (adminId: string) => {
+  return fetchApi(`http://localhost:3000/api/v1/admins/${adminId}`, {
+    method: 'DELETE'
+  }, {
+    promise: 'Eliminando administrador...',
+    resolve: 'Administrador eliminado con éxito',
+    reject: 'Error al eliminar el administrador'
+  })
+}
