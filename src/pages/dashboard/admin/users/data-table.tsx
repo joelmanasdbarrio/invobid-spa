@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button.tsx'
-import { DialogTrigger } from '@/components/ui/dialog.tsx'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
-import { ListFilterIcon } from 'lucide-react'
-import { useState } from 'react'
+import {Button} from '@/components/ui/button.tsx'
+import {DialogTrigger} from '@/components/ui/dialog.tsx'
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table.tsx'
+import {type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState} from '@tanstack/react-table'
+import {ListFilterIcon} from 'lucide-react'
+import {useState} from 'react'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -16,6 +16,7 @@ export function DataTable<TData, TValue> ({
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,

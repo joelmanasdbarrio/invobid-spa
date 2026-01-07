@@ -1,8 +1,8 @@
-import fetchApi, { downloadFile } from '@/lib/fetchApi.ts'
+import fetchApi, {downloadFile} from '@/lib/fetchApi.ts'
 
 const base_url = import.meta.env.VITE_BASE_URL
 
-export const getDocuments = async (queryParams?: Record<string, any>) => {
+export const getDocuments = async (queryParams?: Record<string, string>) => {
   const queryString = new URLSearchParams(queryParams).toString()
   return fetchApi(`${base_url}/documents?${queryString}`, {
     method: 'GET'

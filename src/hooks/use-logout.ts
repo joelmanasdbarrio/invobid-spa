@@ -12,11 +12,9 @@ export function useLogout () {
   }
   const { setLoggedInUser } = authContext
 
-  const logout = () => {
+  return () => {
     setLoggedInUser(null)
     Cookies.remove('logged-in-user')
-    navigate('/login', { replace: true })
+    navigate('/login', {replace: true})
   }
-
-  return logout
 }
