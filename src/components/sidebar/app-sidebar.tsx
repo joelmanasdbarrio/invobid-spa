@@ -1,3 +1,5 @@
+import CommonSidebarContent from '@/components/sidebar/common-sidebar-content.tsx'
+import UserSidebarDropdown from '@/components/sidebar/user-sidebar-dropdown.tsx'
 import {
   Sidebar,
   SidebarContent,
@@ -10,19 +12,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar.tsx'
-import {ModeToggle} from '../dark-mode/mode-toggle.tsx'
-import {InvestorSidebarContent} from './investor-sidebar-content'
-import {AdminSidebarContent} from './admin-sidebar-content'
-import CommonSidebarContent from '@/components/sidebar/common-sidebar-content.tsx'
-import UserSidebarDropdown from '@/components/sidebar/user-sidebar-dropdown.tsx'
-import {Link, useLocation} from 'react-router'
-import {useContext} from 'react'
 import {AuthContext} from '@/contexts/auth.context.ts'
+import {InvestorStatus, UserType} from '@/types/User.ts'
+import {useContext} from 'react'
+import {Link, useLocation} from 'react-router'
+import {ModeToggle} from '../dark-mode/mode-toggle.tsx'
+import {AdminSidebarContent} from './admin-sidebar-content'
+import {InvestorSidebarContent} from './investor-sidebar-content'
 
 export function AppSidebar () {
   const appName = import.meta.env.VITE_APP_NAME
   const location = useLocation()
-  const { loggedInUser } = useContext(AuthContext)
+
+  const authContext = useContext(AuthContext)
+  if (!authContext) {
+    throw new Error('AuthContext must be used within AuthProvider')
+  }
+  const { loggedInUser } = authContext
 
   return (
     <Sidebar variant='inset'>
@@ -51,8 +57,14 @@ export function AppSidebar () {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <InvestorSidebarContent />
-        <AdminSidebarContent />
+        {
+          (loggedInUser?.type === UserType.INVESTOR && loggedInUser?.status === InvestorStatus.VERIFIED) &&
+          <InvestorSidebarContent />
+        }
+        {
+          loggedInUser?.type === UserType.ADMIN &&
+          <AdminSidebarContent />
+        }
         <CommonSidebarContent />
       </SidebarContent>
       <SidebarFooter>

@@ -1,16 +1,16 @@
 import {Button} from '@/components/ui/button.tsx'
+import {Dialog, DialogContent, DialogHeader} from '@/components/ui/dialog.tsx'
 import {Select, SelectContent, SelectItem, SelectTrigger} from '@/components/ui/select.tsx'
 import {investorColumns} from '@/pages/dashboard/admin/users/columns.tsx'
 import {DataTable} from '@/pages/dashboard/admin/users/data-table.tsx'
+import UserFilters from '@/pages/dashboard/admin/users/filters.tsx'
 import {getInvestors} from '@/services/investor.api.ts'
+import {InvestorStatus, InvestorType} from '@/types/User'
 import {zodResolver} from '@hookform/resolvers/zod'
 import {useEffect, useMemo, useState} from 'react'
 import {useForm} from 'react-hook-form'
 import {useSearchParams} from 'react-router'
 import {z} from 'zod'
-import UserFilters from '@/pages/dashboard/admin/users/filters.tsx'
-import {Dialog, DialogContent, DialogHeader} from '@/components/ui/dialog.tsx'
-import {InvestorStatus, InvestorType} from '@/types/Investor.ts'
 
 const formSchema = z.object({
   email: z.string().optional(),
@@ -19,7 +19,8 @@ const formSchema = z.object({
   phoneNumber: z.string().optional(),
   documentValue: z.string().optional(),
   investorType: z.enum(InvestorType).optional(),
-  status: z.enum(InvestorStatus).optional()
+  status: z.enum(InvestorStatus).optional(),
+  includeDeleted: z.boolean().default(false).optional()
 })
 
 export default function AdminUsersPage () {
@@ -32,7 +33,8 @@ export default function AdminUsersPage () {
     phoneNumber: searchParams.get('phoneNumber') || '',
     documentValue: searchParams.get('documentValue') || '',
     investorType: searchParams.has('investorType') ? (searchParams.get('investorType') as InvestorType) : undefined,
-    status: searchParams.has('status') ? (searchParams.get('status') as InvestorStatus) : undefined
+    status: searchParams.has('status') ? (searchParams.get('status') as InvestorStatus) : undefined,
+    includeDeleted: searchParams.get('includeDeleted') === 'true'
   }), [searchParams])
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -89,7 +91,8 @@ export default function AdminUsersPage () {
       phoneNumber: '',
       documentValue: '',
       investorType: undefined,
-      status: undefined
+      status: undefined,
+      includeDeleted: false
     })
     setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
   }
@@ -117,7 +120,7 @@ export default function AdminUsersPage () {
           <UserFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
         </div>
 
-        <DialogContent>
+        <DialogContent className='max-h-svh overflow-scroll'>
           <DialogHeader className='font-bold text-lg'>
             Filtrar usuarios
           </DialogHeader>

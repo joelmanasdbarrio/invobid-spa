@@ -1,11 +1,10 @@
-import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs'
-import {TabsContent} from '@radix-ui/react-tabs'
-import AdminForm from './admin-form'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import InvestorForm from '@/pages/register/investor-form.tsx'
+import { TabsContent } from '@radix-ui/react-tabs'
+import AdminForm from './admin-form'
 
 export default function Register () {
   const appName = import.meta.env.VITE_APP_NAME
-
 
   return (
     <div className='grow flex flex-col sm:items-center sm:justify-center p-4'>

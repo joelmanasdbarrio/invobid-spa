@@ -1,12 +1,13 @@
-import {Button} from '@/components/ui/button'
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
-import {Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator} from '@/components/ui/field'
-import {Form} from '@/components/ui/form'
-import {InputGroup, InputGroupAddon, InputGroupInput} from '@/components/ui/input-group'
-import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
-import {AuthContext} from '@/contexts/auth.context.ts'
-import {createInvestor} from '@/services/investor.api'
-import {zodResolver} from '@hookform/resolvers/zod'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { Form } from '@/components/ui/form'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { AuthContext } from '@/contexts/auth.context.ts'
+import { createInvestor } from '@/services/investor.api'
+import { InvestorType } from '@/types/User'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Cookies from 'js-cookie'
 import {
   BuildingIcon,
@@ -18,11 +19,10 @@ import {
   UserIcon,
   UsersIcon
 } from 'lucide-react'
-import {useContext} from 'react'
-import {Controller, useForm, useWatch} from 'react-hook-form'
-import {useNavigate} from 'react-router'
-import {z} from 'zod'
-import {InvestorType} from '@/types/Investor.ts'
+import { useContext } from 'react'
+import { Controller, useForm, useWatch } from 'react-hook-form'
+import { Link, useNavigate } from 'react-router'
+import { z } from 'zod'
 
 const formSchema = z.object({
   name: z.string()
@@ -163,36 +163,35 @@ export default function InvestorForm ({ investorType }: { investorType: 'company
                   </Field>
                 )}
               />
-              {investorType === InvestorType.COMPANY && (
-                <Controller
-                  name='companyName'
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>Razón social</FieldLabel>
-                      <InputGroup>
-                        <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='ACME S.L.' required />
-                        <InputGroupAddon>
-                          <BuildingIcon />
-                        </InputGroupAddon>
-                        <InputGroupAddon align={'inline-end'}>
-                          <Tooltip>
-                            <TooltipTrigger className='leading-1'>
-                              <CircleQuestionMarkIcon className='w-4 h-4'/>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className='text-center'>Nombre legal de tu empresa <br /> tal como figura en el registro</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </InputGroupAddon>
-                      </InputGroup>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              )}
+              <Controller
+                name='companyName'
+                control={form.control}
+                disabled={investorType === InvestorType.INDIVIDUAL}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Razón social</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='ACME S.L.' required />
+                      <InputGroupAddon>
+                        <BuildingIcon />
+                      </InputGroupAddon>
+                      <InputGroupAddon align={'inline-end'}>
+                        <Tooltip>
+                          <TooltipTrigger className='leading-1'>
+                            <CircleQuestionMarkIcon className='w-4 h-4'/>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className='text-center'>Nombre legal de tu empresa <br /> tal como figura en el registro</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
             </FieldGroup>
             <FieldGroup className='flex flex-col gap-4 sm:grid sm:grid-cols-2'>
               <Controller
@@ -345,9 +344,9 @@ export default function InvestorForm ({ investorType }: { investorType: 'company
                 <FieldSeparator />
                 <FieldDescription className='text-center'>
                   ¿Ya tienes cuenta?{' '}
-                  <a href='/login' className='underline underline-offset-4'>
+                  <Link to='/login' className='underline underline-offset-4'>
                     Inicia sesión
-                  </a>
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

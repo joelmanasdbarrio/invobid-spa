@@ -4,6 +4,8 @@ export interface Document {
   filename: string;
   value: string;
   type: DocumentType;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export enum DocumentType {

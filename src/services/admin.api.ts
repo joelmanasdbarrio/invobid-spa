@@ -26,3 +26,31 @@ export const createAdmin = (body: string, onSuccess?: (response: CreateAdminResp
   onReject
   )
 }
+
+export const getAdmins = async () => {
+  return fetchApi('http://localhost:3000/api/v1/admins', {
+    method: 'GET'
+  }, {
+    reject: 'Error al cargar los administradores'
+  })
+}
+
+export const getAdminById = async (adminId: string) => {
+  return fetchApi(`http://localhost:3000/api/v1/admins/${adminId}`, {
+    method: 'GET'
+  }, {
+    reject: 'Error al cargar el administrador'
+  })
+}
+
+export const updateAdminById = async (adminId: string, body: string) => {
+  return fetchApi(`http://localhost:3000/api/v1/admins/${adminId}`, {
+    method: 'PATCH',
+    body,
+    headers: { 'Content-Type': 'application/json'}
+  }, {
+    promise: 'Actualizando administrador...',
+    resolve: 'Administrador actualizado con éxito',
+    reject: 'Error al actualizar el administrador'
+  })
+}

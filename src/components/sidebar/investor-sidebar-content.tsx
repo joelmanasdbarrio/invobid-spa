@@ -1,4 +1,4 @@
-import {Collapsible, CollapsibleContent, CollapsibleTrigger} from '@/components/ui/collapsible.tsx'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible.tsx'
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -9,7 +9,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem
 } from '@/components/ui/sidebar.tsx'
-import {ChevronRight, FileText, Gavel} from 'lucide-react'
+import { ChevronRight, FileText, Gavel } from 'lucide-react'
 
 export function InvestorSidebarContent () {
   return (

@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button.tsx'
-import { downloadDocument } from '@/services/document.api.ts'
-import { type Document } from '@/types/Document.ts'
-import type { ColumnDef } from '@tanstack/react-table'
-import { DownloadIcon } from 'lucide-react'
+import {Button} from '@/components/ui/button.tsx'
+import {downloadDocument} from '@/services/document.api.ts'
+import {type Document} from '@/types/Document.ts'
+import type {ColumnDef} from '@tanstack/react-table'
+import {DownloadIcon} from 'lucide-react'
 
 export const documentColumns: ColumnDef<Document>[] = [
   {
@@ -26,5 +26,10 @@ export const documentColumns: ColumnDef<Document>[] = [
   {
     accessorKey: 'value',
     header: 'Valor'
+  },
+  {
+    accessorKey: 'createdAt',
+    header: 'Fecha de subida',
+    cell: ({row}) => new Date(row.original.createdAt).toLocaleString(undefined, { hour12: false })
   }
 ]
