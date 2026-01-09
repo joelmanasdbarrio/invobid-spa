@@ -7,19 +7,19 @@ import {
   AlertDialogHeader,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog.tsx'
-import {Button} from '@/components/ui/button'
-import {Checkbox} from '@/components/ui/checkbox'
-import {Field, FieldError, FieldGroup, FieldLabel, FieldSeparator} from '@/components/ui/field'
-import {Form} from '@/components/ui/form'
-import {InputGroup, InputGroupAddon, InputGroupInput} from '@/components/ui/input-group'
-import {Label} from '@/components/ui/label'
-import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
-import {AuthContext} from '@/contexts/auth.context'
-import {useLogout} from '@/hooks/use-logout'
-import {deleteInvestorById, updateInvestorById} from '@/services/investor.api'
-import {type Investor, InvestorStatus, InvestorType, UserType} from '@/types/User'
-import {zodResolver} from '@hookform/resolvers/zod'
-import {AlertDialogCancel, AlertDialogTitle} from '@radix-ui/react-alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { Form } from '@/components/ui/form'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Label } from '@/components/ui/label'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { AuthContext } from '@/contexts/auth.context'
+import { useLogout } from '@/hooks/use-logout'
+import { deleteInvestorById, updateInvestorById } from '@/services/investor.api'
+import { type Investor, InvestorStatus, InvestorType, UserType } from '@/types/User'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { AlertDialogCancel, AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import {
   CircleQuestionMarkIcon,
   EllipsisIcon,
@@ -32,9 +32,9 @@ import {
   UserIcon,
   UsersIcon
 } from 'lucide-react'
-import {useCallback, useContext, useEffect} from 'react'
-import {Controller, useForm, useWatch} from 'react-hook-form'
-import {z} from 'zod'
+import { useCallback, useContext, useEffect } from 'react'
+import { Controller, useForm, useWatch } from 'react-hook-form'
+import { z } from 'zod'
 
 const validateFormSchema = z.object({
   status: z.enum(InvestorStatus)
