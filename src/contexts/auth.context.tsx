@@ -1,16 +1,20 @@
-import { getAdminById } from '@/services/admin.api'
-import { getInvestorById } from '@/services/investor.api'
-import { UserType } from '@/types/User'
+import {getAdminById} from '@/services/admin.api'
+import {getInvestorById} from '@/services/investor.api'
+import {UserType} from '@/types/User'
 import Cookies from 'js-cookie'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
-import { AuthContext } from './auth.context'
+import {useEffect, useState} from 'react'
+import {toast} from 'sonner'
+import {AuthContext} from './auth.context'
 
 export function AuthProvider ({children}: {children: React.ReactNode}) {
   const userCookie = Cookies.get('logged-in-user')
   const [loggedInUser, setLoggedInUser] = useState(userCookie ? JSON.parse(userCookie) : null)
   const [loggedInUserId, setLoggedInUserId] = useState(userCookie ? JSON.parse(userCookie).id : null)
   const [isLoading, setIsLoading] = useState(!!loggedInUserId)
+
+  useEffect(() => {
+    setLoggedInUserId(loggedInUser ? loggedInUser.id : null)
+  }, [loggedInUser])
 
   useEffect(() => {
     if(loggedInUserId) {

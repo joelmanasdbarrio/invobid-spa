@@ -50,7 +50,7 @@ export default function MainLayout ({
   return (
     <SidebarProvider className='w-dvw! h-dvh!'>
       <AppSidebar />
-      <div className='grow flex flex-col bg-background text-foreground md:m-2 md:rounded-lg md:shadow-md overflow-scroll'>
+      <div className='grow flex flex-col bg-background text-foreground md:m-2 md:rounded-lg md:shadow-md'>
         <div className='flex items-center gap-2 border-b p-2'>
           <SidebarTrigger className='p-2' />
           <span className='h-8 border-s'/>
