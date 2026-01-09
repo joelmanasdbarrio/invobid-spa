@@ -79,7 +79,7 @@ export default function AdminProfileForm ({ user }: { user: Admin }) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='col-span-full flex flex-col gap-4'>
         <FieldGroup className='grid grid-cols-1 xl:grid-cols-2'>
           <Controller
             name='email'
