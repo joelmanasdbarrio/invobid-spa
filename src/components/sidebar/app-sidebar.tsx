@@ -1,3 +1,5 @@
+import CommonSidebarContent from '@/components/sidebar/common-sidebar-content.tsx'
+import UserSidebarDropdown from '@/components/sidebar/user-sidebar-dropdown.tsx'
 import {
   Sidebar,
   SidebarContent,
@@ -10,16 +12,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar.tsx'
-import {ModeToggle} from '../dark-mode/mode-toggle.tsx'
-import {InvestorSidebarContent} from './investor-sidebar-content'
-import {AdminSidebarContent} from './admin-sidebar-content'
-import CommonSidebarContent from '@/components/sidebar/common-sidebar-content.tsx'
-import UserSidebarDropdown from '@/components/sidebar/user-sidebar-dropdown.tsx'
-import {useLocation} from 'react-router'
+import { AuthContext } from '@/contexts/auth.context.ts'
+import { type Investor, InvestorStatus, UserType } from '@/types/User.ts'
+import { useContext } from 'react'
+import { Link, useLocation } from 'react-router'
+import { ModeToggle } from '../dark-mode/mode-toggle.tsx'
+import { AdminSidebarContent } from './admin-sidebar-content'
+import { InvestorSidebarContent } from './investor-sidebar-content'
 
 export function AppSidebar () {
   const appName = import.meta.env.VITE_APP_NAME
   const location = useLocation()
+
+  const authContext = useContext(AuthContext)
+  if (!authContext) {
+    throw new Error('AuthContext must be used within AuthProvider')
+  }
+  const { loggedInUser } = authContext
 
   return (
     <Sidebar variant='inset'>
@@ -27,8 +36,8 @@ export function AppSidebar () {
         <SidebarMenu>
           <SidebarMenuItem>
             <div className={'flex gap-2 items-center'}>
-              <img src='/logo.png' alt={`${appName?.toUpperCase()}'s logo`} className={'w-12'} />
-              <h1 className='text-2xl font-bold'>{appName?.toUpperCase()}</h1>
+              <img src='/logo.png' alt={`${appName}'s logo`} className={'w-12'} />
+              <h1 className='text-2xl font-bold'>{appName}</h1>
             </div>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -39,24 +48,29 @@ export function AppSidebar () {
             <SidebarGroupLabel>General</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton isActive={location.pathname === '/'}>
-                  Dashboard
-                </SidebarMenuButton>
+                <Link to='/'>
+                  <SidebarMenuButton isActive={location.pathname === '/'} className='hover:cursor-pointer'>
+                    Dashboard
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <InvestorSidebarContent />
-        <AdminSidebarContent />
+        {
+          (loggedInUser?.type === UserType.INVESTOR && (loggedInUser as Investor)?.status === InvestorStatus.VERIFIED) &&
+          <InvestorSidebarContent />
+        }
+        {
+          loggedInUser?.type === UserType.ADMIN &&
+          <AdminSidebarContent />
+        }
         <CommonSidebarContent />
       </SidebarContent>
       <SidebarFooter>
         <UserSidebarDropdown
-          user={{
-            name: 'Charlie Kirk',
-            email: 'mail@mail.com',
-            avatar: '/avatar.png'
-          }}
+          name={loggedInUser?.name}
+          email={loggedInUser?.email}
         />
         <ModeToggle />
       </SidebarFooter>

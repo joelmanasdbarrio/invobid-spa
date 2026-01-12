@@ -3,10 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { AuthContext } from '@/contexts/auth.context.ts'
 import { createAdmin } from '@/services/admin.api'
 import { zodResolver } from '@hookform/resolvers/zod'
+import Cookies from 'js-cookie'
+import { EllipsisIcon, MailIcon, UserIcon } from 'lucide-react'
+import { useContext } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { z } from 'zod'
 
 const formSchema = z.object({
@@ -36,9 +40,19 @@ export default function AdminForm () {
     }
   })
 
-  function onSubmit (data: z.infer<typeof formSchema>) {
-    const body = JSON.stringify(data)
-    createAdmin(body, () => navigate('/'))
+  const authContext = useContext(AuthContext)
+  if (!authContext) {
+    throw new Error('AuthContext must be used within AuthProvider')
+  }
+  const { setLoggedInUser } = authContext
+  function onSubmit (formData: z.infer<typeof formSchema>) {
+    const body = JSON.stringify(formData)
+    createAdmin(body, (res) => {
+      Cookies.set('logged-in-user', JSON.stringify(res.data), { expires: 1 })
+      setLoggedInUser(res.data)
+
+      navigate('/')
+    })
   }
 
   return (
@@ -62,7 +76,7 @@ export default function AdminForm () {
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='John Doe' required />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0' /><path d='M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2' /></svg>
+                        <UserIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
@@ -80,7 +94,7 @@ export default function AdminForm () {
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='email' placeholder='m@example.com' required />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10z' /><path d='M3 7l9 6l9 -6' /></svg>
+                        <MailIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
@@ -100,7 +114,7 @@ export default function AdminForm () {
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='password' required />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M12 10v4' /><path d='M10 13l4 -2' /><path d='M10 11l4 2' /><path d='M5 10v4' /><path d='M3 13l4 -2' /><path d='M3 11l4 2' /><path d='M19 10v4' /><path d='M17 13l4 -2' /><path d='M17 11l4 2' /></svg>
+                        <EllipsisIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
@@ -118,7 +132,7 @@ export default function AdminForm () {
                     <InputGroup>
                       <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='password' required />
                       <InputGroupAddon>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M12 10v4' /><path d='M10 13l4 -2' /><path d='M10 11l4 2' /><path d='M5 10v4' /><path d='M3 13l4 -2' /><path d='M3 11l4 2' /><path d='M19 10v4' /><path d='M17 13l4 -2' /><path d='M17 11l4 2' /></svg>
+                        <EllipsisIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
@@ -134,9 +148,9 @@ export default function AdminForm () {
                 <FieldSeparator />
                 <FieldDescription className='text-center'>
                   ¿Ya tienes cuenta?{' '}
-                  <a href='/login' className='underline underline-offset-4'>
+                  <Link to='/login' className='underline underline-offset-4'>
                     Inicia sesión
-                  </a>
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
