@@ -1,11 +1,13 @@
 import AdminUsersPage from '@/pages/dashboard/admin/users/page.tsx'
-import {Route, Routes} from 'react-router'
-import {ThemeProvider} from './components/dark-mode/theme-provider'
-import {ProtectedRoute} from './components/protected-route'
+import { Route, Routes } from 'react-router'
+import { ThemeProvider } from './components/dark-mode/theme-provider'
+import { ProtectedRoute } from './components/protected-route'
 import MainLayout from './layouts/layout'
+import DebtorsPage from './pages/dashboard/admin/debtors/page'
 import AdminUserPage from './pages/dashboard/admin/users/user/page'
 import DashboardPage from './pages/dashboard/page'
 import Login from './pages/login/page'
+import NotFoundPage from './pages/not-found'
 import ProfilePage from './pages/profile/page'
 import Register from './pages/register/page'
 
@@ -27,6 +29,12 @@ function App () {
             <Route index element={<ProtectedRoute><MainLayout header='Gestión de usuarios'><AdminUsersPage /></MainLayout></ProtectedRoute>} />
             <Route path=':investorId' element={<ProtectedRoute><MainLayout header='Gestionar usuario'><AdminUserPage /></MainLayout></ProtectedRoute>} />
           </Route>
+
+          <Route path='/admin/debtors'>
+            <Route index element={<ProtectedRoute><MainLayout header='Deudores pendientes'><DebtorsPage /></MainLayout></ProtectedRoute>} />
+          </Route>
+
+          <Route path='*' element={<ProtectedRoute><MainLayout><NotFoundPage /></MainLayout></ProtectedRoute>} />
         </Routes>
       </main>
     </ThemeProvider>

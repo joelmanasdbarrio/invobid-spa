@@ -28,7 +28,7 @@ export default function UserFilters (
       name?: string | undefined
       companyName?: string | undefined
       phoneNumber?: string | undefined
-      documentValue?: string | undefined
+      taxId?: string | undefined
       investorType?: InvestorType | undefined
       status?: InvestorStatus | undefined
       includeDeleted?: boolean | undefined
@@ -38,7 +38,7 @@ export default function UserFilters (
       name?: string | undefined
       companyName?: string | undefined
       phoneNumber?: string | undefined
-      documentValue?: string | undefined
+      taxId?: string | undefined
       investorType?: InvestorType | undefined
       status?: InvestorStatus | undefined
       includeDeleted?: boolean | undefined
@@ -112,7 +112,7 @@ export default function UserFilters (
                 )}
               />
               <Controller
-                name='documentValue'
+                name='taxId'
                 control={form.control}
                 render={({ field }) => (
                   <Field>
@@ -120,7 +120,7 @@ export default function UserFilters (
                     <InputGroup>
                       <InputGroupInput {...field} id={field.name} type='text' placeholder='12345678A' autoComplete='off'/>
                       <InputGroupAddon>
-                        <IdCardIcon/>
+                        <IdCardIcon />
                       </InputGroupAddon>
                     </InputGroup>
                   </Field>

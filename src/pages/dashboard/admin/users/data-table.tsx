@@ -1,9 +1,11 @@
-import {Button} from '@/components/ui/button.tsx'
-import {DialogTrigger} from '@/components/ui/dialog.tsx'
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table.tsx'
-import {type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState} from '@tanstack/react-table'
-import {ListFilterIcon} from 'lucide-react'
-import {useState} from 'react'
+
+import { Button } from '@/components/ui/button.tsx'
+import { DialogTrigger } from '@/components/ui/dialog.tsx'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
+import { cn } from '@/lib/utils'
+import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
+import { ListFilterIcon } from 'lucide-react'
+import { useState } from 'react'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -64,6 +66,11 @@ export function DataTable<TData, TValue> ({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
+                  className={
+                    cn({
+                      'bg-red-600/10': row.original.deletedAt != null
+                    })
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

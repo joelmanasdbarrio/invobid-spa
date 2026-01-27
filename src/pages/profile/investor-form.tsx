@@ -7,19 +7,19 @@ import {
   AlertDialogHeader,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog.tsx'
-import {Button} from '@/components/ui/button'
-import {Checkbox} from '@/components/ui/checkbox'
-import {Field, FieldError, FieldGroup, FieldLabel, FieldSeparator} from '@/components/ui/field'
-import {Form} from '@/components/ui/form'
-import {InputGroup, InputGroupAddon, InputGroupInput} from '@/components/ui/input-group'
-import {Label} from '@/components/ui/label'
-import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
-import {AuthContext} from '@/contexts/auth.context'
-import {useLogout} from '@/hooks/use-logout'
-import {deleteInvestorById, updateInvestorById} from '@/services/investor.api'
-import {type Investor, InvestorStatus, InvestorType, UserType} from '@/types/User'
-import {zodResolver} from '@hookform/resolvers/zod'
-import {AlertDialogCancel, AlertDialogTitle} from '@radix-ui/react-alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { Form } from '@/components/ui/form'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Label } from '@/components/ui/label'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { AuthContext } from '@/contexts/auth.context'
+import { useLogout } from '@/hooks/use-logout'
+import { deleteInvestorById, updateInvestorById } from '@/services/investor.api'
+import { type Investor, InvestorStatus, InvestorType, UserType } from '@/types/User'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { AlertDialogCancel, AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import {
   CircleQuestionMarkIcon,
   EllipsisIcon,
@@ -32,9 +32,9 @@ import {
   UserIcon,
   UsersIcon
 } from 'lucide-react'
-import {useCallback, useContext, useEffect} from 'react'
-import {Controller, useForm, useWatch} from 'react-hook-form'
-import {z} from 'zod'
+import { useCallback, useContext, useEffect } from 'react'
+import { Controller, useForm, useWatch } from 'react-hook-form'
+import { z } from 'zod'
 
 const validateFormSchema = z.object({
   status: z.enum(InvestorStatus)
@@ -75,7 +75,7 @@ const notificationFormSchema = z.object({
 })
 
 const documentFormSchema = z.object({
-  documentValue: z.string()
+  taxId: z.string()
     .min(1, 'El CIF/NIF es obligatorio')
     .optional()
     .or(z.literal('')),
@@ -135,7 +135,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
     resolver: zodResolver(documentFormSchema),
     mode: 'onTouched',
     defaultValues: {
-      documentValue: '',
+      taxId: '',
       document: undefined
     }
   })
@@ -150,7 +150,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
   const email = useWatch({ control: baseForm.control, name: 'email' })
   const phoneNumber = useWatch({ control: baseForm.control, name: 'phoneNumber' })
   const document = useWatch({ control: documentForm.control, name: 'document' })
-  const documentValue = useWatch({ control: documentForm.control, name: 'documentValue' })
+  const taxId = useWatch({ control: documentForm.control, name: 'taxId' })
 
   function onSubmitBase (data: z.infer<typeof baseFormSchema>) {
     const companyName = data.companyName || data.name
@@ -193,7 +193,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
 
   function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
     const documentFormData = new FormData()
-    documentFormData.append('documentValue', data.documentValue)
+    documentFormData.append('taxId', data.taxId)
     documentFormData.append('document', data.document)
     updateInvestorById(user.id, documentFormData).then(res => setLoggedInUser(res.data))
   }
@@ -466,7 +466,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
               <h4 className='text-md col-span-full font-bold'>Documento de identidad</h4>
               <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
                 <Controller
-                  name='documentValue'
+                  name='taxId'
                   control={documentForm.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
@@ -534,13 +534,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                 />
                 <Button
                   className='w-min self-end justify-self-end'
-                  disabled={
-                    (
-                      !document ||
-                  documentValue === ''
-                    ) ||
-                isFormDisabled
-                  }
+                  disabled={(!document || taxId === '' ) || isFormDisabled}
                   title='Subir documento'
                 >
                   <UploadIcon />

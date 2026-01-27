@@ -1,12 +1,13 @@
-import {Button} from '@/components/ui/button'
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card'
-import {Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator} from '@/components/ui/field'
-import {Form} from '@/components/ui/form'
-import {InputGroup, InputGroupAddon, InputGroupInput} from '@/components/ui/input-group'
-import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
-import {AuthContext} from '@/contexts/auth.context.ts'
-import {InvestorType} from '@/types/User'
-import {zodResolver} from '@hookform/resolvers/zod'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { Form } from '@/components/ui/form'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { AuthContext } from '@/contexts/auth.context.ts'
+import { createInvestor } from '@/services/investor.api.ts'
+import { InvestorType } from '@/types/User'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Cookies from 'js-cookie'
 import {
   BuildingIcon,
@@ -18,11 +19,10 @@ import {
   UserIcon,
   UsersIcon
 } from 'lucide-react'
-import {useContext, useEffect} from 'react'
-import {Controller, useForm} from 'react-hook-form'
-import {Link, useNavigate} from 'react-router'
-import {z} from 'zod'
-import {createInvestor} from '@/services/investor.api.ts'
+import { useContext, useEffect } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { Link, useNavigate } from 'react-router'
+import { z } from 'zod'
 
 const formSchema = z.object({
   name: z.string()
@@ -36,7 +36,7 @@ const formSchema = z.object({
     .min(6, 'La contraseña debe tener al menos 6 caracteres'),
   passwordRepeat: z.string()
     .min(6, 'La repetición de la contraseña debe tener al menos 6 caracteres'),
-  documentValue: z.string()
+  taxId: z.string()
     .min(1, 'El CIF/NIF es obligatorio'),
   document: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
@@ -60,7 +60,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
       phoneNumber: '',
       password: '',
       passwordRepeat: '',
-      documentValue: '',
+      taxId: '',
       document: undefined,
       investorType: investorType
     }
@@ -90,7 +90,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
     formData.append('phoneNumber', data.phoneNumber)
     formData.append('password', data.password)
     formData.append('passwordRepeat', data.passwordRepeat)
-    formData.append('documentValue', data.documentValue)
+    formData.append('taxId', data.taxId)
     formData.append('document', data.document)
 
     createInvestor(formData, (res) => {
@@ -276,7 +276,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
             </FieldGroup>
             <FieldGroup className='flex flex-col gap-4 sm:grid sm:grid-cols-2'>
               <Controller
-                name='documentValue'
+                name='taxId'
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
