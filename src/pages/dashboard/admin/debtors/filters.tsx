@@ -134,6 +134,15 @@ export default function DebtorFilters (
                         )}
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem>
+                          <button
+                            type='button'
+                            onClick={() => field.onChange(undefined)}
+                            className='w-full text-sm text-left'
+                          >
+                            Selecciona un estado
+                          </button>
+                        </SelectItem>
                         <SelectItem value={DebtorStatus.PENDING}>
                           <span className='flex items-center gap-1'>
                             <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
@@ -176,7 +185,7 @@ export default function DebtorFilters (
                     />
                     <div className='grid gap-1.5 font-normal'>
                       <p className='text-sm leading-none font-medium'>
-                        Incluir usuarios eliminados
+                        Incluir deudores eliminados
                       </p>
                     </div>
                   </Label>

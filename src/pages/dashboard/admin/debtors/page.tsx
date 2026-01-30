@@ -22,7 +22,7 @@ const formSchema = z.object({
   includeDeleted: z.boolean().default(false).optional()
 })
 
-export default function DebtorsPage () {
+export default function AdminDebtorsPage () {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const defaultForm = useMemo(() => ({

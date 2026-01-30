@@ -3,7 +3,8 @@ import { Route, Routes } from 'react-router'
 import { ThemeProvider } from './components/dark-mode/theme-provider'
 import { ProtectedRoute } from './components/protected-route'
 import MainLayout from './layouts/layout'
-import DebtorsPage from './pages/dashboard/admin/debtors/page'
+import AdminDebtorPage from './pages/dashboard/admin/debtors/debtor/page'
+import AdminDebtorsPage from './pages/dashboard/admin/debtors/page'
 import AdminUserPage from './pages/dashboard/admin/users/user/page'
 import DashboardPage from './pages/dashboard/page'
 import Login from './pages/login/page'
@@ -31,7 +32,8 @@ function App () {
           </Route>
 
           <Route path='/admin/debtors'>
-            <Route index element={<ProtectedRoute><MainLayout header='Deudores pendientes'><DebtorsPage /></MainLayout></ProtectedRoute>} />
+            <Route index element={<ProtectedRoute><MainLayout header='Gestión de deudores'><AdminDebtorsPage /></MainLayout></ProtectedRoute>} />
+            <Route path=':debtorId' element={<ProtectedRoute><MainLayout header='Gestionar deudor'><AdminDebtorPage /></MainLayout></ProtectedRoute>} />
           </Route>
 
           <Route path='*' element={<ProtectedRoute><MainLayout><NotFoundPage /></MainLayout></ProtectedRoute>} />

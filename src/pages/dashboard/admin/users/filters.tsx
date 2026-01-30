@@ -133,7 +133,7 @@ export default function UserFilters (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Tipo de inversor</FieldLabel>
                     <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''}>
-                      <SelectTrigger>
+                      <SelectTrigger className='grow'>
                         {field.value ?
                           (
                             field.value === InvestorType.INDIVIDUAL
@@ -153,6 +153,15 @@ export default function UserFilters (
                           )}
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem>
+                          <button
+                            type='button'
+                            onClick={() => field.onChange(undefined)}
+                            className='w-full text-sm text-left'
+                          >
+                            Selecciona un tipo
+                          </button>
+                        </SelectItem>
                         <SelectItem value={InvestorType.INDIVIDUAL}>
                           <span className='flex items-center gap-2'>
                             <UserIcon className='w-4 h-4' />
@@ -177,7 +186,7 @@ export default function UserFilters (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
                     <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''} >
-                      <SelectTrigger>
+                      <SelectTrigger className='grow'>
                         {field.value ? (
                           field.value === InvestorStatus.PENDING ? (
                             <span className='flex items-center gap-1'>
@@ -205,6 +214,15 @@ export default function UserFilters (
                         )}
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem>
+                          <button
+                            type='button'
+                            onClick={() => field.onChange(undefined)}
+                            className='w-full text-sm text-left'
+                          >
+                            Selecciona un estado
+                          </button>
+                        </SelectItem>
                         <SelectItem value={InvestorStatus.PENDING}>
                           <span className='flex items-center gap-1'>
                             <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
