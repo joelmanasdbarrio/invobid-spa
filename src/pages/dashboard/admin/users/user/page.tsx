@@ -30,6 +30,7 @@ import {
   CircleAlertIcon,
   ClockIcon,
   CopyIcon,
+  IdCardIcon,
   LockIcon,
   LockOpenIcon,
   MailIcon,
@@ -51,6 +52,7 @@ const formSchema = z.object({
   email: z.email('Correo electrónico no válido'),
   phoneNumber: z.string()
     .min(6, 'El número de teléfono es obligatorio'),
+  taxId: z.string().optional(),
   investorType: z.enum(InvestorType),
   lastCommunication: z.string().optional()
 })
@@ -64,6 +66,7 @@ export default function AdminUserPage () {
     type: UserType.INVESTOR,
     phoneNumber: '',
     companyName: '',
+    taxId: '',
     investorType: InvestorType.INDIVIDUAL,
     lastCommunication: '',
     status: InvestorStatus.PENDING,
@@ -104,6 +107,7 @@ export default function AdminUserPage () {
       companyName: investor.companyName,
       email: investor.email,
       phoneNumber: investor.phoneNumber,
+      taxId: investor.taxId,
       investorType: investor.investorType,
       lastCommunication: ''
     }
@@ -115,6 +119,7 @@ export default function AdminUserPage () {
       companyName: investor.companyName,
       email: investor.email,
       phoneNumber: investor.phoneNumber,
+      taxId: investor.taxId,
       investorType: investor.investorType,
       lastCommunication: ''
     })
@@ -128,6 +133,7 @@ export default function AdminUserPage () {
       companyName: data.companyName,
       email: data.email,
       phoneNumber: data.phoneNumber,
+      taxId: data.taxId,
       investorType: data.investorType,
       status: investor.status,
       ...(data.lastCommunication && { lastCommunication: data.lastCommunication })
@@ -143,9 +149,11 @@ export default function AdminUserPage () {
           companyName: updatedInvestor.companyName,
           email: updatedInvestor.email,
           phoneNumber: updatedInvestor.phoneNumber,
+          taxId: updatedInvestor.taxId,
           investorType: updatedInvestor.investorType,
           lastCommunication: ''
         })
+        setIsFormDisabled(true)
         setIsDialogOpen(false)
       })
   }
@@ -168,7 +176,6 @@ export default function AdminUserPage () {
   const updateNotesMap: Record<string, string> = {
     correctVerification: 'Usuario verificado correctamente',
     incorrectIdentificationDocument: 'El documento de identificación es incorrecto o no es legible',
-    updatedEmail: 'Se ha actualizado el correo electrónico',
     updatedCompanyName: 'Se ha actualizado la razón social'
   }
 
@@ -215,28 +222,40 @@ export default function AdminUserPage () {
             </div>
 
             <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
-              <Field>
-                <FieldLabel htmlFor='investorId'>ID:</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput id='investorId' value={investor.id} disabled />
-                  <InputGroupAddon align='inline-end'>
-                    <button onClick={(e) => copyToClipboard(e, investor.id)} className='group'>
-                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+              <Controller
+                name='taxId'
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>CIF/NIF:</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='12345678A' required disabled={isFormDisabled} />
+                      <InputGroupAddon>
+                        <IdCardIcon />
+                      </InputGroupAddon>
+                      <InputGroupAddon align='inline-end'>
+                        <button onClick={(e) => copyToClipboard(e, investor.taxId)} className='group'>
+                          <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent className='relative -top-2 right-3'>
-                          <p className='text-center'>¡Copiado!</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </button>
-                  </InputGroupAddon>
-                </InputGroup>
-              </Field>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className='relative -top-2 right-3'>
+                              <p className='text-center'>¡Copiado!</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </button>
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
               <Controller
                 name='investorType'
                 control={form.control}

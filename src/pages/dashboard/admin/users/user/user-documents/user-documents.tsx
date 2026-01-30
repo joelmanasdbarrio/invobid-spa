@@ -1,10 +1,10 @@
-import {useEffect, useState} from 'react'
-import {getDocuments} from '@/services/document.api.ts'
-import {DataTable} from '@/pages/dashboard/admin/users/user/user-documents/data-table.tsx'
-import {documentColumns} from '@/pages/dashboard/admin/users/user/user-documents/columns.tsx'
-import {Button} from '@/components/ui/button.tsx'
-import {Select, SelectContent, SelectItem, SelectTrigger} from '@/components/ui/select.tsx'
-import {DocumentType} from '@/types/Document.ts'
+import { Button } from '@/components/ui/button.tsx'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
+import { documentColumns } from '@/pages/dashboard/admin/users/user/user-documents/columns.tsx'
+import { DataTable } from '@/pages/dashboard/admin/users/user/user-documents/data-table.tsx'
+import { getDocuments } from '@/services/document.api.ts'
+import { DocumentType } from '@/types/Document.ts'
+import { useEffect, useState } from 'react'
 
 export default function UserDocuments ({ investorId } : { investorId: string | undefined }) {
   const [data, setData] = useState([])
@@ -14,15 +14,17 @@ export default function UserDocuments ({ investorId } : { investorId: string | u
   const [currentLimit, setCurrentLimit] = useState(10)
 
   useEffect(() => {
-    getDocuments({
-      investorId,
-      type: DocumentType.IDENTIFICATION,
-      page: currentPage,
-      limit: currentLimit
-    }).then(res => {
-      setData(res.data)
-      setTotalItems(res['_metadata'].total)
-    })
+    if (investorId) {
+      getDocuments({
+        investorId,
+        type: DocumentType.IDENTIFICATION,
+        page: currentPage,
+        limit: currentLimit
+      }).then(res => {
+        setData(res.data)
+        setTotalItems(res['_metadata'].total)
+      })
+    }
   }, [investorId, currentLimit, currentPage])
 
   return (

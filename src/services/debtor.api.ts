@@ -11,6 +11,33 @@ export const getDebtors = async (queryParams?: Record<string, string>) => {
   })
 }
 
+export const getDebtorById = async (debtorId: string) => {
+  return fetchApi(`${base_url}/debtors/${debtorId}`, {
+    method: 'GET'
+  }, {
+    reject: 'Error al cargar el deudor'
+  })
+}
+
+export const updateDebtorById = async (debtorId: string, body: FormData | string) => {
+  const fetchOptions: RequestInit = {
+    method: 'PATCH'
+  }
+
+  if (body instanceof FormData) {
+    fetchOptions.body = body
+  } else {
+    fetchOptions.body = body
+    fetchOptions.headers = { 'Content-Type': 'application/json' }
+  }
+
+  return fetchApi(`${base_url}/debtors/${debtorId}`, fetchOptions, {
+    promise: 'Actualizando deudor...',
+    resolve: 'Deudor actualizado con éxito',
+    reject: 'Error al actualizar el deudor'
+  })
+}
+
 // Lookup service
 
 export const countPendingDebtors = async () => {
