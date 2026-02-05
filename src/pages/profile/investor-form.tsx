@@ -411,7 +411,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
               name='isOptedInNotificationsEmail'
               control={notificationForm.control}
               render={({field}) => (
-                <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                <Label className='hover:bg-accent/50 flex items-start gap-3 border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                   <Checkbox
                     id='toggle-email-notifications'
                     checked={field.value}
@@ -434,7 +434,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
               name='isOptedInNotificationsSMS'
               control={notificationForm.control}
               render={({field}) => (
-                <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                <Label className='hover:bg-accent/50 flex items-start gap-3 border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                   <Checkbox
                     id='toggle-sms-notifications'
                     checked={field.value}

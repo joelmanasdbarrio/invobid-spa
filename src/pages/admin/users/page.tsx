@@ -153,7 +153,7 @@ export default function AdminUsersPage () {
           Siguiente
         </Button>
         <Select value={String(currentLimit)} onValueChange={value => handleLimitChange(Number(value))}>
-          <SelectTrigger>
+          <SelectTrigger className='py-0! h-8!'>
             {currentLimit}
           </SelectTrigger>
           <SelectContent>

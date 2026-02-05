@@ -50,7 +50,7 @@ export default function UserDocuments ({ investorId } : { investorId: string | u
           Siguiente
         </Button>
         <Select value={String(currentLimit)} onValueChange={value => setCurrentLimit(Number(value))}>
-          <SelectTrigger>
+          <SelectTrigger className='py-0! h-8!'>
             {currentLimit}
           </SelectTrigger>
           <SelectContent>
