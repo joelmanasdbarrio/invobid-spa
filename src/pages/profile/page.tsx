@@ -1,15 +1,10 @@
-import {AuthContext} from '@/contexts/auth.context'
-import {type Admin, type Investor, UserType} from '@/types/User'
-import {useContext} from 'react'
+import useLoggedInUser from '@/hooks/use-loggedInUser'
+import { type Admin, type Investor, UserType } from '@/types/User'
 import AdminProfileForm from './admin-form'
 import InvestorProfileForm from './investor-form'
 
 export default function ProfilePage () {
-  const authContext = useContext(AuthContext)
-  if (!authContext) {
-    throw new Error('AuthContext must be used within AuthProvider')
-  }
-  const { loggedInUser } = authContext
+  const loggedInUser = useLoggedInUser()
 
   return (
     <section className='grid md:grid-cols-[1fr_200px] gap-4'>
