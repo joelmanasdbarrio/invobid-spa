@@ -75,10 +75,8 @@ const notificationFormSchema = z.object({
 })
 
 const documentFormSchema = z.object({
-  taxId: z.string()
-    .min(1, 'El CIF/NIF es obligatorio')
-    .optional()
-    .or(z.literal('')),
+  taxId: z.string('El CIF/NIF es obligatorio')
+    .min(7, 'El NIF/CIF debe tener al menos 7 caracteres'),
   document: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
@@ -218,14 +216,14 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
           {(user.status === InvestorStatus.CORRECTION || user.status === InvestorStatus.PENDING) && (
             <Button
               variant='outline'
-              className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2'
+              className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-300'
               disabled={user.status === InvestorStatus.PENDING || isFormDisabled}
               onClick={() => {
                 validateForm.setValue('status', InvestorStatus.PENDING)
                 validateForm.handleSubmit(onSubmitValidate)()
               }}
             >
-              <RefreshCcwIcon className='transition-all group-hover:rotate-180' />
+              <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-300' />
               <span className='overflow-hidden'>
                 Solicitar verificación
               </span>

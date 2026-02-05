@@ -9,14 +9,63 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem
 } from '@/components/ui/sidebar.tsx'
-import { ChevronRight, FileText, Gavel } from 'lucide-react'
+import { ChevronRight, ChevronRightIcon, FileText, Gavel, HandCoinsIcon } from 'lucide-react'
+import { Link } from 'react-router'
 
 export function InvestorSidebarContent () {
   return (
     <SidebarGroup>
       <SidebarGroupContent>
         <SidebarGroupLabel>Inversión</SidebarGroupLabel>
+
         <SidebarMenu>
+          <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/debtors')}>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild className={'group/collapsible'}>
+                <SidebarMenuButton isActive={location.pathname.startsWith('/debtors')}>
+                  <HandCoinsIcon /> Deudores
+                  <ChevronRightIcon className='ms-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub className={'m-0 pe-0'}>
+                  <SidebarMenuSubItem>
+                    <Link to='/debtors'>
+                      <SidebarMenuButton>
+                        Mis deudores
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuSubItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+
+          <Collapsible className='group/collapsible'>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild className={'group/collapsible'}>
+                <SidebarMenuButton>
+                  <FileText /> Facturas
+                  <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub className={'m-0 pe-0'}>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuButton>
+                      Publicadas
+                    </SidebarMenuButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuButton>
+                      Invertidas
+                    </SidebarMenuButton>
+                  </SidebarMenuSubItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+
           <Collapsible className='group/collapsible'>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild className={'group/collapsible'}>
@@ -32,32 +81,6 @@ export function InvestorSidebarContent () {
                       Disponibles
                     </SidebarMenuButton>
                   </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Publicadas
-                    </SidebarMenuButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Invertidas
-                    </SidebarMenuButton>
-                  </SidebarMenuSubItem>
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-        </SidebarMenu>
-        <SidebarMenu>
-          <Collapsible className='group/collapsible'>
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild className={'group/collapsible'}>
-                <SidebarMenuButton>
-                  <FileText /> Facturas
-                  <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub className={'m-0 pe-0'}>
                   <SidebarMenuSubItem>
                     <SidebarMenuButton>
                       Publicadas
