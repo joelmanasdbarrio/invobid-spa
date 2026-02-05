@@ -191,8 +191,7 @@ export default function DebtorFilters (
                   </Label>
                 )}
               />
-            </FieldGroup>
-            <div className='justify-end items-end flex gap-2'>
+              <div className='md:col-start-2 xl:col-start-4 justify-end items-end flex gap-2'>
               <Button type='submit'>Filtrar</Button>
               <Button type='button' variant='outline' onClick={handleClear}>Limpiar</Button>
             </div>
