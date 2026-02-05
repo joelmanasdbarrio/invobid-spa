@@ -39,7 +39,7 @@ export function DataTable<TData, TValue> ({
           </Button>
         </DialogTrigger>
       </div>
-      <div className='overflow-x-scroll rounded-md border shadow-sm'>
+      <div className='overflow-x-scroll border shadow-sm'>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

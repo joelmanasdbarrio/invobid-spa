@@ -176,7 +176,7 @@ export default function DebtorFilters (
                 name='includeDeleted'
                 control={form.control}
                 render={({ field }) => (
-                  <Label className='h-min self-end hover:bg-accent/50 flex items-start gap-3 rounded-md border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                  <Label className='h-min self-end hover:bg-accent/50 flex items-start gap-3 border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                     <Checkbox
                       id='toggle-include-deleted'
                       checked={field.value}
@@ -192,9 +192,10 @@ export default function DebtorFilters (
                 )}
               />
               <div className='md:col-start-2 xl:col-start-4 justify-end items-end flex gap-2'>
-              <Button type='submit'>Filtrar</Button>
-              <Button type='button' variant='outline' onClick={handleClear}>Limpiar</Button>
-            </div>
+                <Button type='submit'>Filtrar</Button>
+                <Button type='button' variant='outline' onClick={handleClear}>Limpiar</Button>
+              </div>
+            </FieldGroup>
           </form>
         </Form>
       </CardContent>
