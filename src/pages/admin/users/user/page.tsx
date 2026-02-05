@@ -17,11 +17,11 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip.tsx'
-import { UserChangeHistory } from '@/pages/dashboard/admin/users/user/user-change-history.tsx'
-import UserDocuments from '@/pages/dashboard/admin/users/user/user-documents/user-documents.tsx'
+import { UserChangeHistory } from '@/pages/admin/users/user/user-change-history.tsx'
+import UserDocuments from '@/pages/admin/users/user/user-documents/user-documents.tsx'
 import { getInvestorById, updateInvestorById } from '@/services/investor.api.ts'
 import { DocumentType } from '@/types/Document.ts'
-import { type Investor, InvestorStatus, InvestorType, UserType } from '@/types/User'
+import { type Investor, InvestorStatus, InvestorType } from '@/types/User'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   BuildingIcon,
@@ -59,29 +59,8 @@ const formSchema = z.object({
 
 export default function AdminUserPage () {
   const {investorId} = useParams()
-  const [investor, setInvestor] = useState<Investor>({
-    id: '',
-    email: '',
-    name: '',
-    type: UserType.INVESTOR,
-    phoneNumber: '',
-    companyName: '',
-    taxId: '',
-    investorType: InvestorType.INDIVIDUAL,
-    lastCommunication: '',
-    status: InvestorStatus.PENDING,
-    isOptedInNotificationsEmail: false,
-    isOptedInNotificationsSMS: false,
-    documents: [],
-    bankAccount: {
-      id: '',
-      balance: 0
-    },
-    createdAt: '',
-    updatedAt: '',
-    deletedAt: ''
-  })
-  const [originalInvestor, setOriginalInvestor] = useState<Investor>(investor)
+  const [investor, setInvestor] = useState<Investor | undefined>()
+  const [originalInvestor, setOriginalInvestor] = useState<Investor | undefined>(investor)
   const [isFormDisabled, setIsFormDisabled] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -103,24 +82,24 @@ export default function AdminUserPage () {
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
-      name: investor.name,
-      companyName: investor.companyName,
-      email: investor.email,
-      phoneNumber: investor.phoneNumber,
-      taxId: investor.taxId,
-      investorType: investor.investorType,
+      name: investor?.name ?? '',
+      companyName: investor?.companyName ?? '',
+      email: investor?.email ?? '',
+      phoneNumber: investor?.phoneNumber ?? '',
+      taxId: investor?.taxId ?? '',
+      investorType: investor?.investorType ?? InvestorType.INDIVIDUAL,
       lastCommunication: ''
     }
   })
 
   useEffect(() => {
     form.reset({
-      name: investor.name,
-      companyName: investor.companyName,
-      email: investor.email,
-      phoneNumber: investor.phoneNumber,
-      taxId: investor.taxId,
-      investorType: investor.investorType,
+      name: investor?.name ?? '',
+      companyName: investor?.companyName ?? '',
+      email: investor?.email ?? '',
+      phoneNumber: investor?.phoneNumber ?? '',
+      taxId: investor?.taxId ?? '',
+      investorType: investor?.investorType ?? InvestorType.INDIVIDUAL,
       lastCommunication: ''
     })
   }, [investor, form])
@@ -135,7 +114,7 @@ export default function AdminUserPage () {
       phoneNumber: data.phoneNumber,
       taxId: data.taxId,
       investorType: data.investorType,
-      status: investor.status,
+      status: investor?.status ?? InvestorStatus.ACTIVE,
       ...(data.lastCommunication && { lastCommunication: data.lastCommunication })
     }
 
@@ -185,7 +164,7 @@ export default function AdminUserPage () {
         <Form {...form}>
           <form id='investor-form' onSubmit={form.handleSubmit(onSubmit)} className='xl:col-span-2 flex flex-col gap-4'>
             <div className='flex flex-col xl:flex-row gap-2'>
-              <h3 className='text-lg'>Detalles del usuario {investor.companyName}</h3>
+              <h3 className='text-lg'>Detalles del usuario {investor?.companyName}</h3>
               <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                 <ButtonGroup>
                   {isFormDisabled
@@ -203,19 +182,19 @@ export default function AdminUserPage () {
                 <ButtonGroup>
                   <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/10' onClick={() => setInvestor({...investor, status: InvestorStatus.DENIED})}>
                     <OctagonXIcon className='rounded-full text-zinc-600'/>
-                    {investor.status === InvestorStatus.DENIED && 'Denegado'}
+                    {investor?.status === InvestorStatus.DENIED && 'Denegado'}
                   </Button>
                   <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/15' onClick={() => setInvestor({...investor, status: InvestorStatus.CORRECTION})}>
                     <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                    {investor.status === InvestorStatus.CORRECTION && 'Corrección requerida'}
+                    {investor?.status === InvestorStatus.CORRECTION && 'Corrección requerida'}
                   </Button>
                   <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/15' onClick={() => setInvestor({...investor, status: InvestorStatus.PENDING})}>
                     <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
-                    {investor.status === InvestorStatus.PENDING && 'Por verificar'}
+                    {investor?.status === InvestorStatus.PENDING && 'Por verificar'}
                   </Button>
                   <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/15' onClick={() => setInvestor({...investor, status: InvestorStatus.VERIFIED})}>
                     <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
-                    {investor.status === InvestorStatus.VERIFIED && 'Verificado'}
+                    {investor?.status === InvestorStatus.VERIFIED && 'Verificado'}
                   </Button>
                 </ButtonGroup>
               </ButtonGroup>
@@ -234,7 +213,7 @@ export default function AdminUserPage () {
                         <IdCardIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, investor.taxId)} className='group'>
+                        <button onClick={(e) => copyToClipboard(e, investor?.taxId ?? '')} className='group'>
                           <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
@@ -298,7 +277,7 @@ export default function AdminUserPage () {
                         <BuildingIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, investor.companyName)} className='group'>
+                        <button onClick={(e) => copyToClipboard(e, investor?.companyName ?? '')} className='group'>
                           <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
@@ -339,7 +318,7 @@ export default function AdminUserPage () {
                           : <UserIcon />}
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, investor.name)} className='group'>
+                        <button onClick={(e) => copyToClipboard(e, investor?.name ?? '')} className='group'>
                           <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
@@ -373,7 +352,7 @@ export default function AdminUserPage () {
                         <MailIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, investor.email)} className='group'>
+                        <button onClick={(e) => copyToClipboard(e, investor?.email ?? '')} className='group'>
                           <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
@@ -407,7 +386,7 @@ export default function AdminUserPage () {
                         <PhoneIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, investor.phoneNumber)} className='group'>
+                        <button onClick={(e) => copyToClipboard(e, investor?.phoneNumber ?? '')} className='group'>
                           <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
