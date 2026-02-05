@@ -1,4 +1,4 @@
-import {AppSidebar} from '@/components/sidebar/app-sidebar.tsx'
+import { AppSidebar } from '@/components/sidebar/app-sidebar.tsx'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -7,13 +7,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader
 } from '@/components/ui/alert-dialog'
-import {Item, ItemContent, ItemDescription, ItemMedia, ItemTitle} from '@/components/ui/item'
-import {SidebarProvider, SidebarTrigger} from '@/components/ui/sidebar'
-import {AuthContext} from '@/contexts/auth.context'
-import {type Investor, InvestorStatus, UserType} from '@/types/User'
-import {AlertDialogTitle} from '@radix-ui/react-alert-dialog'
-import {CircleAlertIcon, ClockIcon, OctagonXIcon} from 'lucide-react'
-import {useContext} from 'react'
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import useLoggedInUser from '@/hooks/use-loggedInUser'
+import { type Investor, InvestorStatus, UserType } from '@/types/User'
+import { AlertDialogTitle } from '@radix-ui/react-alert-dialog'
+import { CircleAlertIcon, ClockIcon, OctagonXIcon } from 'lucide-react'
 
 export default function MainLayout ({
   header,
@@ -22,11 +21,7 @@ export default function MainLayout ({
   header: string;
   children: React.ReactNode;
 }>) {
-  const authContext = useContext(AuthContext)
-  if (!authContext) {
-    throw new Error('AuthContext must be used within AuthProvider')
-  }
-  const { loggedInUser } = authContext
+  const loggedInUser = useLoggedInUser()
 
   const investorStatusTextMap: {
     pending: { title: string; icon: React.JSX.Element };
