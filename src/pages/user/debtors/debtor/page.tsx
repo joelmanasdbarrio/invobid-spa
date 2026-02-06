@@ -1,11 +1,13 @@
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { getDebtorById, updateDebtorById } from '@/services/debtor.api'
 import { DebtorStatus, type Debtor } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { FileIcon, IdCardIcon, KeyRoundIcon, MailIcon, PhoneIcon, RefreshCcwIcon, SaveIcon, UsersIcon } from 'lucide-react'
+import { CircleAlertIcon, ClockIcon, FileIcon, IdCardIcon, KeyRoundIcon, MailIcon, OctagonXIcon, PhoneIcon, RefreshCcwIcon, SaveIcon, UsersIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
@@ -19,7 +21,7 @@ const baseFormSchema = z.object({
   companyName: z.string().min(2, 'El nombre de la empresa debe tener al menos 2 caracteres'),
   taxId: z.string().min(7, 'El NIF/CIF debe tener al menos 7 caracteres'),
   email: z.email('Correo electrónico no válido'),
-  phoneNumber: z.string().min(6, 'El número de teléfono debe tener al menos 7 caracteres')
+  phoneNumber: z.string().min(6, 'El número de teléfono debe tener al menos 6 caracteres')
 })
 
 const documentFormSchema = z.object({
@@ -132,6 +134,25 @@ export default function DebtorPage () {
     updateDebtorById(debtorId, JSON.stringify({
       status: data.status
     })).then(res => setDebtor(res.data))
+  }
+
+  const debtorStatusTextMap: {
+    pending: { title: string; icon: React.JSX.Element };
+    correction: { title: string; icon: React.JSX.Element };
+    denied: { title: string; icon: React.JSX.Element }
+  } = {
+    pending: {
+      title: 'Pendiente de verificación',
+      icon: <ClockIcon className='w-full h-full rounded-full text-yellow-600 bg-yellow-300/25 p-2'/>
+    },
+    correction: {
+      title: 'Corrección requerida',
+      icon: <CircleAlertIcon className='w-full h-full rounded-full text-red-600 bg-red-300/25 p-2'/>
+    },
+    denied: {
+      title: 'Deudor denegado',
+      icon: <OctagonXIcon className='w-full h-full rounded-full text-zinc-600 bg-zinc-300/25 p-2'/>
+    }
   }
 
   return (
@@ -278,7 +299,17 @@ export default function DebtorPage () {
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
                   <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='file' disabled={isFormDisabled} />
+                    <InputGroupInput
+                      aria-invalid={fieldState.invalid}
+                      id={field.name}
+                      onChange={(e) => field.onChange(e.target.files)}
+                      onBlur={field.onBlur}
+                      ref={field.ref}
+                      type='file'
+                      accept='image/jpg,image/jpeg,image/png,.pdf'
+                      aria-description='Fotocopia que permita visualizar el documento completo'
+                      disabled={isFormDisabled}
+                    />
                     <InputGroupAddon>
                       <FileIcon />
                     </InputGroupAddon>
@@ -317,7 +348,17 @@ export default function DebtorPage () {
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
                   <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='file' disabled={isFormDisabled} />
+                    <InputGroupInput
+                      aria-invalid={fieldState.invalid}
+                      id={field.name}
+                      onChange={(e) => field.onChange(e.target.files)}
+                      onBlur={field.onBlur}
+                      ref={field.ref}
+                      type='file'
+                      accept='image/jpg,image/jpeg,image/png,.pdf'
+                      aria-description='Fotocopia que permita visualizar el documento completo'
+                      disabled={isFormDisabled}
+                    />
                     <InputGroupAddon>
                       <FileIcon />
                     </InputGroupAddon>
@@ -341,6 +382,33 @@ export default function DebtorPage () {
           </FieldGroup>
         </form>
       </Form>
+
+      {(debtor?.status && debtor.status !== DebtorStatus.VERIFIED) && (
+        <AlertDialog defaultOpen>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Actualización del deudor</AlertDialogTitle>
+              <AlertDialogDescription>
+                Comprueba el estado del deudor y ejecuta las acciones necesarias:
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <Item variant='muted' className='gap-2'>
+              <ItemMedia className='self-center! w-10 h-10'>
+                {debtorStatusTextMap[debtor?.status].icon}
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{debtorStatusTextMap[debtor?.status].title}</ItemTitle>
+                <ItemDescription>
+                  {debtor?.lastCommunication}
+                </ItemDescription>
+              </ItemContent>
+            </Item>
+            <AlertDialogFooter>
+              <AlertDialogAction>Aceptar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </section>
   )
 }

@@ -2,6 +2,17 @@ import fetchApi from '@/lib/fetchApi'
 
 const base_url = import.meta.env.VITE_BASE_URL
 
+export const createDebtor = async (body: FormData) => {
+  return fetchApi(`${base_url}/debtors`, {
+    method: 'POST',
+    body
+  }, {
+    promise: 'Creando deudor...',
+    resolve: 'Deudor creado con éxito',
+    reject: 'Error al crear el deudor'
+  })
+}
+
 export const getDebtors = async (queryParams?: Record<string, string>) => {
   const queryString = new URLSearchParams(queryParams).toString()
   return fetchApi(`${base_url}/debtors?${queryString}`, {
@@ -42,6 +53,12 @@ export const updateDebtorById = async (debtorId: string, body: FormData | string
 
 export const countPendingDebtors = async () => {
   return fetchApi(`${base_url}/debtors/lookup/countPending`, {
+    method: 'GET'
+  })
+}
+
+export const countCorrectionDebtors = async ({ investorId }: { investorId: string }) => {
+  return fetchApi(`${base_url}/debtors/lookup/countCorrection/${investorId}`, {
     method: 'GET'
   })
 }
