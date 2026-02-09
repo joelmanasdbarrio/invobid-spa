@@ -7,19 +7,19 @@ import {
   AlertDialogHeader,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog.tsx'
-import {Button} from '@/components/ui/button'
-import {Checkbox} from '@/components/ui/checkbox'
-import {Field, FieldError, FieldGroup, FieldLabel, FieldSeparator} from '@/components/ui/field'
-import {Form} from '@/components/ui/form'
-import {InputGroup, InputGroupAddon, InputGroupInput} from '@/components/ui/input-group'
-import {Label} from '@/components/ui/label'
-import {Tooltip, TooltipContent, TooltipTrigger} from '@/components/ui/tooltip'
-import {AuthContext} from '@/contexts/auth.context'
-import {useLogout} from '@/hooks/use-logout'
-import {deleteInvestorById, updateInvestorById} from '@/services/investor.api'
-import {type Investor, InvestorStatus, InvestorType, UserType} from '@/types/User'
-import {zodResolver} from '@hookform/resolvers/zod'
-import {AlertDialogCancel, AlertDialogTitle} from '@radix-ui/react-alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { Form } from '@/components/ui/form'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Label } from '@/components/ui/label'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { AuthContext } from '@/contexts/auth.context'
+import { useLogout } from '@/hooks/use-logout'
+import { deleteInvestorById, updateInvestorById } from '@/services/investor.api'
+import { type Investor, InvestorStatus, InvestorType, UserType } from '@/types/User'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { AlertDialogCancel, AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import {
   CircleQuestionMarkIcon,
   EllipsisIcon,
@@ -32,9 +32,9 @@ import {
   UserIcon,
   UsersIcon
 } from 'lucide-react'
-import {useCallback, useContext, useEffect} from 'react'
-import {Controller, useForm, useWatch} from 'react-hook-form'
-import {z} from 'zod'
+import { useCallback, useContext, useEffect } from 'react'
+import { Controller, useForm, useWatch } from 'react-hook-form'
+import { z } from 'zod'
 
 const validateFormSchema = z.object({
   status: z.enum(InvestorStatus)
@@ -75,10 +75,8 @@ const notificationFormSchema = z.object({
 })
 
 const documentFormSchema = z.object({
-  documentValue: z.string()
-    .min(1, 'El CIF/NIF es obligatorio')
-    .optional()
-    .or(z.literal('')),
+  taxId: z.string('El CIF/NIF es obligatorio')
+    .min(7, 'El NIF/CIF debe tener al menos 7 caracteres'),
   document: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
@@ -135,7 +133,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
     resolver: zodResolver(documentFormSchema),
     mode: 'onTouched',
     defaultValues: {
-      documentValue: '',
+      taxId: '',
       document: undefined
     }
   })
@@ -150,7 +148,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
   const email = useWatch({ control: baseForm.control, name: 'email' })
   const phoneNumber = useWatch({ control: baseForm.control, name: 'phoneNumber' })
   const document = useWatch({ control: documentForm.control, name: 'document' })
-  const documentValue = useWatch({ control: documentForm.control, name: 'documentValue' })
+  const taxId = useWatch({ control: documentForm.control, name: 'taxId' })
 
   function onSubmitBase (data: z.infer<typeof baseFormSchema>) {
     const companyName = data.companyName || data.name
@@ -193,7 +191,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
 
   function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
     const documentFormData = new FormData()
-    documentFormData.append('documentValue', data.documentValue)
+    documentFormData.append('taxId', data.taxId)
     documentFormData.append('document', data.document)
     updateInvestorById(user.id, documentFormData).then(res => setLoggedInUser(res.data))
   }
@@ -218,14 +216,14 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
           {(user.status === InvestorStatus.CORRECTION || user.status === InvestorStatus.PENDING) && (
             <Button
               variant='outline'
-              className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2'
+              className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-300'
               disabled={user.status === InvestorStatus.PENDING || isFormDisabled}
               onClick={() => {
                 validateForm.setValue('status', InvestorStatus.PENDING)
                 validateForm.handleSubmit(onSubmitValidate)()
               }}
             >
-              <RefreshCcwIcon className='transition-all group-hover:rotate-180' />
+              <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-300' />
               <span className='overflow-hidden'>
                 Solicitar verificación
               </span>
@@ -413,7 +411,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
               name='isOptedInNotificationsEmail'
               control={notificationForm.control}
               render={({field}) => (
-                <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                <Label className='hover:bg-accent/50 flex items-start gap-3 border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                   <Checkbox
                     id='toggle-email-notifications'
                     checked={field.value}
@@ -436,7 +434,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
               name='isOptedInNotificationsSMS'
               control={notificationForm.control}
               render={({field}) => (
-                <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                <Label className='hover:bg-accent/50 flex items-start gap-3 border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                   <Checkbox
                     id='toggle-sms-notifications'
                     checked={field.value}
@@ -466,7 +464,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
               <h4 className='text-md col-span-full font-bold'>Documento de identidad</h4>
               <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
                 <Controller
-                  name='documentValue'
+                  name='taxId'
                   control={documentForm.control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
@@ -534,13 +532,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                 />
                 <Button
                   className='w-min self-end justify-self-end'
-                  disabled={
-                    (
-                      !document ||
-                  documentValue === ''
-                    ) ||
-                isFormDisabled
-                  }
+                  disabled={(!document || taxId === '' ) || isFormDisabled}
                   title='Subir documento'
                 >
                   <UploadIcon />

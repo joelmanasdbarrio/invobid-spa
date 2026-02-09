@@ -1,23 +1,23 @@
-import {Button} from '@/components/ui/button.tsx'
-import {Dialog, DialogContent, DialogHeader} from '@/components/ui/dialog.tsx'
-import {Select, SelectContent, SelectItem, SelectTrigger} from '@/components/ui/select.tsx'
-import {investorColumns} from '@/pages/dashboard/admin/users/columns.tsx'
-import {DataTable} from '@/pages/dashboard/admin/users/data-table.tsx'
-import UserFilters from '@/pages/dashboard/admin/users/filters.tsx'
-import {getInvestors} from '@/services/investor.api.ts'
-import {InvestorStatus, InvestorType} from '@/types/User'
-import {zodResolver} from '@hookform/resolvers/zod'
-import {useEffect, useMemo, useState} from 'react'
-import {useForm} from 'react-hook-form'
-import {useSearchParams} from 'react-router'
-import {z} from 'zod'
+import { Button } from '@/components/ui/button.tsx'
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog.tsx'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
+import { investorColumns } from '@/pages/admin/users/columns.tsx'
+import { DataTable } from '@/pages/admin/users/data-table.tsx'
+import UserFilters from '@/pages/admin/users/filters.tsx'
+import { getInvestors } from '@/services/investor.api.ts'
+import { InvestorStatus, InvestorType } from '@/types/User'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useSearchParams } from 'react-router'
+import { z } from 'zod'
 
 const formSchema = z.object({
   email: z.string().optional(),
   name: z.string().optional(),
   companyName: z.string().optional(),
   phoneNumber: z.string().optional(),
-  documentValue: z.string().optional(),
+  taxId: z.string().optional(),
   investorType: z.enum(InvestorType).optional(),
   status: z.enum(InvestorStatus).optional(),
   includeDeleted: z.boolean().default(false).optional()
@@ -31,7 +31,7 @@ export default function AdminUsersPage () {
     name: searchParams.get('name') || '',
     companyName: searchParams.get('companyName') || '',
     phoneNumber: searchParams.get('phoneNumber') || '',
-    documentValue: searchParams.get('documentValue') || '',
+    taxId: searchParams.get('taxId') || '',
     investorType: searchParams.has('investorType') ? (searchParams.get('investorType') as InvestorType) : undefined,
     status: searchParams.has('status') ? (searchParams.get('status') as InvestorStatus) : undefined,
     includeDeleted: searchParams.get('includeDeleted') === 'true'
@@ -73,10 +73,14 @@ export default function AdminUsersPage () {
       }
     })
 
+    if (searchParams.get('includeDeleted') !== true.toString()) {
+      delete filters.includeDeleted
+    }
+
     getInvestors({
       ...filters,
-      page: currentPage,
-      limit: currentLimit
+      page: String(currentPage),
+      limit: String(currentLimit)
     }).then(res => {
       setData(res.data)
       setTotalItems(res['_metadata'].total)
@@ -89,7 +93,7 @@ export default function AdminUsersPage () {
       name: '',
       companyName: '',
       phoneNumber: '',
-      documentValue: '',
+      taxId: '',
       investorType: undefined,
       status: undefined,
       includeDeleted: false
@@ -149,7 +153,7 @@ export default function AdminUsersPage () {
           Siguiente
         </Button>
         <Select value={String(currentLimit)} onValueChange={value => handleLimitChange(Number(value))}>
-          <SelectTrigger>
+          <SelectTrigger className='py-0! h-8!'>
             {currentLimit}
           </SelectTrigger>
           <SelectContent>

@@ -1,12 +1,11 @@
-import {useEffect, useState} from 'react'
-import {getDocuments} from '@/services/document.api.ts'
-import {DataTable} from '@/pages/dashboard/admin/users/user/user-documents/data-table.tsx'
-import {documentColumns} from '@/pages/dashboard/admin/users/user/user-documents/columns.tsx'
-import {Button} from '@/components/ui/button.tsx'
-import {Select, SelectContent, SelectItem, SelectTrigger} from '@/components/ui/select.tsx'
-import {DocumentType} from '@/types/Document.ts'
+import { Button } from '@/components/ui/button.tsx'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
+import { getDocuments } from '@/services/document.api.ts'
+import { useEffect, useState } from 'react'
+import { documentColumns } from './columns'
+import { DataTable } from './data-table'
 
-export default function UserDocuments ({ investorId } : { investorId: string | undefined }) {
+export default function DebtorDocuments ({ debtorId } : { debtorId: string | undefined }) {
   const [data, setData] = useState([])
   const [totalItems, setTotalItems] = useState(0)
 
@@ -14,16 +13,17 @@ export default function UserDocuments ({ investorId } : { investorId: string | u
   const [currentLimit, setCurrentLimit] = useState(10)
 
   useEffect(() => {
-    getDocuments({
-      investorId,
-      type: DocumentType.IDENTIFICATION,
-      page: currentPage,
-      limit: currentLimit
-    }).then(res => {
-      setData(res.data)
-      setTotalItems(res['_metadata'].total)
-    })
-  }, [investorId, currentLimit, currentPage])
+    if (debtorId) {
+      getDocuments({
+        debtorId,
+        page: currentPage,
+        limit: currentLimit
+      }).then(res => {
+        setData(res.data)
+        setTotalItems(res['_metadata'].total)
+      })
+    }
+  }, [debtorId, currentLimit, currentPage])
 
   return (
     <div className='flex flex-col gap-4'>
@@ -48,7 +48,7 @@ export default function UserDocuments ({ investorId } : { investorId: string | u
           Siguiente
         </Button>
         <Select value={String(currentLimit)} onValueChange={value => setCurrentLimit(Number(value))}>
-          <SelectTrigger>
+          <SelectTrigger className='py-0! h-8!'>
             {currentLimit}
           </SelectTrigger>
           <SelectContent>

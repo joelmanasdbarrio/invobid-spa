@@ -12,9 +12,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar.tsx'
-import { AuthContext } from '@/contexts/auth.context.ts'
+import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 import { type Investor, InvestorStatus, UserType } from '@/types/User.ts'
-import { useContext } from 'react'
 import { Link, useLocation } from 'react-router'
 import { ModeToggle } from '../dark-mode/mode-toggle.tsx'
 import { AdminSidebarContent } from './admin-sidebar-content'
@@ -24,11 +23,7 @@ export function AppSidebar () {
   const appName = import.meta.env.VITE_APP_NAME
   const location = useLocation()
 
-  const authContext = useContext(AuthContext)
-  if (!authContext) {
-    throw new Error('AuthContext must be used within AuthProvider')
-  }
-  const { loggedInUser } = authContext
+  const loggedInUser = useLoggedInUser()
 
   return (
     <Sidebar variant='inset'>
