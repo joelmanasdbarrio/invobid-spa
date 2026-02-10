@@ -20,6 +20,7 @@ export type Investor = {
   type: UserType;
   phoneNumber: string;
   companyName: string;
+  taxId: string;
   investorType: InvestorType;
   lastCommunication: string;
   status: InvestorStatus;
