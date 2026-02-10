@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button.tsx'
 import { Card, CardContent } from '@/components/ui/card.tsx'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
-import { Field, FieldGroup, FieldLabel } from '@/components/ui/field.tsx'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field.tsx'
 import { Form } from '@/components/ui/form.tsx'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group.tsx'
 import { Label } from '@/components/ui/label.tsx'
@@ -27,7 +27,7 @@ export default function UserFilters (
       email?: string | undefined
       name?: string | undefined
       companyName?: string | undefined
-      phoneNumber?: string | undefined
+      phoneNumber?: number | undefined
       taxId?: string | undefined
       investorType?: InvestorType | undefined
       status?: InvestorStatus | undefined
@@ -37,7 +37,7 @@ export default function UserFilters (
       email?: string | undefined
       name?: string | undefined
       companyName?: string | undefined
-      phoneNumber?: string | undefined
+      phoneNumber?: number | undefined
       taxId?: string | undefined
       investorType?: InvestorType | undefined
       status?: InvestorStatus | undefined
@@ -54,7 +54,7 @@ export default function UserFilters (
               <Controller
                 name='companyName'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Razón social</FieldLabel>
                     <InputGroup>
@@ -63,13 +63,16 @@ export default function UserFilters (
                         <BuildingIcon />
                       </InputGroupAddon>
                     </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
               <Controller
                 name='name'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Nombre</FieldLabel>
                     <InputGroup>
@@ -78,13 +81,16 @@ export default function UserFilters (
                         <UserIcon />
                       </InputGroupAddon>
                     </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
               <Controller
                 name='email'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Correo</FieldLabel>
                     <InputGroup>
@@ -93,28 +99,42 @@ export default function UserFilters (
                         <MailIcon />
                       </InputGroupAddon>
                     </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
               <Controller
                 name='phoneNumber'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Teléfono</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput {...field} id={field.name} type='text' placeholder='34 600 000 000' autoComplete='off'/>
+                      <InputGroupInput
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                        id={field.name}
+                        type='number'
+                        placeholder='34 600 000 000'
+                        autoComplete='off'
+                      />
                       <InputGroupAddon>
                         <PhoneIcon />
                       </InputGroupAddon>
                     </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
               <Controller
                 name='taxId'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>CIF/NIF</FieldLabel>
                     <InputGroup>
@@ -123,13 +143,16 @@ export default function UserFilters (
                         <IdCardIcon />
                       </InputGroupAddon>
                     </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
               <Controller
                 name='investorType'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Tipo de inversor</FieldLabel>
                     <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''}>
@@ -142,10 +165,14 @@ export default function UserFilters (
                                   <UserIcon className='w-4 h-4' />
                                   Particular
                                 </span>
-                              ) : (
+                              ) : field.value === InvestorType.COMPANY ? (
                                 <span className='flex items-center gap-2'>
                                   <BuildingIcon className='w-4 h-4' />
                                   Empresa
+                                </span>
+                              ) : (
+                                <span className='flex items-center gap-2'>
+                                  {field.value}
                                 </span>
                               )
                           ) : (
@@ -176,13 +203,16 @@ export default function UserFilters (
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
               <Controller
                 name='status'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
                     <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''} >
@@ -203,10 +233,14 @@ export default function UserFilters (
                               <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
                               Corrección requerida
                             </span>
-                          ) : (
+                          ) : field.value === InvestorStatus.DENIED ? (
                             <span className='flex items-center gap-2'>
                               <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
                               Denegado
+                            </span>
+                          ) : (
+                            <span className='flex items-center gap-2'>
+                              {field.value}
                             </span>
                           )
                         ) : (
@@ -249,6 +283,9 @@ export default function UserFilters (
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
@@ -259,7 +296,7 @@ export default function UserFilters (
                   <Label className='h-min self-end hover:bg-accent/50 flex items-start gap-3 border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                     <Checkbox
                       id='toggle-include-deleted'
-                      checked={field.value}
+                      checked={field.value ?? false}
                       onCheckedChange={field.onChange}
                       className='data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700'
                     />

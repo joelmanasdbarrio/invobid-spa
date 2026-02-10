@@ -14,7 +14,7 @@ import DebtorFilters from './filters'
 
 const formSchema = z.object({
   email: z.string().optional(),
-  phoneNumber: z.string().optional(),
+  phoneNumber: z.number().positive().optional(),
   companyName: z.string().optional(),
   taxId: z.string().optional(),
   investorId: z.string().optional(),
@@ -27,12 +27,12 @@ export default function AdminDebtorsPage () {
 
   const defaultForm = useMemo(() => ({
     email: searchParams.get('email') || '',
-    phoneNumber: searchParams.get('phoneNumber') || '',
+    phoneNumber: searchParams.get('phoneNumber') ? Number(searchParams.get('phoneNumber')) : undefined,
     companyName: searchParams.get('companyName') || '',
     taxId: searchParams.get('taxId') || '',
     investorId: searchParams.get('investorId') || '',
     status: searchParams.has('status') ? (searchParams.get('status') as DebtorStatus) : undefined,
-    includeDeleted: searchParams.get('includeDeleted') === 'true'
+    includeDeleted: searchParams.get('includeDeleted') ? searchParams.get('includeDeleted') === 'true' : undefined
   }), [searchParams])
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -67,13 +67,13 @@ export default function AdminDebtorsPage () {
     const filters: Record<string, string> = {}
     searchParams.forEach((value, key) => {
       if (key !== 'page' && key !== 'limit') {
-        filters[key] = value
+        if (value === 'true') {
+          filters[key] = '1'
+        } else if (value !== 'false') {
+          filters[key] = value
+        }
       }
     })
-
-    if (searchParams.get('includeDeleted') !== true.toString()) {
-      delete filters.includeDeleted
-    }
 
     getDebtors({
       ...filters,
@@ -88,12 +88,12 @@ export default function AdminDebtorsPage () {
   function handleClear () {
     form.reset({
       email: '',
-      phoneNumber: '',
+      phoneNumber: undefined,
       companyName: '',
       taxId: '',
       investorId: '',
       status: undefined,
-      includeDeleted: false
+      includeDeleted: undefined
     })
     setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
   }

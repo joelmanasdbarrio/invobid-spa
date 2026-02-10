@@ -378,7 +378,7 @@ export default function AdminDebtorPage () {
                   <DialogHeader>
                     <DialogTitle>¿Estás seguro de que deseas guardar los cambios?</DialogTitle>
                   </DialogHeader>
-                  <DialogDescription>Esta acción actualizará la información del usuario en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
+                  <DialogDescription>Esta acción actualizará la información del deudor en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
 
                   <Controller
                     name='lastCommunication'
