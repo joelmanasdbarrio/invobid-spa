@@ -5,6 +5,7 @@ import { ProtectedRoute } from './components/protected-route'
 import MainLayout from './layouts/layout'
 import AdminDebtorPage from './pages/admin/debtors/debtor/page'
 import AdminDebtorsPage from './pages/admin/debtors/page'
+import AdminInvoicesPage from './pages/admin/invoices/page'
 import AdminUserPage from './pages/admin/users/user/page'
 import DashboardPage from './pages/dashboard/page'
 import Login from './pages/login/page'
@@ -38,6 +39,10 @@ function App () {
           <Route path='/admin/debtors'>
             <Route index element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout header='Gestión de deudores'><AdminDebtorsPage /></MainLayout></ProtectedRoute>} />
             <Route path=':debtorId' element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout header='Gestionar deudor'><AdminDebtorPage /></MainLayout></ProtectedRoute>} />
+          </Route>
+
+          <Route path='/admin/invoices'>
+            <Route index element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout header='Gestión de facturas'><AdminInvoicesPage /></MainLayout></ProtectedRoute>} />
           </Route>
 
           <Route path='/debtors'>

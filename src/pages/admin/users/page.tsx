@@ -16,7 +16,7 @@ const formSchema = z.object({
   email: z.string().optional(),
   name: z.string().optional(),
   companyName: z.string().optional(),
-  phoneNumber: z.string().optional(),
+  phoneNumber: z.number().positive().optional(),
   taxId: z.string().optional(),
   investorType: z.enum(InvestorType).optional(),
   status: z.enum(InvestorStatus).optional(),
@@ -30,11 +30,11 @@ export default function AdminUsersPage () {
     email: searchParams.get('email') || '',
     name: searchParams.get('name') || '',
     companyName: searchParams.get('companyName') || '',
-    phoneNumber: searchParams.get('phoneNumber') || '',
+    phoneNumber: searchParams.get('phoneNumber') ? Number(searchParams.get('phoneNumber')) : undefined,
     taxId: searchParams.get('taxId') || '',
     investorType: searchParams.has('investorType') ? (searchParams.get('investorType') as InvestorType) : undefined,
     status: searchParams.has('status') ? (searchParams.get('status') as InvestorStatus) : undefined,
-    includeDeleted: searchParams.get('includeDeleted') === 'true'
+    includeDeleted: searchParams.get('includeDeleted') ? searchParams.get('includeDeleted') === 'true' : undefined
   }), [searchParams])
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -69,13 +69,13 @@ export default function AdminUsersPage () {
     const filters: Record<string, string|number> = {}
     searchParams.forEach((value, key) => {
       if (key !== 'page' && key !== 'limit') {
-        filters[key] = value
+        if (value === 'true') {
+          filters[key] = '1'
+        } else if (value !== 'false') {
+          filters[key] = value
+        }
       }
     })
-
-    if (searchParams.get('includeDeleted') !== true.toString()) {
-      delete filters.includeDeleted
-    }
 
     getInvestors({
       ...filters,
@@ -92,11 +92,11 @@ export default function AdminUsersPage () {
       email: '',
       name: '',
       companyName: '',
-      phoneNumber: '',
+      phoneNumber: undefined,
       taxId: '',
       investorType: undefined,
       status: undefined,
-      includeDeleted: false
+      includeDeleted: undefined
     })
     setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
   }

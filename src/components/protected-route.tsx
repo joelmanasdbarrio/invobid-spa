@@ -23,10 +23,6 @@ export function ProtectedRoute ({ userType, children }: { userType: UserType | I
     return <Navigate to='/login' replace />
   }
 
-  console.log({userType})
-  console.log(loggedInUser['type'])
-  console.log(loggedInUser['investorType'])
-
   if (userType && (userType !== loggedInUser.type && !(loggedInUser.type === UserType.INVESTOR && userType === (loggedInUser as Investor).investorType))) {
     return <Navigate to='/' replace />
   }

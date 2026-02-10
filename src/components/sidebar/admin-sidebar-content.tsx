@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sidebar.tsx'
 import { countPendingDebtors } from '@/services/debtor.api'
 import { countPendingInvestors } from '@/services/investor.api.ts'
+import { countPendingInvoices } from '@/services/invoice.api'
 import { ChevronRightIcon, FileTextIcon, GavelIcon, HandCoinsIcon, UserIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
@@ -33,7 +34,13 @@ export function AdminSidebarContent () {
     })
   }, [])
 
-  const pendingInvoicesCount = 0 // TODO: fetch pending invoices count
+  const [pendingInvoicesCount, setPendingInvoicesCount] = useState(0)
+  useEffect(() => {
+    countPendingInvoices().then(res => {
+      setPendingInvoicesCount(res.data)
+    })
+  }, [])
+
   const pendingAuctionsCount = 0 // TODO: fetch pending auctions count
 
   return (
@@ -119,7 +126,7 @@ export function AdminSidebarContent () {
           <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/admin/invoices')}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild className={'group/collapsible'}>
-                <SidebarMenuButton>
+                <SidebarMenuButton isActive={location.pathname.startsWith('/admin/invoices')}>
                   <FileTextIcon /> Facturas
                   {pendingInvoicesCount > 0 && (
                     <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
@@ -130,19 +137,23 @@ export function AdminSidebarContent () {
               <CollapsibleContent>
                 <SidebarMenuSub className={'m-0 pe-0'}>
                   <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Todas las facturas
-                    </SidebarMenuButton>
+                    <Link to='/admin/invoices'>
+                      <SidebarMenuButton>
+                        Todas las facturas
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Facturas para validar
-                      {pendingInvoicesCount > 0 && (
-                        <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
-                          {pendingInvoicesCount > 99 ? '+99' : pendingInvoicesCount}
-                        </Badge>
-                      )}
-                    </SidebarMenuButton>
+                    <Link to='/admin/invoices?status=pending'>
+                      <SidebarMenuButton>
+                        Facturas para validar
+                        {pendingInvoicesCount > 0 && (
+                          <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
+                            {pendingInvoicesCount > 99 ? '+99' : pendingInvoicesCount}
+                          </Badge>
+                        )}
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>
               </CollapsibleContent>
