@@ -44,6 +44,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import { z } from 'zod'
 import UserDebtors from './user-debtors/user-debtors'
+import UserInvoices from './user-invoices/user-invoices'
 
 const formSchema = z.object({
   name: z.string()
@@ -486,7 +487,7 @@ export default function AdminUserPage () {
           <UserDebtors investorId={investorId} />
         </TabsContent>
         <TabsContent value={DocumentType.INVOICE}>
-          Facturas...
+          <UserInvoices investorId={investorId} />
         </TabsContent>
       </Tabs>
     </section>
