@@ -1,414 +1,425 @@
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { ButtonGroup } from '@/components/ui/button-group'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
-import { getDebtorById, updateDebtorById } from '@/services/debtor.api'
-import { DebtorStatus, type Debtor } from '@/types/Debtor'
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { getInvoiceById, updateInvoiceById } from '@/services/invoice.api'
+import { InvoiceStatus, type Invoice } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CircleAlertIcon, ClockIcon, FileIcon, IdCardIcon, KeyRoundIcon, MailIcon, OctagonXIcon, PhoneIcon, RefreshCcwIcon, SaveIcon, UsersIcon } from 'lucide-react'
+import { BuildingIcon, CheckCheckIcon, CheckIcon, CircleAlertIcon, ClockIcon, CopyIcon, IdCardIcon, LockIcon, LockOpenIcon, OctagonXIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import z from 'zod'
+import { InvoiceChangeHistory } from './invoice-change-history'
+import InvoiceDocuments from './invoice-documents/invoice-documents'
 
-const validateFormSchema = z.object({
-  status: z.enum(DebtorStatus)
+const formSchema = z.object({
+  rating: z.coerce.number().optional(),
+  lastCommunication: z.string().optional()
 })
 
-const baseFormSchema = z.object({
-  companyName: z.string().min(2, 'El nombre de la empresa debe tener al menos 2 caracteres'),
-  taxId: z.string().min(7, 'El NIF/CIF debe tener al menos 7 caracteres'),
-  email: z.email('Correo electrónico no válido'),
-  phoneNumber: z.string().min(6, 'El número de teléfono debe tener al menos 6 caracteres')
-})
-
-const documentFormSchema = z.object({
-  modelo111Csv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 111')
-    .optional()
-    .or(z.literal('')),
-  modelo111: z.custom<FileList>()
-    .refine((files) => files && files.length > 0, 'El documento 111 es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
-    .transform((files) => files[0]).optional(),
-  modelo303Csv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 303')
-    .optional()
-    .or(z.literal('')),
-  modelo303: z.custom<FileList>()
-    .refine((files) => files && files.length > 0, 'El documento 303 es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
-    .transform((files) => files[0]).optional()
-}).refine((data) => {
-  if (data.modelo111 || data.modelo111Csv) {
-    return data.modelo111 && data.modelo111Csv
-  }
-  if (data.modelo303 || data.modelo303Csv) {
-    return data.modelo303 && data.modelo303Csv
-  }
-  return true
-})
-
-export default function DebtorPage () {
-  const {debtorId} = useParams()
-  const [debtor, setDebtor] = useState<Debtor | undefined>()
-  const [originalDebtor, setOriginalDebtor] = useState<Debtor | undefined>(debtor)
-
-  const isFormDisabled = debtor?.status === DebtorStatus.PENDING || debtor?.status === DebtorStatus.DENIED
-
-  const validateForm = useForm<z.infer<typeof validateFormSchema>>({
-    resolver: zodResolver(validateFormSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      status: debtor?.status
-    }
-  })
-
-  const baseForm = useForm<z.infer<typeof baseFormSchema>>({
-    resolver: zodResolver(baseFormSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      companyName: debtor?.companyName ?? '',
-      taxId: debtor?.taxId ?? '',
-      email: debtor?.email ?? '',
-      phoneNumber: debtor?.phoneNumber ?? ''
-    }
-  })
-
-  const documentForm = useForm<z.infer<typeof documentFormSchema>>({
-    resolver: zodResolver(documentFormSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      modelo111Csv: '',
-      modelo111: undefined,
-      modelo303Csv: '',
-      modelo303: undefined
-    }
-  })
-
-  useEffect(() => {
-    baseForm.reset({
-      companyName: debtor?.companyName ?? '',
-      taxId: debtor?.taxId ?? '',
-      email: debtor?.email ?? '',
-      phoneNumber: debtor?.phoneNumber ?? ''
-    })
-  }, [debtor, baseForm])
+export default function AdminInvoicePage () {
+  const {invoiceId} = useParams()
+  const [invoice, setInvoice] = useState<Invoice | undefined>()
+  const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
+  const [isFormDisabled, setIsFormDisabled] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const navigate = useNavigate()
   useEffect(() => {
-    if (debtorId) {
-      getDebtorById(debtorId)
+    if(invoiceId) {
+      getInvoiceById(invoiceId)
         .then(res => res.data)
-        .then(data => {
-          setDebtor(data)
-          setOriginalDebtor(data)
+        .then(invoice => {
+          setInvoice(invoice)
+          setOriginalInvoice(invoice)
         })
         .catch(() => {
-          navigate('/user/debtors')
+          navigate('/admin/invoices')
         })
     }
-  }, [debtorId, navigate])
+  }, [invoiceId, navigate])
 
-  function onSubmitBase (data: z.infer<typeof baseFormSchema>) {
-    updateDebtorById(debtorId, JSON.stringify({
-      companyName: data.companyName,
-      taxId: data.taxId,
-      email: data.email,
-      phoneNumber: data.phoneNumber
-    })).then(res => setDebtor(res.data))
-  }
-
-  function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
-    const formData = new FormData()
-    formData.append('modelo111', data.modelo111)
-    formData.append('modelo111Csv', data.modelo111Csv)
-    formData.append('modelo303', data.modelo303)
-    formData.append('modelo303Csv', data.modelo303Csv)
-    updateDebtorById(debtorId, formData).then(res => setDebtor(res.data))
-  }
-
-  function onSubmitValidate (data: z.infer<typeof validateFormSchema>) {
-    updateDebtorById(debtorId, JSON.stringify({
-      status: data.status
-    })).then(res => setDebtor(res.data))
-  }
-
-  const debtorStatusTextMap: {
-    pending: { title: string; icon: React.JSX.Element };
-    correction: { title: string; icon: React.JSX.Element };
-    denied: { title: string; icon: React.JSX.Element }
-  } = {
-    pending: {
-      title: 'Pendiente de verificación',
-      icon: <ClockIcon className='w-full h-full rounded-full text-yellow-600 bg-yellow-300/25 p-2'/>
-    },
-    correction: {
-      title: 'Corrección requerida',
-      icon: <CircleAlertIcon className='w-full h-full rounded-full text-red-600 bg-red-300/25 p-2'/>
-    },
-    denied: {
-      title: 'Deudor denegado',
-      icon: <OctagonXIcon className='w-full h-full rounded-full text-zinc-600 bg-zinc-300/25 p-2'/>
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      rating: invoice?.rating ?? 0,
+      lastCommunication: invoice?.lastCommunication ?? ''
     }
+  })
+
+  useEffect(() => {
+    form.reset({
+      rating: invoice?.rating ?? 0,
+      lastCommunication: invoice?.lastCommunication ?? ''
+    })
+  }, [invoice, form])
+
+  function onSubmit (data: z.infer<typeof formSchema>) {
+    if (!invoice) return
+
+    const updateData = {
+      ...invoice,
+      status: invoice.status,
+      rating: data.rating,
+      ...(data.lastCommunication && { lastCommunication: data.lastCommunication })
+    }
+
+    updateInvoiceById(invoice.id, JSON.stringify(updateData))
+      .then(res => res.data)
+      .then(updatedInvoice => {
+        setInvoice(updatedInvoice)
+        setOriginalInvoice(updatedInvoice)
+        form.reset({
+          rating: updatedInvoice.rating ?? 0,
+          lastCommunication: updatedInvoice.lastCommunication ?? ''})
+        setIsFormDisabled(true)
+        setIsDialogOpen(false)
+      })
+  }
+
+  function handleReset () {
+    form.reset()
+    setInvoice(originalInvoice)
+  }
+
+  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
+    e.preventDefault()
+    navigator.clipboard.writeText(text.toString())
+    const button = e.currentTarget
+    button.setAttribute('data-copied', 'true')
+    setTimeout(() => {
+      button.removeAttribute('data-copied')
+    }, 2000)
+  }
+
+  const updateNotesMap: Record<string, string> = {
+    correctVerification: 'Factura verificada correctamente',
+    updatedCompanyName: 'Se ha actualizado el rating de la factura',
+    incorrectDocument: 'El documento es incorrecto o no es legible'
   }
 
   return (
-    <section className='grid md:grid-cols-[1fr_200px] gap-4'>
-      <h3 className='text-lg'>Detalles del deudor {debtor?.companyName}</h3>
-      <Form {...validateForm}>
-        <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='flex md:justify-end'>
-          {(debtor?.status === DebtorStatus.CORRECTION || debtor?.status === DebtorStatus.PENDING) && (
-            <Button
-              variant='outline'
-              className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
-              disabled={debtor?.status === DebtorStatus.PENDING || isFormDisabled}
-              onClick={() => {
-                validateForm.setValue('status', DebtorStatus.PENDING)
-                validateForm.handleSubmit(onSubmitValidate)()
-              }}
-            >
-              <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-200' />
-              <span className='overflow-hidden'>
-                Solicitar verificación
-              </span>
-            </Button>
-          )}
-        </form>
-      </Form>
-      <Form {...baseForm}>
-        <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='col-span-full flex flex-col gap-4'>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='taxId'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>NIF/CIF:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' disabled={debtor?.status === DebtorStatus.VERIFIED || isFormDisabled} />
-                    <InputGroupAddon>
-                      <IdCardIcon/>
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='companyName'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' disabled={debtor?.status === DebtorStatus.VERIFIED || isFormDisabled} />
-                    <InputGroupAddon>
-                      <UsersIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </FieldGroup>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='email'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Correo electrónico:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='email' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <MailIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='phoneNumber'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <PhoneIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Button
-              className='w-min self-end justify-self-end'
-              disabled={JSON.stringify(originalDebtor) === JSON.stringify(debtor) && !baseForm.formState.isDirty}
-              title='Guardar cambios'
-            >
-              <SaveIcon />
-              <span className='lg:hidden'>
-                Guardar cambios
-              </span>
-            </Button>
-          </FieldGroup>
-        </form>
-      </Form>
-      <FieldSeparator className='col-span-full' />
-      <Form {...documentForm}>
-        <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='col-span-full flex flex-col gap-4'>
-          <h4 className='text-md col-span-full font-bold'>Actualizar documentos</h4>
-          <h5 className='text-md col-span-full'>Modelo 111</h5>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='modelo111Csv'
-              control={documentForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <KeyRoundIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='modelo111'
-              control={documentForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput
-                      aria-invalid={fieldState.invalid}
-                      id={field.name}
-                      onChange={(e) => field.onChange(e.target.files)}
-                      onBlur={field.onBlur}
-                      ref={field.ref}
-                      type='file'
-                      accept='image/jpg,image/jpeg,image/png,.pdf'
-                      aria-description='Fotocopia que permita visualizar el documento completo'
-                      disabled={isFormDisabled}
-                    />
-                    <InputGroupAddon>
-                      <FileIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </FieldGroup>
-          <h5 className='text-md col-span-full'>Modelo 303</h5>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='modelo303Csv'
-              control={documentForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <KeyRoundIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='modelo303'
-              control={documentForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput
-                      aria-invalid={fieldState.invalid}
-                      id={field.name}
-                      onChange={(e) => field.onChange(e.target.files)}
-                      onBlur={field.onBlur}
-                      ref={field.ref}
-                      type='file'
-                      accept='image/jpg,image/jpeg,image/png,.pdf'
-                      aria-description='Fotocopia que permita visualizar el documento completo'
-                      disabled={isFormDisabled}
-                    />
-                    <InputGroupAddon>
-                      <FileIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Button
-              className='w-min self-end justify-self-end'
-              disabled={!documentForm.formState.isDirty}
-              title='Actualizar documentos'
-            >
-              <SaveIcon />
-              <span className='lg:hidden'>
-                Actualizar documentos
-              </span>
-            </Button>
-          </FieldGroup>
-        </form>
-      </Form>
+    <section className='flex flex-col gap-4'>
+      <div className='grid xl:grid-cols-3 gap-4'>
+        <Form {...form}>
+          <form id='debtor-form' onSubmit={form.handleSubmit(onSubmit)} className='xl:col-span-2 flex flex-col gap-4'>
+            <div className='flex flex-col xl:flex-row gap-2'>
+              <h3 className='text-lg'>Detalles de la factura</h3>
+              <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
+                <ButtonGroup>
+                  {isFormDisabled
+                    ? (
+                      <Button type='button' variant='outline' onClick={() => setIsFormDisabled(false)}>
+                        <LockIcon />
+                      </Button>
+                    ) : (
+                      <Button type='button' variant='outline' onClick={() => setIsFormDisabled(true)}>
+                        <LockOpenIcon />
+                      </Button>
+                    )}
+                </ButtonGroup>
 
-      {(debtor?.status && debtor.status !== DebtorStatus.VERIFIED) && (
-        <AlertDialog defaultOpen>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Actualización del deudor</AlertDialogTitle>
-              <AlertDialogDescription>
-                Comprueba el estado del deudor y ejecuta las acciones necesarias:
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <Item variant='muted' className='gap-2'>
-              <ItemMedia className='self-center! w-10 h-10'>
-                {debtorStatusTextMap[debtor?.status].icon}
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle>{debtorStatusTextMap[debtor?.status].title}</ItemTitle>
-                <ItemDescription>
-                  {debtor?.lastCommunication}
-                </ItemDescription>
-              </ItemContent>
-            </Item>
-            <AlertDialogFooter>
-              <AlertDialogAction>Aceptar</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+                <ButtonGroup>
+                  <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => invoice && setInvoice({...invoice, status: InvoiceStatus.DENIED})}>
+                    <OctagonXIcon className='rounded-full text-zinc-600'/>
+                    {invoice?.status === InvoiceStatus.DENIED && 'Denegado'}
+                  </Button>
+                  <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => invoice && setInvoice({...invoice, status: InvoiceStatus.CORRECTION})}>
+                    <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
+                    {invoice?.status === InvoiceStatus.CORRECTION && 'Corrección requerida'}
+                  </Button>
+                  <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => invoice && setInvoice({...invoice, status: InvoiceStatus.PENDING})}>
+                    <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
+                    {invoice?.status === InvoiceStatus.PENDING && 'Por verificar'}
+                  </Button>
+                  <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => invoice && setInvoice({...invoice, status: InvoiceStatus.VERIFIED})}>
+                    <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
+                    {invoice?.status === InvoiceStatus.VERIFIED && 'Verificado'}
+                  </Button>
+                </ButtonGroup>
+              </ButtonGroup>
+            </div>
+
+            <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+              <Controller
+                name='rating'
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Rating:</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='0' required disabled={isFormDisabled} />
+                      <InputGroupAddon>
+                        %
+                      </InputGroupAddon>
+                      <InputGroupAddon align='inline-end'>
+                        <button onClick={(e) => copyToClipboard(e, invoice?.rating ?? 0)} className='group'>
+                          <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className='relative -top-2 right-3'>
+                              <p className='text-center'>¡Copiado!</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </button>
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Field>
+                <FieldLabel htmlFor='amount'>Importe:</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput id='amount' value={invoice?.amount} type='text' placeholder='0' required disabled />
+                  <InputGroupAddon>
+                    €
+                  </InputGroupAddon>
+                  <InputGroupAddon align='inline-end'>
+                    <button onClick={(e) => copyToClipboard(e, invoice?.amount ?? '')} className='group'>
+                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className='relative -top-2 right-3'>
+                          <p className='text-center'>¡Copiado!</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </button>
+                  </InputGroupAddon>
+                </InputGroup>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor='buyerPercentage'>Comisión del comprador:</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput id='buyerPercentage' value={invoice?.transactionFee?.buyerPercentage} type='number' placeholder='0' required disabled />
+                  <InputGroupAddon>
+                    %
+                  </InputGroupAddon>
+                  <InputGroupAddon align='inline-end'>
+                    <button onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.buyerPercentage ?? 0)} className='group'>
+                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className='relative -top-2 right-3'>
+                          <p className='text-center'>¡Copiado!</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </button>
+                  </InputGroupAddon>
+                </InputGroup>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor='sellerPercentage'>Comisión del vendedor:</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput id='sellerPercentage' value={invoice?.transactionFee?.sellerPercentage} type='number' placeholder='0' required disabled />
+                  <InputGroupAddon>
+                    %
+                  </InputGroupAddon>
+                  <InputGroupAddon align='inline-end'>
+                    <button onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.sellerPercentage ?? 0)} className='group'>
+                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className='relative -top-2 right-3'>
+                          <p className='text-center'>¡Copiado!</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </button>
+                  </InputGroupAddon>
+                </InputGroup>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor='investorTaxId'>CIF/NIF del inversor:</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput id='investorTaxId' value={invoice?.sellerInvestor?.taxId} type='text' placeholder='12345678A' required disabled />
+                  <InputGroupAddon>
+                    <IdCardIcon />
+                  </InputGroupAddon>
+                  <InputGroupAddon align='inline-end'>
+                    <button onClick={(e) => copyToClipboard(e, invoice?.sellerInvestor?.taxId ?? '')} className='group'>
+                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className='relative -top-2 right-3'>
+                          <p className='text-center'>¡Copiado!</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </button>
+                  </InputGroupAddon>
+                </InputGroup>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor='investorCompanyName'>Razón social del inversor:</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput id='investorCompanyName' value={invoice?.sellerInvestor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                  <InputGroupAddon>
+                    <BuildingIcon />
+                  </InputGroupAddon>
+                  <InputGroupAddon align='inline-end'>
+                    <button onClick={(e) => copyToClipboard(e, invoice?.sellerInvestor?.companyName ?? '')} className='group'>
+                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className='relative -top-2 right-3'>
+                          <p className='text-center'>¡Copiado!</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </button>
+                  </InputGroupAddon>
+                </InputGroup>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor='debtorTaxId'>CIF/NIF del deudor:</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput id='debtorTaxId' value={invoice?.debtor?.taxId} type='text' placeholder='12345678A' required disabled />
+                  <InputGroupAddon>
+                    <IdCardIcon />
+                  </InputGroupAddon>
+                  <InputGroupAddon align='inline-end'>
+                    <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.taxId ?? '')} className='group'>
+                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className='relative -top-2 right-3'>
+                          <p className='text-center'>¡Copiado!</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </button>
+                  </InputGroupAddon>
+                </InputGroup>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor='debtorCompanyName'>Razón social del deudor:</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput id='debtorCompanyName' value={invoice?.debtor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                  <InputGroupAddon>
+                    <BuildingIcon />
+                  </InputGroupAddon>
+                  <InputGroupAddon align='inline-end'>
+                    <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.companyName ?? '')} className='group'>
+                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className='relative -top-2 right-3'>
+                          <p className='text-center'>¡Copiado!</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </button>
+                  </InputGroupAddon>
+                </InputGroup>
+              </Field>
+            </FieldGroup>
+            <FieldGroup>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className='ms-auto w-min' disabled={JSON.stringify(originalInvoice) === JSON.stringify(invoice) && !form.formState.isDirty}>
+                    Guardar cambios
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>¿Estás seguro de que deseas guardar los cambios?</DialogTitle>
+                  </DialogHeader>
+                  <DialogDescription>Esta acción actualizará la información de la factura en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
+
+                  <Controller
+                    name='lastCommunication'
+                    control={form.control}
+                    render={({ field }) => (
+                      <Field className='mt-4'>
+                        <FieldLabel htmlFor={field.name}>Notas de la actualización:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
+                        </InputGroup>
+                        <div className='flex flex-wrap gap-1'>
+                          {Object.entries(updateNotesMap).map(([key, note]) => (
+                            <Badge
+                              key={key}
+                              variant='outline'
+                              className='hover:cursor-pointer border-dashed hover:bg-accent'
+                              onClick={() => {
+                                form.setValue('lastCommunication', note)
+                              }}
+                            >
+                              {note}
+                            </Badge>
+                          ))}
+                        </div>
+                        <FieldDescription>
+                          Este mensaje le indicará al usuario próximas acciones que debe realizar o el motivo de la actualización.
+                        </FieldDescription>
+                      </Field>
+                    )}
+                  />
+
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant='outline' onClick={handleReset}>
+                        Cancelar
+                      </Button>
+                    </DialogClose>
+                    <Button type='submit' form='debtor-form' onClick={form.handleSubmit(onSubmit)}>
+                      Confirmar
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </FieldGroup>
+          </form>
+        </Form>
+
+        <InvoiceChangeHistory invoice={invoice} />
+      </div>
+
+      <InvoiceDocuments invoiceId={invoice?.id ?? ''} />
     </section>
   )
 }
