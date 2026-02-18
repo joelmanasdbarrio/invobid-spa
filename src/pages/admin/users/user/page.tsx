@@ -52,7 +52,7 @@ const formSchema = z.object({
   companyName: z.string()
     .min(1, 'La razón social es obligatoria'),
   email: z.email('Correo electrónico no válido'),
-  phoneNumber: z.string()
+  phoneNumber: z.coerce.number<number>()
     .min(6, 'El número de teléfono es obligatorio'),
   taxId: z.string().optional(),
   investorType: z.enum(InvestorType),
@@ -84,24 +84,24 @@ export default function AdminUserPage () {
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
-      name: investor?.name ?? '',
-      companyName: investor?.companyName ?? '',
-      email: investor?.email ?? '',
-      phoneNumber: investor?.phoneNumber ?? '',
-      taxId: investor?.taxId ?? '',
-      investorType: investor?.investorType ?? InvestorType.INDIVIDUAL,
+      name: investor?.name,
+      companyName: investor?.companyName,
+      email: investor?.email,
+      phoneNumber: investor?.phoneNumber,
+      taxId: investor?.taxId,
+      investorType: investor?.investorType,
       lastCommunication: ''
     }
   })
 
   useEffect(() => {
     form.reset({
-      name: investor?.name ?? '',
-      companyName: investor?.companyName ?? '',
-      email: investor?.email ?? '',
-      phoneNumber: investor?.phoneNumber ?? '',
-      taxId: investor?.taxId ?? '',
-      investorType: investor?.investorType ?? InvestorType.INDIVIDUAL,
+      name: investor?.name,
+      companyName: investor?.companyName,
+      email: investor?.email,
+      phoneNumber: investor?.phoneNumber,
+      taxId: investor?.taxId,
+      investorType: investor?.investorType,
       lastCommunication: ''
     })
   }, [investor, form])
@@ -139,6 +139,7 @@ export default function AdminUserPage () {
         setIsFormDisabled(true)
         setIsDialogOpen(false)
       })
+      .then(() => navigate(`/admin/users/${investor.id}`))
   }
 
   function handleReset () {
@@ -146,9 +147,9 @@ export default function AdminUserPage () {
     setInvestor(originalInvestor)
   }
 
-  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string) {
+  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
     e.preventDefault()
-    navigator.clipboard.writeText(text)
+    navigator.clipboard.writeText(String(text))
     const button = e.currentTarget
     button.setAttribute('data-copied', 'true')
     setTimeout(() => {

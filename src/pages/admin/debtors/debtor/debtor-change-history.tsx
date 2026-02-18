@@ -3,7 +3,11 @@ import { FieldSeparator } from '@/components/ui/field.tsx'
 import type { Debtor } from '@/types/Debtor'
 
 export function DebtorChangeHistory ({debtor}: {debtor: Debtor | undefined}) {
-  const createdAt = debtor?.createdAt ? new Date(debtor.createdAt).toLocaleString('es-ES') : 'N/A'
+  const createdAt = debtor
+    ? debtor.createdAt
+      ? new Date(debtor.createdAt).toLocaleString('es-ES')
+      : 'N/A'
+    : 'N/A'
   const dateCreatedAt = createdAt.split(', ')[0]
   const timeCreatedAt = createdAt.split(', ')[1]
 

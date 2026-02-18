@@ -1,15 +1,36 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { DatePicker } from '@/components/ui/date-picker'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getInvoiceById, updateInvoiceById } from '@/services/invoice.api'
-import { InvoiceStatus, type Invoice } from '@/types/Invoice'
+import { type Invoice, InvoiceStatus } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { BuildingIcon, CheckCheckIcon, CheckIcon, CircleAlertIcon, ClockIcon, CopyIcon, IdCardIcon, LockIcon, LockOpenIcon, OctagonXIcon } from 'lucide-react'
+import {
+  BuildingIcon,
+  CheckCheckIcon,
+  CheckIcon,
+  CircleAlertIcon,
+  ClockIcon,
+  CopyIcon,
+  IdCardIcon,
+  LockIcon,
+  LockOpenIcon,
+  OctagonXIcon
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
@@ -18,7 +39,7 @@ import { InvoiceChangeHistory } from './invoice-change-history'
 import InvoiceDocuments from './invoice-documents/invoice-documents'
 
 const formSchema = z.object({
-  rating: z.coerce.number().optional(),
+  rating: z.coerce.number<number>().optional(),
   lastCommunication: z.string().optional()
 })
 
@@ -48,14 +69,14 @@ export default function AdminInvoicePage () {
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
-      rating: invoice?.rating ?? 0,
+      rating: invoice?.rating ?? undefined,
       lastCommunication: invoice?.lastCommunication ?? ''
     }
   })
 
   useEffect(() => {
     form.reset({
-      rating: invoice?.rating ?? 0,
+      rating: invoice?.rating ?? undefined,
       lastCommunication: invoice?.lastCommunication ?? ''
     })
   }, [invoice, form])
@@ -76,11 +97,12 @@ export default function AdminInvoicePage () {
         setInvoice(updatedInvoice)
         setOriginalInvoice(updatedInvoice)
         form.reset({
-          rating: updatedInvoice.rating ?? 0,
+          rating: updatedInvoice.rating ?? undefined,
           lastCommunication: updatedInvoice.lastCommunication ?? ''})
         setIsFormDisabled(true)
         setIsDialogOpen(false)
       })
+      .then(() => navigate(`/admin/invoices/${invoiceId}`))
   }
 
   function handleReset () {
@@ -90,7 +112,7 @@ export default function AdminInvoicePage () {
 
   function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
     e.preventDefault()
-    navigator.clipboard.writeText(text.toString())
+    navigator.clipboard.writeText(String(text))
     const button = e.currentTarget
     button.setAttribute('data-copied', 'true')
     setTimeout(() => {
@@ -181,6 +203,12 @@ export default function AdminInvoicePage () {
                   </Field>
                 )}
               />
+            </FieldGroup>
+            <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+              <Field>
+                <FieldLabel htmlFor='dueDate'>Fecha de vencimiento:</FieldLabel>
+                <DatePicker id='dueDate' value={invoice?.dueDate ? new Date(invoice.dueDate).toISOString().split('T')[0] : ''} disabled />
+              </Field>
               <Field>
                 <FieldLabel htmlFor='amount'>Importe:</FieldLabel>
                 <InputGroup>

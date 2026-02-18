@@ -21,42 +21,40 @@ const baseFormSchema = z.object({
   companyName: z.string().min(2, 'El nombre de la empresa debe tener al menos 2 caracteres'),
   taxId: z.string().min(7, 'El NIF/CIF debe tener al menos 7 caracteres'),
   email: z.email('Correo electrónico no válido'),
-  phoneNumber: z.string().min(6, 'El número de teléfono debe tener al menos 6 caracteres')
+  phoneNumber: z.coerce.number<number>().min(6, 'El número de teléfono debe tener al menos 6 caracteres')
 })
 
 const documentFormSchema = z.object({
   modelo111Csv: z.string()
     .min(1, 'El CSV es obligatorio para el modelo 111')
-    .optional()
     .or(z.literal('')),
   modelo111: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento 111 es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
-    .transform((files) => files[0]).optional(),
+    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío'),
   modelo303Csv: z.string()
     .min(1, 'El CSV es obligatorio para el modelo 303')
-    .optional()
     .or(z.literal('')),
   modelo303: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento 303 es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
-    .transform((files) => files[0]).optional()
 }).refine((data) => {
   if (data.modelo111 || data.modelo111Csv) {
     return data.modelo111 && data.modelo111Csv
   }
+  return true
+}, 'Para actualizar el modelo 111 ambos campos son obligatorios').refine((data) => {
   if (data.modelo303 || data.modelo303Csv) {
     return data.modelo303 && data.modelo303Csv
   }
   return true
-})
+}, 'Para actualizar el modelo 303 ambos campos son obligatorios')
 
 export default function DebtorPage () {
-  const {debtorId} = useParams()
+  const {debtorId} = useParams<{ debtorId: string }>()
   const [debtor, setDebtor] = useState<Debtor | undefined>()
   const [originalDebtor, setOriginalDebtor] = useState<Debtor | undefined>(debtor)
 
-  const isFormDisabled = debtor?.status === DebtorStatus.PENDING || debtor?.status === DebtorStatus.DENIED
+  const isFormDisabled = !debtor || debtor.status !== DebtorStatus.CORRECTION
 
   const validateForm = useForm<z.infer<typeof validateFormSchema>>({
     resolver: zodResolver(validateFormSchema),
@@ -73,7 +71,7 @@ export default function DebtorPage () {
       companyName: debtor?.companyName ?? '',
       taxId: debtor?.taxId ?? '',
       email: debtor?.email ?? '',
-      phoneNumber: debtor?.phoneNumber ?? ''
+      phoneNumber: debtor?.phoneNumber ?? 0
     }
   })
 
@@ -93,47 +91,55 @@ export default function DebtorPage () {
       companyName: debtor?.companyName ?? '',
       taxId: debtor?.taxId ?? '',
       email: debtor?.email ?? '',
-      phoneNumber: debtor?.phoneNumber ?? ''
+      phoneNumber: debtor?.phoneNumber ?? 0
     })
   }, [debtor, baseForm])
 
   const navigate = useNavigate()
   useEffect(() => {
-    if (debtorId) {
-      getDebtorById(debtorId)
-        .then(res => res.data)
-        .then(data => {
-          setDebtor(data)
-          setOriginalDebtor(data)
-        })
-        .catch(() => {
-          navigate('/user/debtors')
-        })
-    }
+    if (!debtorId) return
+    getDebtorById(debtorId)
+      .then(res => res.data)
+      .then(data => {
+        setDebtor(data)
+        setOriginalDebtor(data)
+      })
+      .catch(() => {
+        navigate('/user/debtors')
+      })
   }, [debtorId, navigate])
 
   function onSubmitBase (data: z.infer<typeof baseFormSchema>) {
+    if (!debtorId) return
     updateDebtorById(debtorId, JSON.stringify({
       companyName: data.companyName,
       taxId: data.taxId,
       email: data.email,
       phoneNumber: data.phoneNumber
-    })).then(res => setDebtor(res.data))
+    }))
+      .then(res => setDebtor(res.data))
+      .then(() => navigate(`/user/debtors/${debtorId}`))
   }
 
   function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
+    if (!debtorId) return
     const formData = new FormData()
-    formData.append('modelo111', data.modelo111)
     formData.append('modelo111Csv', data.modelo111Csv)
-    formData.append('modelo303', data.modelo303)
+    formData.append('modelo111', data.modelo111[0])
     formData.append('modelo303Csv', data.modelo303Csv)
-    updateDebtorById(debtorId, formData).then(res => setDebtor(res.data))
+    formData.append('modelo303', data.modelo303[0])
+    updateDebtorById(debtorId, formData)
+      .then(res => setDebtor(res.data))
+      .then(() => navigate(`/user/debtors/${debtorId}`))
   }
 
   function onSubmitValidate (data: z.infer<typeof validateFormSchema>) {
+    if (!debtorId) return
     updateDebtorById(debtorId, JSON.stringify({
       status: data.status
-    })).then(res => setDebtor(res.data))
+    }))
+      .then(res => setDebtor(res.data))
+      .then(() => navigate(`/user/debtors/${debtorId}`))
   }
 
   const debtorStatusTextMap: {
@@ -164,7 +170,7 @@ export default function DebtorPage () {
             <Button
               variant='outline'
               className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
-              disabled={debtor?.status === DebtorStatus.PENDING || isFormDisabled}
+              disabled={isFormDisabled}
               onClick={() => {
                 validateForm.setValue('status', DebtorStatus.PENDING)
                 validateForm.handleSubmit(onSubmitValidate)()
@@ -188,7 +194,7 @@ export default function DebtorPage () {
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name}>NIF/CIF:</FieldLabel>
                   <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' disabled={debtor?.status === DebtorStatus.VERIFIED || isFormDisabled} />
+                    <InputGroupInput {...field} id={field.name} type='text' disabled={isFormDisabled} />
                     <InputGroupAddon>
                       <IdCardIcon/>
                     </InputGroupAddon>
@@ -206,7 +212,7 @@ export default function DebtorPage () {
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
                   <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' disabled={debtor?.status === DebtorStatus.VERIFIED || isFormDisabled} />
+                    <InputGroupInput {...field} id={field.name} type='text' disabled={isFormDisabled} />
                     <InputGroupAddon>
                       <UsersIcon />
                     </InputGroupAddon>
@@ -244,7 +250,7 @@ export default function DebtorPage () {
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
                   <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' disabled={isFormDisabled} />
+                    <InputGroupInput {...field} id={field.name} type='number' disabled={isFormDisabled} />
                     <InputGroupAddon>
                       <PhoneIcon />
                     </InputGroupAddon>
@@ -270,8 +276,8 @@ export default function DebtorPage () {
       </Form>
       <FieldSeparator className='col-span-full' />
       <Form {...documentForm}>
+        <h4 className='text-md col-span-full font-bold'>Actualizar documentos</h4>
         <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='col-span-full flex flex-col gap-4'>
-          <h4 className='text-md col-span-full font-bold'>Actualizar documentos</h4>
           <h5 className='text-md col-span-full'>Modelo 111</h5>
           <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
             <Controller

@@ -6,6 +6,7 @@ import { createDebtor } from '@/services/debtor.api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FileIcon, IdCardIcon, KeyRoundIcon, MailIcon, PhoneIcon, SaveIcon, UsersIcon } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router'
 import z from 'zod'
 
 const formSchema = z.object({
@@ -17,17 +18,15 @@ const formSchema = z.object({
     .min(1, 'El CSV es obligatorio para el modelo 111'),
   modelo111: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
-    .transform((files) => files[0]),
+    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío'),
   modelo303Csv: z.string()
     .min(1, 'El CSV es obligatorio para el modelo 303'),
   modelo303: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
-    .transform((files) => files[0])
 })
 
-export default function CreateDebtor () {
+export default function CreateDebtorPage () {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
@@ -43,17 +42,18 @@ export default function CreateDebtor () {
     }
   })
 
+  const navigate = useNavigate()
   function onSubmit (data: z.infer<typeof formSchema>) {
     const formData = new FormData()
     formData.append('companyName', data.companyName)
     formData.append('taxId', data.taxId)
     formData.append('email', data.email)
     formData.append('phoneNumber', data.phoneNumber)
-    formData.append('modelo111', data.modelo111)
+    formData.append('modelo111', data.modelo111[0])
     formData.append('modelo111Csv', data.modelo111Csv)
-    formData.append('modelo303', data.modelo303)
+    formData.append('modelo303', data.modelo303[0])
     formData.append('modelo303Csv', data.modelo303Csv)
-    createDebtor(formData).then(res => setDebtor(res.data))
+    createDebtor(formData).then(res => navigate(`/debtors/${res.data.id}`))
   }
 
   return (

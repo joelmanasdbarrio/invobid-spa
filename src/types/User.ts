@@ -1,5 +1,5 @@
-import type { BankAccount } from '@/types/BankAccount.ts'
-import type { Document } from '@/types/Document.ts'
+import type {BankAccount} from '@/types/BankAccount.ts'
+import type {Document} from '@/types/Document.ts'
 
 export type User = Admin | Investor
 
@@ -18,7 +18,7 @@ export type Investor = {
   email: string;
   name: string;
   type: UserType;
-  phoneNumber: string;
+  phoneNumber: number;
   companyName: string;
   taxId: string;
   investorType: InvestorType;

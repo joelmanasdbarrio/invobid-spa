@@ -80,7 +80,6 @@ const documentFormSchema = z.object({
   document: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
-    .transform((files) => files[0]).optional()
 })
 
 export default function InvestorProfileForm ({ user }: { user: Investor }) {
@@ -192,7 +191,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
   function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
     const documentFormData = new FormData()
     documentFormData.append('taxId', data.taxId)
-    documentFormData.append('document', data.document)
+    documentFormData.append('document', data.document[0])
     updateInvestorById(user.id, documentFormData).then(res => setLoggedInUser(res.data))
   }
 

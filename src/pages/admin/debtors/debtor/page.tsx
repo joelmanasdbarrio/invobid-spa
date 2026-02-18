@@ -1,15 +1,37 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getDebtorById, updateDebtorById } from '@/services/debtor.api'
-import { DebtorStatus, type Debtor } from '@/types/Debtor'
+import { type Debtor, DebtorStatus } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { BuildingIcon, CheckCheckIcon, CheckIcon, CircleAlertIcon, ClockIcon, CopyIcon, IdCardIcon, LockIcon, LockOpenIcon, MailIcon, OctagonXIcon, PhoneIcon } from 'lucide-react'
+import {
+  BuildingIcon,
+  CheckCheckIcon,
+  CheckIcon,
+  CircleAlertIcon,
+  ClockIcon,
+  CopyIcon,
+  IdCardIcon,
+  LockIcon,
+  LockOpenIcon,
+  MailIcon,
+  OctagonXIcon,
+  PhoneIcon
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
@@ -19,31 +41,15 @@ import DebtorDocuments from './debtor-documents/debtor-documents'
 
 const formSchema = z.object({
   email: z.string().optional(),
-  phoneNumber: z.string().optional(),
+  phoneNumber: z.coerce.number<number>().optional(),
   companyName: z.string().optional(),
   taxId: z.string().optional(),
-  investorId: z.string().optional(),
   lastCommunication: z.string().optional()
 })
 
 export default function AdminDebtorPage () {
   const {debtorId} = useParams()
-  const [debtor, setDebtor] = useState<Debtor | undefined>({
-    id: '',
-    email: '',
-    phoneNumber: '',
-    companyName: '',
-    taxId: '',
-    investor: {
-      taxId: '',
-      companyName: ''
-    },
-    status: DebtorStatus.PENDING,
-    lastCommunication: '',
-    createdAt: '',
-    updatedAt: '',
-    deletedAt: ''
-  })
+  const [debtor, setDebtor] = useState<Debtor | undefined>()
   const [originalDebtor, setOriginalDebtor] = useState<Debtor | undefined>(debtor)
   const [isFormDisabled, setIsFormDisabled] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -58,7 +64,7 @@ export default function AdminDebtorPage () {
           setOriginalDebtor(debtor)
         })
         .catch(() => {
-          navigate('/dashboard/admin/debtors')
+          navigate('/admin/debtors')
         })
     }
   }, [debtorId, navigate])
@@ -112,6 +118,7 @@ export default function AdminDebtorPage () {
         setIsFormDisabled(true)
         setIsDialogOpen(false)
       })
+      .then(() => navigate(`/admin/debtors/${debtor.id}`))
   }
 
   function handleReset () {
@@ -119,9 +126,9 @@ export default function AdminDebtorPage () {
     setDebtor(originalDebtor)
   }
 
-  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string) {
+  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
     e.preventDefault()
-    navigator.clipboard.writeText(text)
+    navigator.clipboard.writeText(String(text))
     const button = e.currentTarget
     button.setAttribute('data-copied', 'true')
     setTimeout(() => {
