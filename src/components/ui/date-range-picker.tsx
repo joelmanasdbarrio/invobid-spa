@@ -1,16 +1,11 @@
-import { format } from 'date-fns'
-import { CalendarIcon } from 'lucide-react'
+import {Button} from '@/components/ui/button'
+import {Calendar} from '@/components/ui/calendar'
+import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
+import {cn} from '@/lib/utils'
+import {format} from 'date-fns'
+import {CalendarIcon} from 'lucide-react'
 import * as React from 'react'
-import { type DateRange } from 'react-day-picker'
-
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+import {type DateRange} from 'react-day-picker'
 
 interface DateRangePickerProps {
   fromDate?: string
@@ -78,7 +73,6 @@ export function DateRangePicker ({
       </PopoverTrigger>
       <PopoverContent className='w-auto p-0' align='start'>
         <Calendar
-          initialFocus
           mode='range'
           defaultMonth={range.from}
           selected={range}

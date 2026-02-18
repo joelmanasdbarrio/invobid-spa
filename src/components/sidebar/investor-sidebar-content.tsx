@@ -47,7 +47,7 @@ export function InvestorSidebarContent () {
               <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/debtors')}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild className={'group/collapsible'}>
-                    <SidebarMenuButton isActive={location.pathname.startsWith('/debtors')}>
+                    <SidebarMenuButton>
                       <HandCoinsIcon /> Deudores
                       {correctionDebtorsCount > 0 && (
                         <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
@@ -59,13 +59,20 @@ export function InvestorSidebarContent () {
                     <SidebarMenuSub className={'m-0 pe-0'}>
                       <SidebarMenuSubItem>
                         <Link to='/debtors'>
-                          <SidebarMenuButton>
+                          <SidebarMenuButton isActive={location.pathname === '/debtors'}>
                             Mis deudores
                             {correctionDebtorsCount > 0 && (
                               <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
                                 {correctionDebtorsCount > 99 ? '+99' : correctionDebtorsCount}
                               </Badge>
                             )}
+                          </SidebarMenuButton>
+                        </Link>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <Link to='/debtors/create'>
+                          <SidebarMenuButton isActive={location.pathname === '/debtors/create'}>
+                            Nuevo deudor
                           </SidebarMenuButton>
                         </Link>
                       </SidebarMenuSubItem>
@@ -76,7 +83,7 @@ export function InvestorSidebarContent () {
             )
           }
 
-          <Collapsible className='group/collapsible'>
+          <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/invoices')}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild className={'group/collapsible'}>
                 <SidebarMenuButton>
@@ -92,7 +99,7 @@ export function InvestorSidebarContent () {
                   {loggedInUser && (loggedInUser as Investor).investorType === InvestorType.COMPANY && (
                     <SidebarMenuSubItem>
                       <Link to='/invoices'>
-                        <SidebarMenuButton>
+                        <SidebarMenuButton isActive={location.pathname === '/invoices'}>
                           Mis facturas
                           {correctionInvoicesCount > 0 && (
                             <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
@@ -104,9 +111,11 @@ export function InvestorSidebarContent () {
                     </SidebarMenuSubItem>
                   )}
                   <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Invertidas
-                    </SidebarMenuButton>
+                    <Link to='/invoices/create'>
+                      <SidebarMenuButton isActive={location.pathname === '/invoices/create'}>
+                        Nueva factura
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>
               </CollapsibleContent>

@@ -1,0 +1,196 @@
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
+import useLoggedInUser from '@/hooks/use-loggedInUser'
+import { getInvoices } from '@/services/invoice.api'
+import { InvoiceStatus } from '@/types/Invoice'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useSearchParams } from 'react-router'
+import z from 'zod'
+import { invoiceColumns } from './columns'
+import { DataTable } from './data-table'
+import InvoiceFilters from './filters'
+
+const formSchema = z.object({
+  buyerCompanyName: z.string().optional(),
+  debtorCompanyName: z.string().optional(),
+  maxAmount: z.number().positive().optional(),
+  minAmount: z.number().positive().optional(),
+  minRating: z.number().positive().optional(),
+  dueDateFrom: z.string().optional(),
+  dueDateTo: z.string().optional(),
+  status: z.enum(InvoiceStatus).optional(),
+  isSold: z.boolean().optional(),
+  includeDeleted: z.boolean().optional()
+}).refine(data => {
+  if (data.dueDateFrom && data.dueDateTo) {
+    return new Date(data.dueDateFrom) <= new Date(data.dueDateTo)
+  }
+  return true
+}, {
+  message: 'La fecha de vencimiento "desde" debe ser anterior a la fecha de vencimiento "hasta", y el importe mínimo debe ser menor o igual al importe máximo.'
+}).refine(data => {
+  if (data.minAmount !== undefined && data.maxAmount !== undefined) {
+    return data.minAmount < data.maxAmount
+  }
+  return true
+}, {
+  message: 'El importe máximo debe ser mayor que el importe mínimo.',
+  path: ['maxAmount']
+})
+
+export default function InvoicesPage () {
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const defaultForm = useMemo(() => ({
+    buyerCompanyName: searchParams.get('buyerCompanyName') || undefined,
+    debtorCompanyName: searchParams.get('debtorCompanyName') || undefined,
+    maxAmount: searchParams.get('maxAmount') ? Number(searchParams.get('maxAmount')) : undefined,
+    minAmount: searchParams.get('minAmount') ? Number(searchParams.get('minAmount')) : undefined,
+    minRating: searchParams.get('minRating') ? Number(searchParams.get('minRating')) : undefined,
+    status: searchParams.get('status') as InvoiceStatus || undefined,
+    dueDateFrom: searchParams.get('dueDateFrom') || undefined,
+    dueDateTo: searchParams.get('dueDateTo') || undefined,
+    isSold: searchParams.get('isSold') ? searchParams.get('isSold') === 'true' : undefined,
+    includeDeleted: searchParams.get('includeDeleted') ? searchParams.get('includeDeleted') === 'true' : undefined
+  }), [searchParams])
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    mode: 'onTouched',
+    defaultValues: defaultForm
+  })
+
+  useEffect(() => {
+    form.reset(defaultForm)
+  }, [form, defaultForm])
+
+  const [data, setData] = useState([])
+  const [totalItems, setTotalItems] = useState(0)
+
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10))
+  const [currentLimit, setCurrentLimit] = useState(parseInt(searchParams.get('limit') || '10', 10))
+
+  function onSubmit (data: z.infer<typeof formSchema>) {
+    const formData = Object.fromEntries(
+      Object.entries(data).filter(
+        ([, value]) => value !== '' && value !== undefined
+      )
+    )
+    const newParams = new URLSearchParams(formData as Record<string, string>)
+    newParams.set('page', '1')
+    newParams.set('limit', currentLimit.toString())
+    setSearchParams(newParams)
+  }
+
+  const loggedInUser = useLoggedInUser()
+
+  useEffect(() => {
+    if (!loggedInUser) return
+
+    const filters: Record<string, string> = {}
+    searchParams.forEach((value, key) => {
+      if (key !== 'page' && key !== 'limit') {
+        if (value === 'true') {
+          filters[key] = '1'
+        } else if (value !== 'false') {
+          filters[key] = value
+        }
+      }
+    })
+
+    getInvoices({
+      ...filters,
+      sellerInvestorId: loggedInUser.id,
+      page: String(currentPage),
+      limit: String(currentLimit)
+    }).then(res => {
+      setData(res.data)
+      setTotalItems(res['_metadata'].total)
+    })
+  }, [loggedInUser, searchParams, currentPage, currentLimit])
+
+  function handleClear () {
+    form.reset({
+      buyerCompanyName: undefined,
+      debtorCompanyName: undefined,
+      maxAmount: undefined,
+      minAmount: undefined,
+      minRating: undefined,
+      status: undefined,
+      dueDateFrom: undefined,
+      dueDateTo: undefined,
+      isSold: undefined,
+      includeDeleted: undefined
+    })
+    setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
+  }
+
+  function handlePageChange (newPage: number) {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set('page', newPage.toString())
+    setCurrentPage(newPage)
+    setSearchParams(newParams)
+  }
+
+  function handleLimitChange (newLimit: number) {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set('limit', newLimit.toString())
+    newParams.set('page', '1')
+    setCurrentLimit(newLimit)
+    setCurrentPage(1)
+    setSearchParams(newParams)
+  }
+
+  return (
+    <div className='flex flex-col gap-4'>
+      <Dialog>
+        <div className='hidden md:block'>
+          <InvoiceFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
+        </div>
+
+        <DialogContent className='max-h-svh overflow-scroll'>
+          <DialogHeader className='font-bold text-lg'>
+            Filtrar usuarios
+          </DialogHeader>
+          <InvoiceFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
+        </DialogContent>
+
+        <DataTable columns={invoiceColumns} data={data} />
+      </Dialog>
+
+      <div className='flex items-center justify-center gap-2'>
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          Anterior
+        </Button>
+        Página {currentPage} de {Math.ceil(totalItems / currentLimit)}
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage * currentLimit >= totalItems}
+        >
+          Siguiente
+        </Button>
+        <Select value={String(currentLimit)} onValueChange={value => handleLimitChange(Number(value))}>
+          <SelectTrigger className='py-0! h-8!'>
+            {currentLimit}
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='5'>5</SelectItem>
+            <SelectItem value='10'>10</SelectItem>
+            <SelectItem value='20'>20</SelectItem>
+            <SelectItem value='50'>50</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  )
+}
