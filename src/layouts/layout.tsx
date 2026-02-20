@@ -16,9 +16,11 @@ import { CircleAlertIcon, ClockIcon, OctagonXIcon } from 'lucide-react'
 
 export default function MainLayout ({
   header,
+  breadcrumbs,
   children
 }: Readonly<{
-  header: string;
+  header?: string;
+  breadcrumbs?: [{ label: string; href: string }],
   children: React.ReactNode;
 }>) {
   const loggedInUser = useLoggedInUser()
@@ -49,7 +51,7 @@ export default function MainLayout ({
         <div className='flex items-center gap-2 border-b p-2'>
           <SidebarTrigger className='p-2' />
           <span className='h-8 border-s'/>
-          <h1 className='text-2xl font-bold'>{header}</h1>
+          {header && <h1 className='text-2xl font-bold'>{header}</h1>}
         </div>
         <section className='grow p-4 overflow-scroll'>
           {children}
@@ -68,10 +70,10 @@ export default function MainLayout ({
             </AlertDialogHeader>
             <Item variant='muted' className='gap-2'>
               <ItemMedia className='self-center! w-10 h-10'>
-                {investorStatusTextMap[(loggedInUser as Investor)?.status].icon}
+                {investorStatusTextMap[(loggedInUser as Investor)?.status as keyof typeof investorStatusTextMap].icon}
               </ItemMedia>
               <ItemContent>
-                <ItemTitle>{investorStatusTextMap[(loggedInUser as Investor)?.status].title}</ItemTitle>
+                <ItemTitle>{investorStatusTextMap[(loggedInUser as Investor)?.status as keyof typeof investorStatusTextMap].title}</ItemTitle>
                 <ItemDescription>
                   {(loggedInUser as Investor)?.lastCommunication}
                 </ItemDescription>

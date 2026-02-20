@@ -43,6 +43,8 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import { z } from 'zod'
+import UserDebtors from './user-debtors/user-debtors'
+import UserInvoices from './user-invoices/user-invoices'
 
 const formSchema = z.object({
   name: z.string()
@@ -50,7 +52,7 @@ const formSchema = z.object({
   companyName: z.string()
     .min(1, 'La razón social es obligatoria'),
   email: z.email('Correo electrónico no válido'),
-  phoneNumber: z.string()
+  phoneNumber: z.coerce.number<number>()
     .min(6, 'El número de teléfono es obligatorio'),
   taxId: z.string().optional(),
   investorType: z.enum(InvestorType),
@@ -82,24 +84,24 @@ export default function AdminUserPage () {
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
-      name: investor?.name ?? '',
-      companyName: investor?.companyName ?? '',
-      email: investor?.email ?? '',
-      phoneNumber: investor?.phoneNumber ?? '',
-      taxId: investor?.taxId ?? '',
-      investorType: investor?.investorType ?? InvestorType.INDIVIDUAL,
+      name: investor?.name,
+      companyName: investor?.companyName,
+      email: investor?.email,
+      phoneNumber: investor?.phoneNumber,
+      taxId: investor?.taxId,
+      investorType: investor?.investorType,
       lastCommunication: ''
     }
   })
 
   useEffect(() => {
     form.reset({
-      name: investor?.name ?? '',
-      companyName: investor?.companyName ?? '',
-      email: investor?.email ?? '',
-      phoneNumber: investor?.phoneNumber ?? '',
-      taxId: investor?.taxId ?? '',
-      investorType: investor?.investorType ?? InvestorType.INDIVIDUAL,
+      name: investor?.name,
+      companyName: investor?.companyName,
+      email: investor?.email,
+      phoneNumber: investor?.phoneNumber,
+      taxId: investor?.taxId,
+      investorType: investor?.investorType,
       lastCommunication: ''
     })
   }, [investor, form])
@@ -107,6 +109,8 @@ export default function AdminUserPage () {
   const investorType = useWatch({ control: form.control, name: 'investorType' })
 
   function onSubmit (data: z.infer<typeof formSchema>) {
+    if (!investor) return
+
     const updateData = {
       name: data.name,
       companyName: data.companyName,
@@ -114,7 +118,7 @@ export default function AdminUserPage () {
       phoneNumber: data.phoneNumber,
       taxId: data.taxId,
       investorType: data.investorType,
-      status: investor?.status ?? InvestorStatus.ACTIVE,
+      status: investor?.status ?? InvestorStatus.VERIFIED,
       ...(data.lastCommunication && { lastCommunication: data.lastCommunication })
     }
 
@@ -135,6 +139,7 @@ export default function AdminUserPage () {
         setIsFormDisabled(true)
         setIsDialogOpen(false)
       })
+      .then(() => navigate(`/admin/users/${investor.id}`))
   }
 
   function handleReset () {
@@ -142,9 +147,9 @@ export default function AdminUserPage () {
     setInvestor(originalInvestor)
   }
 
-  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string) {
+  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
     e.preventDefault()
-    navigator.clipboard.writeText(text)
+    navigator.clipboard.writeText(String(text))
     const button = e.currentTarget
     button.setAttribute('data-copied', 'true')
     setTimeout(() => {
@@ -180,19 +185,19 @@ export default function AdminUserPage () {
                 </ButtonGroup>
 
                 <ButtonGroup>
-                  <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/10' onClick={() => setInvestor({...investor, status: InvestorStatus.DENIED})}>
+                  <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/10' onClick={() => investor && setInvestor({...investor, status: InvestorStatus.DENIED})}>
                     <OctagonXIcon className='rounded-full text-zinc-600'/>
                     {investor?.status === InvestorStatus.DENIED && 'Denegado'}
                   </Button>
-                  <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/15' onClick={() => setInvestor({...investor, status: InvestorStatus.CORRECTION})}>
+                  <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/15' onClick={() => investor && setInvestor({...investor, status: InvestorStatus.CORRECTION})}>
                     <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
                     {investor?.status === InvestorStatus.CORRECTION && 'Corrección requerida'}
                   </Button>
-                  <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/15' onClick={() => setInvestor({...investor, status: InvestorStatus.PENDING})}>
+                  <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/15' onClick={() => investor && setInvestor({...investor, status: InvestorStatus.PENDING})}>
                     <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
                     {investor?.status === InvestorStatus.PENDING && 'Por verificar'}
                   </Button>
-                  <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/15' onClick={() => setInvestor({...investor, status: InvestorStatus.VERIFIED})}>
+                  <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/15' onClick={() => investor && setInvestor({...investor, status: InvestorStatus.VERIFIED})}>
                     <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
                     {investor?.status === InvestorStatus.VERIFIED && 'Verificado'}
                   </Button>
@@ -473,13 +478,17 @@ export default function AdminUserPage () {
       <Tabs defaultValue={DocumentType.IDENTIFICATION} className='gap-4'>
         <TabsList>
           <TabsTrigger value={DocumentType.IDENTIFICATION}>Documentos</TabsTrigger>
+          <TabsTrigger value={DocumentType.MODELO_111}>Deudores</TabsTrigger>
           <TabsTrigger value={DocumentType.INVOICE}>Facturas</TabsTrigger>
         </TabsList>
         <TabsContent value={DocumentType.IDENTIFICATION}>
           <UserDocuments investorId={investorId} />
         </TabsContent>
+        <TabsContent value={DocumentType.MODELO_111}>
+          <UserDebtors investorId={investorId} />
+        </TabsContent>
         <TabsContent value={DocumentType.INVOICE}>
-          Facturas...
+          <UserInvoices investorId={investorId} />
         </TabsContent>
       </Tabs>
     </section>

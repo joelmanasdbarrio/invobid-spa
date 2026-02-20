@@ -1,15 +1,37 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getDebtorById, updateDebtorById } from '@/services/debtor.api'
-import { DebtorStatus, type Debtor } from '@/types/Debtor'
+import { type Debtor, DebtorStatus } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { BuildingIcon, CheckCheckIcon, CheckIcon, CircleAlertIcon, ClockIcon, CopyIcon, IdCardIcon, LockIcon, LockOpenIcon, MailIcon, OctagonXIcon, PhoneIcon } from 'lucide-react'
+import {
+  BuildingIcon,
+  CheckCheckIcon,
+  CheckIcon,
+  CircleAlertIcon,
+  ClockIcon,
+  CopyIcon,
+  IdCardIcon,
+  LockIcon,
+  LockOpenIcon,
+  MailIcon,
+  OctagonXIcon,
+  PhoneIcon
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
@@ -19,32 +41,16 @@ import DebtorDocuments from './debtor-documents/debtor-documents'
 
 const formSchema = z.object({
   email: z.string().optional(),
-  phoneNumber: z.string().optional(),
+  phoneNumber: z.coerce.number<number>().optional(),
   companyName: z.string().optional(),
   taxId: z.string().optional(),
-  investorId: z.string().optional(),
   lastCommunication: z.string().optional()
 })
 
 export default function AdminDebtorPage () {
   const {debtorId} = useParams()
-  const [debtor, setDebtor] = useState<Debtor>({
-    id: '',
-    email: '',
-    phoneNumber: '',
-    companyName: '',
-    taxId: '',
-    investor: {
-      taxId: '',
-      companyName: ''
-    },
-    status: DebtorStatus.PENDING,
-    lastCommunication: '',
-    createdAt: '',
-    updatedAt: '',
-    deletedAt: ''
-  })
-  const [originalDebtor, setOriginalDebtor] = useState<Debtor>(debtor)
+  const [debtor, setDebtor] = useState<Debtor | undefined>()
+  const [originalDebtor, setOriginalDebtor] = useState<Debtor | undefined>(debtor)
   const [isFormDisabled, setIsFormDisabled] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -58,7 +64,7 @@ export default function AdminDebtorPage () {
           setOriginalDebtor(debtor)
         })
         .catch(() => {
-          navigate('/dashboard/admin/debtors')
+          navigate('/admin/debtors')
         })
     }
   }, [debtorId, navigate])
@@ -67,26 +73,26 @@ export default function AdminDebtorPage () {
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
-      email: debtor.email,
-      phoneNumber: debtor.phoneNumber,
-      companyName: debtor.companyName,
-      taxId: debtor.taxId,
+      email: debtor?.email,
+      phoneNumber: debtor?.phoneNumber,
+      companyName: debtor?.companyName,
+      taxId: debtor?.taxId,
       lastCommunication: ''
     }
   })
 
   useEffect(() => {
     form.reset({
-      email: debtor.email,
-      phoneNumber: debtor.phoneNumber,
-      companyName: debtor.companyName,
-      taxId: debtor.taxId,
+      email: debtor?.email,
+      phoneNumber: debtor?.phoneNumber,
+      companyName: debtor?.companyName,
+      taxId: debtor?.taxId,
       lastCommunication: ''
     })
   }, [debtor, form])
 
   function onSubmit (data: z.infer<typeof formSchema>) {
-    console.log(data)
+    if (!debtor) return
 
     const updateData = {
       email: data.email,
@@ -112,6 +118,7 @@ export default function AdminDebtorPage () {
         setIsFormDisabled(true)
         setIsDialogOpen(false)
       })
+      .then(() => navigate(`/admin/debtors/${debtor.id}`))
   }
 
   function handleReset () {
@@ -119,9 +126,9 @@ export default function AdminDebtorPage () {
     setDebtor(originalDebtor)
   }
 
-  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string) {
+  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
     e.preventDefault()
-    navigator.clipboard.writeText(text)
+    navigator.clipboard.writeText(String(text))
     const button = e.currentTarget
     button.setAttribute('data-copied', 'true')
     setTimeout(() => {
@@ -143,7 +150,7 @@ export default function AdminDebtorPage () {
         <Form {...form}>
           <form id='debtor-form' onSubmit={form.handleSubmit(onSubmit)} className='xl:col-span-2 flex flex-col gap-4'>
             <div className='flex flex-col xl:flex-row gap-2'>
-              <h3 className='text-lg'>Detalles del usuario {debtor.companyName}</h3>
+              <h3 className='text-lg'>Detalles del usuario {debtor?.companyName}</h3>
               <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                 <ButtonGroup>
                   {isFormDisabled
@@ -159,21 +166,21 @@ export default function AdminDebtorPage () {
                 </ButtonGroup>
 
                 <ButtonGroup>
-                  <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => setDebtor({...debtor, status: DebtorStatus.DENIED})}>
+                  <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.DENIED})}>
                     <OctagonXIcon className='rounded-full text-zinc-600'/>
-                    {debtor.status === DebtorStatus.DENIED && 'Denegado'}
+                    {debtor?.status === DebtorStatus.DENIED && 'Denegado'}
                   </Button>
-                  <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => setDebtor({...debtor, status: DebtorStatus.CORRECTION})}>
+                  <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.CORRECTION})}>
                     <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                    {debtor.status === DebtorStatus.CORRECTION && 'Corrección requerida'}
+                    {debtor?.status === DebtorStatus.CORRECTION && 'Corrección requerida'}
                   </Button>
-                  <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => setDebtor({...debtor, status: DebtorStatus.PENDING})}>
+                  <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.PENDING})}>
                     <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
-                    {debtor.status === DebtorStatus.PENDING && 'Por verificar'}
+                    {debtor?.status === DebtorStatus.PENDING && 'Por verificar'}
                   </Button>
-                  <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => setDebtor({...debtor, status: DebtorStatus.VERIFIED})}>
+                  <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.VERIFIED})}>
                     <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
-                    {debtor.status === DebtorStatus.VERIFIED && 'Verificado'}
+                    {debtor?.status === DebtorStatus.VERIFIED && 'Verificado'}
                   </Button>
                 </ButtonGroup>
               </ButtonGroup>
@@ -192,7 +199,7 @@ export default function AdminDebtorPage () {
                         <IdCardIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, debtor.taxId)} className='group'>
+                        <button onClick={(e) => copyToClipboard(e, debtor?.taxId ?? '')} className='group'>
                           <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
@@ -226,7 +233,7 @@ export default function AdminDebtorPage () {
                         <BuildingIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, debtor.companyName)} className='group'>
+                        <button onClick={(e) => copyToClipboard(e, debtor?.companyName ?? '')} className='group'>
                           <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
@@ -260,7 +267,7 @@ export default function AdminDebtorPage () {
                         <MailIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, debtor.email)} className='group'>
+                        <button onClick={(e) => copyToClipboard(e, debtor?.email ?? '')} className='group'>
                           <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
@@ -294,7 +301,7 @@ export default function AdminDebtorPage () {
                         <PhoneIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, debtor.phoneNumber)} className='group'>
+                        <button onClick={(e) => copyToClipboard(e, debtor?.phoneNumber ?? '')} className='group'>
                           <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
@@ -319,12 +326,12 @@ export default function AdminDebtorPage () {
               <Field>
                 <FieldLabel htmlFor='investorTaxId'>CIF/NIF del inversor:</FieldLabel>
                 <InputGroup>
-                  <InputGroupInput id='investorTaxId' value={debtor.investor?.taxId} type='text' placeholder='12345678A' required disabled />
+                  <InputGroupInput id='investorTaxId' value={debtor?.investor?.taxId} type='text' placeholder='12345678A' required disabled />
                   <InputGroupAddon>
                     <IdCardIcon />
                   </InputGroupAddon>
                   <InputGroupAddon align='inline-end'>
-                    <button onClick={(e) => copyToClipboard(e, debtor.investor.taxId)} className='group'>
+                    <button onClick={(e) => copyToClipboard(e, debtor?.investor?.taxId ?? '')} className='group'>
                       <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                       <Tooltip>
@@ -344,12 +351,12 @@ export default function AdminDebtorPage () {
               <Field>
                 <FieldLabel htmlFor='investorCompanyName'>Razón social del inversor:</FieldLabel>
                 <InputGroup>
-                  <InputGroupInput id='investorCompanyName' value={debtor.investor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                  <InputGroupInput id='investorCompanyName' value={debtor?.investor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
                   <InputGroupAddon>
                     <BuildingIcon />
                   </InputGroupAddon>
                   <InputGroupAddon align='inline-end'>
-                    <button onClick={(e) => copyToClipboard(e, debtor.investor.companyName)} className='group'>
+                    <button onClick={(e) => copyToClipboard(e, debtor?.investor?.companyName ?? '')} className='group'>
                       <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                       <Tooltip>
@@ -378,7 +385,7 @@ export default function AdminDebtorPage () {
                   <DialogHeader>
                     <DialogTitle>¿Estás seguro de que deseas guardar los cambios?</DialogTitle>
                   </DialogHeader>
-                  <DialogDescription>Esta acción actualizará la información del usuario en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
+                  <DialogDescription>Esta acción actualizará la información del deudor en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
 
                   <Controller
                     name='lastCommunication'
@@ -429,7 +436,7 @@ export default function AdminDebtorPage () {
         <DebtorChangeHistory debtor={debtor} />
       </div>
 
-      <DebtorDocuments debtorId={debtor.id} />
+      <DebtorDocuments debtorId={debtor?.id ?? ''} />
     </section>
   )
 }

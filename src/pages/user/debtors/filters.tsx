@@ -1,10 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { DebtorStatus } from '@/types/Debtor'
 import { BuildingIcon, CheckCheckIcon, CircleAlertIcon, ClockIcon, IdCardIcon, MailIcon, OctagonXIcon, PhoneIcon } from 'lucide-react'
@@ -14,7 +12,7 @@ export default function DebtorFilters (
   { form, onSubmit, handleClear }: {
     form: UseFormReturn<{
       email?: string | undefined;
-      phoneNumber?: string | undefined;
+      phoneNumber?: number | undefined;
       companyName?: string | undefined;
       taxId?: string | undefined;
       investorId?: string | undefined;
@@ -23,7 +21,7 @@ export default function DebtorFilters (
     }>;
     onSubmit: (data: {
       email?: string | undefined;
-      phoneNumber?: string | undefined;
+      phoneNumber?: number | undefined;
       companyName?: string | undefined;
       taxId?: string | undefined;
       investorId?: string | undefined;
@@ -41,7 +39,7 @@ export default function DebtorFilters (
               <Controller
                 name='companyName'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Razón social</FieldLabel>
                     <InputGroup>
@@ -50,13 +48,16 @@ export default function DebtorFilters (
                         <BuildingIcon />
                       </InputGroupAddon>
                     </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
               <Controller
                 name='email'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Correo</FieldLabel>
                     <InputGroup>
@@ -65,28 +66,42 @@ export default function DebtorFilters (
                         <MailIcon />
                       </InputGroupAddon>
                     </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
               <Controller
                 name='phoneNumber'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Teléfono</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput {...field} id={field.name} type='text' placeholder='34 600 000 000' autoComplete='off'/>
+                      <InputGroupInput
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                        id={field.name}
+                        type='number'
+                        placeholder='34 600 000 000'
+                        autoComplete='off'
+                      />
                       <InputGroupAddon>
                         <PhoneIcon />
                       </InputGroupAddon>
                     </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
               <Controller
                 name='taxId'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>CIF/NIF</FieldLabel>
                     <InputGroup>
@@ -95,13 +110,16 @@ export default function DebtorFilters (
                         <IdCardIcon />
                       </InputGroupAddon>
                     </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
               <Controller
                 name='status'
                 control={form.control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
                     <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''} >
@@ -168,17 +186,20 @@ export default function DebtorFilters (
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
                   </Field>
                 )}
               />
-              <Controller
+              {/* <Controller
                 name='includeDeleted'
                 control={form.control}
                 render={({ field }) => (
                   <Label className='h-min self-end hover:bg-accent/50 flex items-start gap-3 border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                     <Checkbox
                       id='toggle-include-deleted'
-                      checked={field.value}
+                      checked={field.value ?? false}
                       onCheckedChange={field.onChange}
                       className='data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700'
                     />
@@ -189,7 +210,7 @@ export default function DebtorFilters (
                     </div>
                   </Label>
                 )}
-              />
+              /> */}
               <div className='md:col-start-2 xl:col-start-4 justify-end items-end flex gap-2'>
                 <Button type='submit'>Filtrar</Button>
                 <Button type='button' variant='outline' onClick={handleClear}>Limpiar</Button>

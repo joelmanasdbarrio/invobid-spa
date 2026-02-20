@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sidebar.tsx'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { countCorrectionDebtors } from '@/services/debtor.api'
+import { countCorrectionInvoices } from '@/services/invoice.api'
 import { InvestorType, type Investor } from '@/types/User'
 import { ChevronRight, ChevronRightIcon, FileText, Gavel, HandCoinsIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -28,6 +29,13 @@ export function InvestorSidebarContent () {
     })
   }, [loggedInUser?.id])
 
+  const [correctionInvoicesCount, setCorrectionInvoicesCount] = useState(0)
+  useEffect(() => {
+    countCorrectionInvoices({ investorId: loggedInUser?.id ?? '' }).then(res => {
+      setCorrectionInvoicesCount(res.data)
+    })
+  }, [loggedInUser?.id])
+
   return (
     <SidebarGroup>
       <SidebarGroupContent>
@@ -39,7 +47,7 @@ export function InvestorSidebarContent () {
               <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/debtors')}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild className={'group/collapsible'}>
-                    <SidebarMenuButton isActive={location.pathname.startsWith('/debtors')}>
+                    <SidebarMenuButton>
                       <HandCoinsIcon /> Deudores
                       {correctionDebtorsCount > 0 && (
                         <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
@@ -51,13 +59,20 @@ export function InvestorSidebarContent () {
                     <SidebarMenuSub className={'m-0 pe-0'}>
                       <SidebarMenuSubItem>
                         <Link to='/debtors'>
-                          <SidebarMenuButton>
+                          <SidebarMenuButton isActive={location.pathname === '/debtors'}>
                             Mis deudores
                             {correctionDebtorsCount > 0 && (
                               <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
                                 {correctionDebtorsCount > 99 ? '+99' : correctionDebtorsCount}
                               </Badge>
                             )}
+                          </SidebarMenuButton>
+                        </Link>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <Link to='/debtors/create'>
+                          <SidebarMenuButton isActive={location.pathname === '/debtors/create'}>
+                            Nuevo deudor
                           </SidebarMenuButton>
                         </Link>
                       </SidebarMenuSubItem>
@@ -68,25 +83,39 @@ export function InvestorSidebarContent () {
             )
           }
 
-          <Collapsible className='group/collapsible'>
+          <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/invoices')}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild className={'group/collapsible'}>
                 <SidebarMenuButton>
                   <FileText /> Facturas
+                  {(loggedInUser && (loggedInUser as Investor).investorType === InvestorType.COMPANY) && correctionInvoicesCount > 0 && (
+                    <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
+                  )}
                   <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub className={'m-0 pe-0'}>
+                  {loggedInUser && (loggedInUser as Investor).investorType === InvestorType.COMPANY && (
+                    <SidebarMenuSubItem>
+                      <Link to='/invoices'>
+                        <SidebarMenuButton isActive={location.pathname === '/invoices'}>
+                          Mis facturas
+                          {correctionInvoicesCount > 0 && (
+                            <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
+                              {correctionInvoicesCount > 99 ? '+99' : correctionInvoicesCount}
+                            </Badge>
+                          )}
+                        </SidebarMenuButton>
+                      </Link>
+                    </SidebarMenuSubItem>
+                  )}
                   <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Publicadas
-                    </SidebarMenuButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Invertidas
-                    </SidebarMenuButton>
+                    <Link to='/invoices/create'>
+                      <SidebarMenuButton isActive={location.pathname === '/invoices/create'}>
+                        Nueva factura
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>
               </CollapsibleContent>

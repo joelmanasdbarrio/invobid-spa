@@ -18,8 +18,8 @@ export default function UserDocuments ({ investorId } : { investorId: string | u
       getDocuments({
         investorId,
         type: DocumentType.IDENTIFICATION,
-        page: currentPage,
-        limit: currentLimit
+        page: String(currentPage),
+        limit: String(currentLimit)
       }).then(res => {
         setData(res.data)
         setTotalItems(res['_metadata'].total)

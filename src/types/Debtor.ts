@@ -1,11 +1,12 @@
 import type { Document } from './Document'
+import type { Invoice } from './Invoice'
 import type { Investor } from './User'
 
 export type Debtor = {
   id: string;
   investor: Investor;
   email: string;
-  phoneNumber: string;
+  phoneNumber: number;
   companyName: string;
   taxId: string;
   status: DebtorStatus;

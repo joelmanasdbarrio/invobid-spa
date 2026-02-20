@@ -3,7 +3,11 @@ import { FieldSeparator } from '@/components/ui/field.tsx'
 import type { Investor } from '@/types/User'
 
 export function UserChangeHistory ({investor}: {investor: Investor | undefined}) {
-  const createdAt = investor?.createdAt ? new Date(investor.createdAt).toLocaleString('es-ES') : 'N/A'
+  const createdAt = investor
+    ? investor.createdAt
+      ? new Date(investor.createdAt).toLocaleString('es-ES')
+      : 'N/A'
+    : 'N/A'
   const dateCreatedAt = createdAt.split(', ')[0]
   const timeCreatedAt = createdAt.split(', ')[1]
 
