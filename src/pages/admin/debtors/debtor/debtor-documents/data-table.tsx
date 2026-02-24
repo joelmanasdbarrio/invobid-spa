@@ -1,6 +1,6 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
-import { useState } from 'react'
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from '@/components/ui/table.tsx'
+import {type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState} from '@tanstack/react-table'
+import {useState} from 'react'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -27,7 +27,7 @@ export function DataTable<TData, TValue> ({
   return (
     <>
       <h3 className='text-lg'>Resultados de la búsqueda</h3>
-      <div className='overflow-x-scroll border shadow-sm'>
+      <div className='overflow-x-scroll rounded-md border shadow-sm'>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

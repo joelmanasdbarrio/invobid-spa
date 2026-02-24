@@ -248,7 +248,27 @@ export default function AdminUserPage () {
                     <FieldLabel htmlFor={field.name}>Tipo de inversor:</FieldLabel>
                     <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''} disabled={isFormDisabled}>
                       <SelectTrigger>
-                        {field.value ? (field.value === InvestorType.INDIVIDUAL ? 'Particular' : 'Empresa') : 'Selecciona un tipo'}
+                        {field.value ?
+                          (
+                            field.value === InvestorType.INDIVIDUAL
+                              ? (
+                                <span className='flex items-center gap-2'>
+                                  <UserIcon className='w-4 h-4' />
+                                  Particular
+                                </span>
+                              ) : field.value === InvestorType.COMPANY ? (
+                                <span className='flex items-center gap-2'>
+                                  <BuildingIcon className='w-4 h-4' />
+                                  Empresa
+                                </span>
+                              ) : (
+                                <span className='flex items-center gap-2'>
+                                  {field.value}
+                                </span>
+                              )
+                          ) : (
+                            'Selecciona un tipo'
+                          )}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value={InvestorType.INDIVIDUAL}>
