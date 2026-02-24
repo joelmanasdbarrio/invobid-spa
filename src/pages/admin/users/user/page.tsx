@@ -191,7 +191,7 @@ export default function AdminUserPage () {
                   </Button>
                   <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/15' onClick={() => investor && setInvestor({...investor, status: InvestorStatus.CORRECTION})}>
                     <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                    {investor?.status === InvestorStatus.CORRECTION && 'Corrección requerida'}
+                    {investor?.status === InvestorStatus.CORRECTION && 'Corrección'}
                   </Button>
                   <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/15' onClick={() => investor && setInvestor({...investor, status: InvestorStatus.PENDING})}>
                     <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
