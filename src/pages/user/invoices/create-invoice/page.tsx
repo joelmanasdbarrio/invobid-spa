@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
 import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
+import { parseDateOnly, toDateOnlyString } from '@/lib/format-date'
 import { getDebtors } from '@/services/debtor.api.ts'
 import { createInvoice } from '@/services/invoice.api'
 import { type Debtor, DebtorStatus } from '@/types/Debtor.ts'
@@ -90,7 +91,7 @@ export default function CreateInvoicePage () {
     const formData = new FormData()
     formData.append('debtorId', data.debtorId)
     formData.append('amount', data.amount.toString())
-    formData.append('dueDate', data.dueDate.toISOString())
+    formData.append('dueDate', toDateOnlyString(data.dueDate))
     formData.append('invoiceId', data.invoiceId)
     formData.append('file', data.file?.[0])
     createInvoice(formData).then(res => navigate(`/invoices/${res.data.id}`))
@@ -177,9 +178,9 @@ export default function CreateInvoicePage () {
                   <FieldLabel htmlFor={field.name}>Fecha de vencimiento:</FieldLabel>
                   <DatePicker
                     id={field.name}
-                    value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                    value={field.value instanceof Date ? toDateOnlyString(field.value) : ''}
                     onChange={(dateStr) => {
-                      const newDate = dateStr ? new Date(dateStr) : undefined
+                      const newDate = dateStr ? parseDateOnly(dateStr) : undefined
                       field.onChange(newDate)
                       baseForm.trigger('dueDate')
                     }}
