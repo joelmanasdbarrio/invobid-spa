@@ -154,7 +154,7 @@ export default function AdminInvoicePage () {
                   </Button>
                   <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => invoice && setInvoice({...invoice, status: InvoiceStatus.CORRECTION})}>
                     <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                    {invoice?.status === InvoiceStatus.CORRECTION && 'Corrección requerida'}
+                    {invoice?.status === InvoiceStatus.CORRECTION && 'Corrección'}
                   </Button>
                   <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => invoice && setInvoice({...invoice, status: InvoiceStatus.PENDING})}>
                     <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
@@ -207,7 +207,7 @@ export default function AdminInvoicePage () {
             <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
               <Field>
                 <FieldLabel htmlFor='dueDate'>Fecha de vencimiento:</FieldLabel>
-                <DatePicker id='dueDate' value={invoice?.dueDate ? new Date(invoice.dueDate).toISOString().split('T')[0] : ''} disabled />
+                <DatePicker id='dueDate' value={invoice?.dueDate ?? ''} disabled />
               </Field>
               <Field>
                 <FieldLabel htmlFor='amount'>Importe:</FieldLabel>

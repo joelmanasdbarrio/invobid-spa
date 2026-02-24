@@ -1,3 +1,4 @@
+import StatusBadge from '@/components/status-badge'
 import { Button } from '@/components/ui/button.tsx'
 import { Card, CardContent } from '@/components/ui/card.tsx'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
@@ -9,12 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
 import { InvestorStatus, InvestorType } from '@/types/User'
 import {
   BuildingIcon,
-  CheckCheckIcon,
-  CircleAlertIcon,
-  ClockIcon,
   IdCardIcon,
   MailIcon,
-  OctagonXIcon,
   PhoneIcon,
   UserIcon
 } from 'lucide-react'
@@ -219,25 +216,13 @@ export default function UserFilters (
                       <SelectTrigger className='grow'>
                         {field.value ? (
                           field.value === InvestorStatus.PENDING ? (
-                            <span className='flex items-center gap-1'>
-                              <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
-                              Por verificar
-                            </span>
+                            <StatusBadge status='pending' />
                           ) : field.value === InvestorStatus.VERIFIED ? (
-                            <span className='flex items-center gap-2'>
-                              <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
-                              Verificado
-                            </span>
+                            <StatusBadge status='verified' />
                           ) : field.value === InvestorStatus.CORRECTION ? (
-                            <span className='flex items-center gap-2'>
-                              <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
-                              Corrección requerida
-                            </span>
+                            <StatusBadge status='correction' />
                           ) : field.value === InvestorStatus.DENIED ? (
-                            <span className='flex items-center gap-2'>
-                              <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
-                              Denegado
-                            </span>
+                            <StatusBadge status='denied' />
                           ) : (
                             <span className='flex items-center gap-2'>
                               {field.value}
@@ -258,28 +243,16 @@ export default function UserFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={InvestorStatus.PENDING}>
-                          <span className='flex items-center gap-1'>
-                            <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
-                            Por verificar
-                          </span>
+                          <StatusBadge status='pending' />
                         </SelectItem>
                         <SelectItem value={InvestorStatus.VERIFIED}>
-                          <span className='flex items-center gap-2'>
-                            <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
-                            Verificado
-                          </span>
+                          <StatusBadge status='verified' />
                         </SelectItem>
                         <SelectItem value={InvestorStatus.CORRECTION}>
-                          <span className='flex items-center gap-2'>
-                            <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
-                            Corrección requerida
-                          </span>
+                          <StatusBadge status='correction' />
                         </SelectItem>
                         <SelectItem value={InvestorStatus.DENIED}>
-                          <span className='flex items-center gap-2'>
-                            <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
-                            Denegado
-                          </span>
+                          <StatusBadge status='denied' />
                         </SelectItem>
                       </SelectContent>
                     </Select>

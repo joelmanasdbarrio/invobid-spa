@@ -1,3 +1,4 @@
+import StatusBadge from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -5,7 +6,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { DebtorStatus } from '@/types/Debtor'
-import { BuildingIcon, CheckCheckIcon, CircleAlertIcon, ClockIcon, IdCardIcon, MailIcon, OctagonXIcon, PhoneIcon } from 'lucide-react'
+import { BuildingIcon, IdCardIcon, MailIcon, PhoneIcon } from 'lucide-react'
 import { Controller, type UseFormReturn } from 'react-hook-form'
 
 export default function DebtorFilters (
@@ -127,25 +128,13 @@ export default function DebtorFilters (
                       <SelectTrigger>
                         {field.value ? (
                           field.value === DebtorStatus.PENDING ? (
-                            <span className='flex items-center gap-1'>
-                              <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
-                              Por verificar
-                            </span>
+                            <StatusBadge status='pending' />
                           ) : field.value === DebtorStatus.VERIFIED ? (
-                            <span className='flex items-center gap-2'>
-                              <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
-                              Verificado
-                            </span>
+                            <StatusBadge status='verified' />
                           ) : field.value === DebtorStatus.CORRECTION ? (
-                            <span className='flex items-center gap-2'>
-                              <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
-                              Corrección requerida
-                            </span>
+                            <StatusBadge status='correction' />
                           ) : field.value === DebtorStatus.DENIED ? (
-                            <span className='flex items-center gap-2'>
-                              <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
-                              Denegado
-                            </span>
+                            <StatusBadge status='denied' />
                           ) : (
                             <span className='flex items-center gap-2'>
                               {field.value}
@@ -166,28 +155,16 @@ export default function DebtorFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={DebtorStatus.PENDING}>
-                          <span className='flex items-center gap-1'>
-                            <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
-                            Por verificar
-                          </span>
+                          <StatusBadge status='pending' />
                         </SelectItem>
                         <SelectItem value={DebtorStatus.VERIFIED}>
-                          <span className='flex items-center gap-2'>
-                            <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
-                            Verificado
-                          </span>
+                          <StatusBadge status='verified' />
                         </SelectItem>
                         <SelectItem value={DebtorStatus.CORRECTION}>
-                          <span className='flex items-center gap-2'>
-                            <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
-                            Corrección requerida
-                          </span>
+                          <StatusBadge status='correction' />
                         </SelectItem>
                         <SelectItem value={DebtorStatus.DENIED}>
-                          <span className='flex items-center gap-2'>
-                            <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
-                            Denegado
-                          </span>
+                          <StatusBadge status='denied' />
                         </SelectItem>
                       </SelectContent>
                     </Select>

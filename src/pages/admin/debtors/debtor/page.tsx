@@ -172,7 +172,7 @@ export default function AdminDebtorPage () {
                   </Button>
                   <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.CORRECTION})}>
                     <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                    {debtor?.status === DebtorStatus.CORRECTION && 'Corrección requerida'}
+                    {debtor?.status === DebtorStatus.CORRECTION && 'Corrección'}
                   </Button>
                   <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.PENDING})}>
                     <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
