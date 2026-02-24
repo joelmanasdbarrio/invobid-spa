@@ -1,11 +1,12 @@
-import {Button} from '@/components/ui/button'
-import {Calendar} from '@/components/ui/calendar'
-import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
-import {cn} from '@/lib/utils'
-import {format} from 'date-fns'
-import {CalendarIcon} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import useLocale from '@/hooks/use-locale'
+import { formatDate, parseDateOnly, toDateOnlyString } from '@/lib/format-date'
+import { cn } from '@/lib/utils'
+import { CalendarIcon } from 'lucide-react'
 import * as React from 'react'
-import {type DateRange} from 'react-day-picker'
+import { type DateRange } from 'react-day-picker'
 
 interface DateRangePickerProps {
   fromDate?: string
@@ -20,15 +21,17 @@ export function DateRangePicker ({
   onFromChange,
   onToChange
 }: DateRangePickerProps) {
+  const { dateLocale } = useLocale()
+
   const [range, setRange] = React.useState<{ from?: Date; to?: Date }>({
-    from: fromDate ? new Date(fromDate) : undefined,
-    to: toDate ? new Date(toDate) : undefined
+    from: fromDate ? parseDateOnly(fromDate) : undefined,
+    to: toDate ? parseDateOnly(toDate) : undefined
   })
 
   React.useEffect(() => {
     setRange({
-      from: fromDate ? new Date(fromDate) : undefined,
-      to: toDate ? new Date(toDate) : undefined
+      from: fromDate ? parseDateOnly(fromDate) : undefined,
+      to: toDate ? parseDateOnly(toDate) : undefined
     })
   }, [fromDate, toDate])
 
@@ -36,11 +39,11 @@ export function DateRangePicker ({
     if (type === 'from') {
       const newFrom = day
       setRange(prev => ({ ...prev, from: newFrom }))
-      onFromChange(newFrom ? format(newFrom, 'yyyy-MM-dd') : undefined)
+      onFromChange(newFrom ? toDateOnlyString(newFrom) : undefined)
     } else {
       const newTo = day
       setRange(prev => ({ ...prev, to: newTo }))
-      onToChange(newTo ? format(newTo, 'yyyy-MM-dd') : undefined)
+      onToChange(newTo ? toDateOnlyString(newTo) : undefined)
     }
   }
 
@@ -49,13 +52,13 @@ export function DateRangePicker ({
       return 'Selecciona un rango'
     }
     if (range.from && !range.to) {
-      return format(range.from, 'dd/MM/yyyy')
+      return formatDate(range.from, dateLocale)
     }
     if (range.from && range.to) {
-      return `${format(range.from, 'dd/MM/yyyy')} - ${format(range.to, 'dd/MM/yyyy')}`
+      return `${formatDate(range.from, dateLocale)} - ${formatDate(range.to, dateLocale)}`
     }
     return 'Selecciona un rango'
-  }, [range])
+  }, [range, dateLocale])
 
   return (
     <Popover>

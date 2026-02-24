@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
 import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
+import { parseDateOnly, toDateOnlyString } from '@/lib/format-date'
 import { getDebtors } from '@/services/debtor.api.ts'
 import { getInvoiceById, updateInvoiceById } from '@/services/invoice.api'
 import { type Debtor, DebtorStatus } from '@/types/Debtor.ts'
@@ -94,7 +95,7 @@ export default function InvoicePage () {
     defaultValues: {
       debtorId: invoice?.debtor.id || '',
       amount: invoice?.amount || 0,
-      dueDate: invoice ? new Date(invoice.dueDate) : undefined
+      dueDate: invoice ? parseDateOnly(invoice.dueDate) : undefined
     }
   })
 
@@ -111,7 +112,7 @@ export default function InvoicePage () {
     baseForm.reset({
       debtorId: invoice?.debtor.id || '',
       amount: invoice?.amount || 0,
-      dueDate: invoice ? new Date(invoice.dueDate) : undefined
+      dueDate: invoice ? parseDateOnly(invoice.dueDate) : undefined
     })
   }, [invoice, baseForm])
 
@@ -154,7 +155,7 @@ export default function InvoicePage () {
     updateInvoiceById(invoiceId, JSON.stringify({
       debtorId: data.debtorId,
       amount: data.amount,
-      dueDate: data.dueDate.toISOString()
+      dueDate: toDateOnlyString(data.dueDate)
     }))
       .then(res => setInvoice(res.data))
       .then(() => navigate(`/user/invoices/${invoiceId}`))
@@ -300,9 +301,9 @@ export default function InvoicePage () {
                   <FieldLabel htmlFor={field.name}>Fecha de vencimiento:</FieldLabel>
                   <DatePicker
                     id={field.name}
-                    value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                    value={field.value instanceof Date ? toDateOnlyString(field.value) : ''}
                     onChange={(dateStr) => {
-                      const newDate = dateStr ? new Date(dateStr) : undefined
+                      const newDate = dateStr ? parseDateOnly(dateStr) : undefined
                       field.onChange(newDate)
                       baseForm.trigger('dueDate')
                     }}

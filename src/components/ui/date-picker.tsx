@@ -4,8 +4,9 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover'
+import useLocale from '@/hooks/use-locale'
+import { formatDate, parseDateOnly, toDateOnlyString } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import * as React from 'react'
 
@@ -24,25 +25,27 @@ export function DatePicker ({
   disabled = false,
   placeholder = 'Selecciona una fecha'
 }: DatePickerProps) {
+  const { dateLocale } = useLocale()
+
   const [date, setDate] = React.useState<Date | undefined>(
-    value ? new Date(value) : undefined
+    value ? parseDateOnly(value) : undefined
   )
 
   React.useEffect(() => {
-    setDate(value ? new Date(value) : undefined)
+    setDate(value ? parseDateOnly(value) : undefined)
   }, [value])
 
   const handleSelect = (day: Date | undefined) => {
     setDate(day)
-    onChange?.(day ? format(day, 'yyyy-MM-dd') : undefined)
+    onChange?.(day ? toDateOnlyString(day) : undefined)
   }
 
   const displayText = React.useMemo(() => {
     if (!date) {
       return placeholder
     }
-    return format(date, 'dd/MM/yyyy')
-  }, [date, placeholder])
+    return formatDate(date, dateLocale)
+  }, [date, placeholder, dateLocale])
 
   return (
     <div>
