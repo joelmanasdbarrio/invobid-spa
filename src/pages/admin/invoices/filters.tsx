@@ -103,7 +103,7 @@ export default function InvoiceFilters (
                 )}
               />
               <Controller
-                name='dueDate'
+                name='dueDateFrom'
                 control={form.control}
                 render={() => (
                   <Field>
@@ -181,7 +181,11 @@ export default function InvoiceFilters (
                 render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
-                    <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''} >
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => field.onChange(value === '__NONE__' ? '' : value)}
+                      defaultValue={field.value || '__NONE__'}
+                    >
                       <SelectTrigger>
                         {field.value ? (
                           field.value === InvoiceStatus.PENDING ? (
@@ -202,7 +206,7 @@ export default function InvoiceFilters (
                         )}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem>
+                        <SelectItem value='__NONE__'>
                           <button
                             type='button'
                             onClick={() => field.onChange(undefined)}

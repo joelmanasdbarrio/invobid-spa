@@ -152,7 +152,11 @@ export default function UserFilters (
                 render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Tipo de inversor</FieldLabel>
-                    <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''}>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => field.onChange(value === '__NONE__' ? '' : value)}
+                      defaultValue={field.value || '__NONE__'}
+                    >
                       <SelectTrigger className='grow'>
                         {field.value ?
                           (
@@ -177,7 +181,7 @@ export default function UserFilters (
                           )}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem>
+                        <SelectItem value='__NONE__'>
                           <button
                             type='button'
                             onClick={() => field.onChange(undefined)}
@@ -212,7 +216,11 @@ export default function UserFilters (
                 render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
-                    <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''} >
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => field.onChange(value === '__NONE__' ? '' : value)}
+                      defaultValue={field.value || '__NONE__'}
+                    >
                       <SelectTrigger className='grow'>
                         {field.value ? (
                           field.value === InvestorStatus.PENDING ? (
@@ -233,7 +241,7 @@ export default function UserFilters (
                         )}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem>
+                        <SelectItem value='__NONE__'>
                           <button
                             type='button'
                             onClick={() => field.onChange(undefined)}
@@ -266,7 +274,7 @@ export default function UserFilters (
                 name='includeDeleted'
                 control={form.control}
                 render={({ field }) => (
-                  <Label className='h-min self-end hover:bg-accent/50 flex items-start gap-3 border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                  <Label className='h-min self-end hover:bg-accent/50 flex items-start gap-3 rounded-md border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                     <Checkbox
                       id='toggle-include-deleted'
                       checked={field.value ?? false}
