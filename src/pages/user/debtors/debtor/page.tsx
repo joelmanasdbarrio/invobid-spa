@@ -49,7 +49,7 @@ const documentFormSchema = z.object({
   return true
 }, 'Para actualizar el modelo 303 ambos campos son obligatorios')
 
-export default function DebtorPage () {
+export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {debtorId} = useParams<{ debtorId: string }>()
   const [debtor, setDebtor] = useState<Debtor | undefined>()
   const [originalDebtor, setOriginalDebtor] = useState<Debtor | undefined>(debtor)
@@ -103,11 +103,12 @@ export default function DebtorPage () {
       .then(data => {
         setDebtor(data)
         setOriginalDebtor(data)
+        setLastBreadcrumb(data.companyName)
       })
       .catch(() => {
         navigate('/user/debtors')
       })
-  }, [debtorId, navigate])
+  }, [debtorId, navigate, setLastBreadcrumb])
 
   function onSubmitBase (data: z.infer<typeof baseFormSchema>) {
     if (!debtorId) return
@@ -163,7 +164,7 @@ export default function DebtorPage () {
 
   return (
     <section className='grid md:grid-cols-[1fr_200px] gap-4'>
-      <h3 className='text-lg'>Detalles del deudor {debtor?.companyName}</h3>
+      <h3 className='text-lg font-bold'>Gestionar deudor <span className='text-primary'>{debtor?.companyName}</span></h3>
       <Form {...validateForm}>
         <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='flex md:justify-end'>
           {(debtor?.status === DebtorStatus.CORRECTION || debtor?.status === DebtorStatus.PENDING) && (

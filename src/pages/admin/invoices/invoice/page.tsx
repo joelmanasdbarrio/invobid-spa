@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -26,10 +26,12 @@ import {
   CircleAlertIcon,
   ClockIcon,
   CopyIcon,
+  FileTextIcon,
   IdCardIcon,
   LockIcon,
   LockOpenIcon,
-  OctagonXIcon
+  OctagonXIcon,
+  SaveIcon
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -43,7 +45,7 @@ const formSchema = z.object({
   lastCommunication: z.string().optional()
 })
 
-export default function AdminInvoicePage () {
+export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {invoiceId} = useParams()
   const [invoice, setInvoice] = useState<Invoice | undefined>()
   const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
@@ -58,12 +60,13 @@ export default function AdminInvoicePage () {
         .then(invoice => {
           setInvoice(invoice)
           setOriginalInvoice(invoice)
+          setLastBreadcrumb(`Factura ${invoice.invoiceId}`)
         })
         .catch(() => {
           navigate('/admin/invoices')
         })
     }
-  }, [invoiceId, navigate])
+  }, [invoiceId, navigate, setLastBreadcrumb])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -132,7 +135,12 @@ export default function AdminInvoicePage () {
         <Form {...form}>
           <form id='debtor-form' onSubmit={form.handleSubmit(onSubmit)} className='xl:col-span-2 flex flex-col gap-4'>
             <div className='flex flex-col xl:flex-row gap-2'>
-              <h3 className='text-lg'>Detalles de la factura</h3>
+              <div className='flex items-center gap-2'>
+                <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+                  <FileTextIcon className='w-6 h-6' />
+                </span>
+                <h3 className='text-lg font-bold'>Gestionar factura <span className='text-primary'>{invoice?.invoiceId}</span></h3>
+              </div>
               <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                 <ButtonGroup>
                   {isFormDisabled
@@ -168,20 +176,218 @@ export default function AdminInvoicePage () {
               </ButtonGroup>
             </div>
 
-            <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
-              <Controller
-                name='rating'
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Rating:</FieldLabel>
+            <FieldSet>
+              <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                <Controller
+                  name='rating'
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Rating:</FieldLabel>
+                      <InputGroup>
+                        <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='0' required disabled={isFormDisabled} />
+                        <InputGroupAddon>
+                          %
+                        </InputGroupAddon>
+                        <InputGroupAddon align='inline-end'>
+                          <button onClick={(e) => copyToClipboard(e, invoice?.rating ?? 0)} className='group'>
+                            <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>
+                                  <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className='relative -top-2 right-3'>
+                                <p className='text-center'>¡Copiado!</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </button>
+                        </InputGroupAddon>
+                      </InputGroup>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Field>
+                  <FieldLabel htmlFor='invoiceId'>UID de factura:</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput id='invoiceId' value={invoice?.invoiceId} type='text' placeholder='0' required disabled />
+                    <InputGroupAddon>
+                      #
+                    </InputGroupAddon>
+                    <InputGroupAddon align='inline-end'>
+                      <button onClick={(e) => copyToClipboard(e, invoice?.invoiceId ?? '')} className='group'>
+                        <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className='relative -top-2 right-3'>
+                            <p className='text-center'>¡Copiado!</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor='dueDate'>Fecha de vencimiento:</FieldLabel>
+                  <DatePicker id='dueDate' value={invoice?.dueDate ?? ''} disabled />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor='amount'>Importe:</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput id='amount' value={invoice?.amount} type='text' placeholder='0' required disabled />
+                    <InputGroupAddon>
+                      €
+                    </InputGroupAddon>
+                    <InputGroupAddon align='inline-end'>
+                      <button onClick={(e) => copyToClipboard(e, invoice?.amount ?? '')} className='group'>
+                        <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className='relative -top-2 right-3'>
+                            <p className='text-center'>¡Copiado!</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor='buyerPercentage'>Comisión del comprador:</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput id='buyerPercentage' value={invoice?.transactionFee?.buyerPercentage} type='number' placeholder='0' required disabled />
+                    <InputGroupAddon>
+                      %
+                    </InputGroupAddon>
+                    <InputGroupAddon align='inline-end'>
+                      <button onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.buyerPercentage ?? 0)} className='group'>
+                        <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className='relative -top-2 right-3'>
+                            <p className='text-center'>¡Copiado!</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor='sellerPercentage'>Comisión del vendedor:</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput id='sellerPercentage' value={invoice?.transactionFee?.sellerPercentage} type='number' placeholder='0' required disabled />
+                    <InputGroupAddon>
+                      %
+                    </InputGroupAddon>
+                    <InputGroupAddon align='inline-end'>
+                      <button onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.sellerPercentage ?? 0)} className='group'>
+                        <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className='relative -top-2 right-3'>
+                            <p className='text-center'>¡Copiado!</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </Field>
+              </FieldGroup>
+            </FieldSet>
+            <FieldSet>
+              <FieldLegend>Información del vendedor</FieldLegend>
+              <FieldDescription>Inversor que publicó la factura</FieldDescription>
+              <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                <Field>
+                  <FieldLabel htmlFor='investorTaxId'>CIF/NIF del vendedor:</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput id='investorTaxId' value={invoice?.sellerInvestor?.taxId} type='text' placeholder='12345678A' required disabled />
+                    <InputGroupAddon>
+                      <IdCardIcon />
+                    </InputGroupAddon>
+                    <InputGroupAddon align='inline-end'>
+                      <button onClick={(e) => copyToClipboard(e, invoice?.sellerInvestor?.taxId ?? '')} className='group'>
+                        <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className='relative -top-2 right-3'>
+                            <p className='text-center'>¡Copiado!</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor='investorCompanyName'>Razón social del vendedor:</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput id='investorCompanyName' value={invoice?.sellerInvestor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                    <InputGroupAddon>
+                      <BuildingIcon />
+                    </InputGroupAddon>
+                    <InputGroupAddon align='inline-end'>
+                      <button onClick={(e) => copyToClipboard(e, invoice?.sellerInvestor?.companyName ?? '')} className='group'>
+                        <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className='relative -top-2 right-3'>
+                            <p className='text-center'>¡Copiado!</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </Field>
+              </FieldGroup>
+            </FieldSet>
+            {invoice?.buyerInvestor && (
+              <FieldSet>
+                <FieldLegend>Información del comprador</FieldLegend>
+                <FieldDescription>Inversor que compró la factura</FieldDescription>
+                <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                  <Field>
+                    <FieldLabel htmlFor='investorTaxId'>CIF/NIF del comprador:</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='0' required disabled={isFormDisabled} />
+                      <InputGroupInput id='investorTaxId' value={invoice?.buyerInvestor?.taxId} type='text' placeholder='12345678A' required disabled />
                       <InputGroupAddon>
-                        %
+                        <IdCardIcon />
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, invoice?.rating ?? 0)} className='group'>
+                        <button onClick={(e) => copyToClipboard(e, invoice?.buyerInvestor?.taxId ?? '')} className='group'>
                           <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
@@ -197,198 +403,96 @@ export default function AdminInvoicePage () {
                         </button>
                       </InputGroupAddon>
                     </InputGroup>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
                   </Field>
-                )}
-              />
-            </FieldGroup>
-            <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
-              <Field>
-                <FieldLabel htmlFor='dueDate'>Fecha de vencimiento:</FieldLabel>
-                <DatePicker id='dueDate' value={invoice?.dueDate ?? ''} disabled />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor='amount'>Importe:</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput id='amount' value={invoice?.amount} type='text' placeholder='0' required disabled />
-                  <InputGroupAddon>
-                    €
-                  </InputGroupAddon>
-                  <InputGroupAddon align='inline-end'>
-                    <button onClick={(e) => copyToClipboard(e, invoice?.amount ?? '')} className='group'>
-                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                  <Field>
+                    <FieldLabel htmlFor='investorCompanyName'>Razón social del comprador:</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput id='investorCompanyName' value={invoice?.buyerInvestor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                      <InputGroupAddon>
+                        <BuildingIcon />
+                      </InputGroupAddon>
+                      <InputGroupAddon align='inline-end'>
+                        <button onClick={(e) => copyToClipboard(e, invoice?.buyerInvestor?.companyName ?? '')} className='group'>
+                          <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent className='relative -top-2 right-3'>
-                          <p className='text-center'>¡Copiado!</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </button>
-                  </InputGroupAddon>
-                </InputGroup>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor='buyerPercentage'>Comisión del comprador:</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput id='buyerPercentage' value={invoice?.transactionFee?.buyerPercentage} type='number' placeholder='0' required disabled />
-                  <InputGroupAddon>
-                    %
-                  </InputGroupAddon>
-                  <InputGroupAddon align='inline-end'>
-                    <button onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.buyerPercentage ?? 0)} className='group'>
-                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className='relative -top-2 right-3'>
+                              <p className='text-center'>¡Copiado!</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </button>
+                      </InputGroupAddon>
+                    </InputGroup>
+                  </Field>
+                </FieldGroup>
+              </FieldSet>
+            )}
+            <FieldSet>
+              <FieldLegend>Información del deudor</FieldLegend>
+              <FieldDescription>Deudor asociado a la factura</FieldDescription>
+              <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                <Field>
+                  <FieldLabel htmlFor='debtorTaxId'>CIF/NIF del deudor:</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput id='debtorTaxId' value={invoice?.debtor?.taxId} type='text' placeholder='12345678A' required disabled />
+                    <InputGroupAddon>
+                      <IdCardIcon />
+                    </InputGroupAddon>
+                    <InputGroupAddon align='inline-end'>
+                      <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.taxId ?? '')} className='group'>
+                        <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent className='relative -top-2 right-3'>
-                          <p className='text-center'>¡Copiado!</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </button>
-                  </InputGroupAddon>
-                </InputGroup>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor='sellerPercentage'>Comisión del vendedor:</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput id='sellerPercentage' value={invoice?.transactionFee?.sellerPercentage} type='number' placeholder='0' required disabled />
-                  <InputGroupAddon>
-                    %
-                  </InputGroupAddon>
-                  <InputGroupAddon align='inline-end'>
-                    <button onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.sellerPercentage ?? 0)} className='group'>
-                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className='relative -top-2 right-3'>
+                            <p className='text-center'>¡Copiado!</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor='debtorCompanyName'>Razón social del deudor:</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput id='debtorCompanyName' value={invoice?.debtor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                    <InputGroupAddon>
+                      <BuildingIcon />
+                    </InputGroupAddon>
+                    <InputGroupAddon align='inline-end'>
+                      <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.companyName ?? '')} className='group'>
+                        <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent className='relative -top-2 right-3'>
-                          <p className='text-center'>¡Copiado!</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </button>
-                  </InputGroupAddon>
-                </InputGroup>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor='investorTaxId'>CIF/NIF del inversor:</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput id='investorTaxId' value={invoice?.sellerInvestor?.taxId} type='text' placeholder='12345678A' required disabled />
-                  <InputGroupAddon>
-                    <IdCardIcon />
-                  </InputGroupAddon>
-                  <InputGroupAddon align='inline-end'>
-                    <button onClick={(e) => copyToClipboard(e, invoice?.sellerInvestor?.taxId ?? '')} className='group'>
-                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent className='relative -top-2 right-3'>
-                          <p className='text-center'>¡Copiado!</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </button>
-                  </InputGroupAddon>
-                </InputGroup>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor='investorCompanyName'>Razón social del inversor:</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput id='investorCompanyName' value={invoice?.sellerInvestor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
-                  <InputGroupAddon>
-                    <BuildingIcon />
-                  </InputGroupAddon>
-                  <InputGroupAddon align='inline-end'>
-                    <button onClick={(e) => copyToClipboard(e, invoice?.sellerInvestor?.companyName ?? '')} className='group'>
-                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent className='relative -top-2 right-3'>
-                          <p className='text-center'>¡Copiado!</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </button>
-                  </InputGroupAddon>
-                </InputGroup>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor='debtorTaxId'>CIF/NIF del deudor:</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput id='debtorTaxId' value={invoice?.debtor?.taxId} type='text' placeholder='12345678A' required disabled />
-                  <InputGroupAddon>
-                    <IdCardIcon />
-                  </InputGroupAddon>
-                  <InputGroupAddon align='inline-end'>
-                    <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.taxId ?? '')} className='group'>
-                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent className='relative -top-2 right-3'>
-                          <p className='text-center'>¡Copiado!</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </button>
-                  </InputGroupAddon>
-                </InputGroup>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor='debtorCompanyName'>Razón social del deudor:</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput id='debtorCompanyName' value={invoice?.debtor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
-                  <InputGroupAddon>
-                    <BuildingIcon />
-                  </InputGroupAddon>
-                  <InputGroupAddon align='inline-end'>
-                    <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.companyName ?? '')} className='group'>
-                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent className='relative -top-2 right-3'>
-                          <p className='text-center'>¡Copiado!</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </button>
-                  </InputGroupAddon>
-                </InputGroup>
-              </Field>
-            </FieldGroup>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className='relative -top-2 right-3'>
+                            <p className='text-center'>¡Copiado!</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </button>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </Field>
+              </FieldGroup>
+            </FieldSet>
             <FieldGroup>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className='ms-auto w-min' disabled={JSON.stringify(originalInvoice) === JSON.stringify(invoice) && !form.formState.isDirty}>
+                    <SaveIcon />
                     Guardar cambios
                   </Button>
                 </DialogTrigger>
