@@ -36,6 +36,7 @@ import {
   MailIcon,
   OctagonXIcon,
   PhoneIcon,
+  SaveIcon,
   UserIcon,
   UsersIcon
 } from 'lucide-react'
@@ -59,7 +60,7 @@ const formSchema = z.object({
   lastCommunication: z.string().optional()
 })
 
-export default function AdminUserPage () {
+export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {investorId} = useParams()
   const [investor, setInvestor] = useState<Investor | undefined>()
   const [originalInvestor, setOriginalInvestor] = useState<Investor | undefined>(investor)
@@ -74,11 +75,12 @@ export default function AdminUserPage () {
         .then(user => {
           setInvestor(user)
           setOriginalInvestor(user)
+          setLastBreadcrumb(user.companyName)
         })
         .catch(() => {
           navigate('/admin/users')
         })
-  }, [investorId, navigate])
+  }, [investorId, navigate, setLastBreadcrumb])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -169,7 +171,12 @@ export default function AdminUserPage () {
         <Form {...form}>
           <form id='investor-form' onSubmit={form.handleSubmit(onSubmit)} className='xl:col-span-2 flex flex-col gap-4'>
             <div className='flex flex-col xl:flex-row gap-2'>
-              <h3 className='text-lg'>Detalles del usuario {investor?.companyName}</h3>
+              <div className='flex items-center gap-2'>
+                <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+                  <UserIcon className='w-6 h-6' />
+                </span>
+                <h3 className='text-lg font-bold'>Gestionar usuario <span className='text-primary'>{investor?.companyName}</span></h3>
+              </div>
               <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                 <ButtonGroup>
                   {isFormDisabled
@@ -438,6 +445,7 @@ export default function AdminUserPage () {
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className='ms-auto w-min' disabled={JSON.stringify(originalInvestor) === JSON.stringify(investor) && !form.formState.isDirty}>
+                    <SaveIcon />
                     Guardar cambios
                   </Button>
                 </DialogTrigger>

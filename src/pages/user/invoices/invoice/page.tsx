@@ -71,7 +71,7 @@ const documentFormSchema = z.object({
   return true
 })
 
-export default function InvoicePage () {
+export default function InvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {invoiceId} = useParams<{ invoiceId: string }>()
   const [invoice, setInvoice] = useState<Invoice | undefined>()
   const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
@@ -126,11 +126,12 @@ export default function InvoicePage () {
       .then(invoice => {
         setInvoice(invoice)
         setOriginalInvoice(invoice)
+        setLastBreadcrumb(`Factura ${invoice.invoiceId}`)
       })
       .catch(() => {
         navigate('/user/invoices')
       })
-  }, [invoiceId, loggedInUser, navigate])
+  }, [invoiceId, loggedInUser, navigate, setLastBreadcrumb])
 
   useEffect(() => {
     if (!loggedInUser) return
@@ -201,7 +202,7 @@ export default function InvoicePage () {
 
   return (
     <section className='grid md:grid-cols-[1fr_200px] gap-4'>
-      <h3 className='text-lg'>Detalles de la factura</h3>
+      <h3 className='text-lg font-bold'>Gestionar factura <span className='text-primary'>{invoice?.invoiceId}</span></h3>
       <Form {...validateForm}>
         <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='flex md:justify-end'>
           {(invoice?.status === InvoiceStatus.CORRECTION || invoice?.status === InvoiceStatus.PENDING) && (

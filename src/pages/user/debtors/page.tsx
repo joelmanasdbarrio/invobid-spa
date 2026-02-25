@@ -5,6 +5,7 @@ import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { getDebtors } from '@/services/debtor.api'
 import { DebtorStatus } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
@@ -134,38 +135,43 @@ export default function DebtorsPage () {
           <DebtorFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
         </DialogContent>
 
-        <DataTable columns={debtorColumns} data={data} />
+        <DataTable columns={debtorColumns} data={data} totalItems={totalItems} />
       </Dialog>
 
-      <div className='flex items-center justify-center gap-2'>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          Anterior
-        </Button>
-        Página {currentPage} de {Math.ceil(totalItems / currentLimit)}
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage * currentLimit >= totalItems}
-        >
-          Siguiente
-        </Button>
-        <Select value={String(currentLimit)} onValueChange={value => handleLimitChange(Number(value))}>
-          <SelectTrigger>
-            {currentLimit}
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='5'>5</SelectItem>
-            <SelectItem value='10'>10</SelectItem>
-            <SelectItem value='20'>20</SelectItem>
-            <SelectItem value='50'>50</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className='flex items-center justify-between gap-2 text-accent-foreground'>
+        <div className='flex items-center justify-center gap-2'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeftIcon />
+          </Button>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage * currentLimit >= totalItems}
+          >
+            <ChevronRightIcon />
+          </Button>
+          Página {currentPage} de {Math.ceil(totalItems / currentLimit)}
+        </div>
+        <div className='flex items-center gap-2'>
+          <Select value={String(currentLimit)} onValueChange={value => handleLimitChange(Number(value))}>
+            <span className='text-sm'>Filas por página</span>
+            <SelectTrigger>
+              {currentLimit}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='5'>5</SelectItem>
+              <SelectItem value='10'>10</SelectItem>
+              <SelectItem value='20'>20</SelectItem>
+              <SelectItem value='50'>50</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   )

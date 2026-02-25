@@ -3,8 +3,8 @@ import { DialogTrigger } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { cn } from '@/lib/utils'
-import { InvestorType } from '@/types/User'
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
+import { InvestorType, type Investor } from '@/types/User'
+import { flexRender, getCoreRowModel, useReactTable, type ColumnDef, type VisibilityState } from '@tanstack/react-table'
 import { ListFilterIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -12,11 +12,13 @@ import { useNavigate } from 'react-router'
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  totalItems: number
 }
 
 export function DataTable<TData, TValue> ({
   columns,
-  data
+  data,
+  totalItems
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const navigate = useNavigate()
@@ -35,31 +37,32 @@ export function DataTable<TData, TValue> ({
   const loggedInUser = useLoggedInUser()
 
   return (
-    <>
-      <div className='w-full flex flex-col sm:flex-row md:items-center justify-between gap-2'>
-        <h3 className='text-lg'>Resultados de la búsqueda</h3>
-        <div className='ms-auto flex gap-2'>
-          {loggedInUser?.investorType === InvestorType.COMPANY && (
-            <Button onClick={() => navigate('create')}>
-              Crear
-            </Button>
-          )}
-          <DialogTrigger asChild className='md:hidden'>
-            <Button variant='outline'>
-              Filtrar
-              <ListFilterIcon />
-            </Button>
-          </DialogTrigger>
+    <div className='rounded-xl border shadow-sm'>
+      <div className='w-full flex flex-col sm:flex-row md:items-center justify-between gap-2 p-6'>
+        <div className='flex gap-2 items-center justify-between sm:justify-start md:justify-between w-full'>
+          <h3 className='text-lg'>Resultados de la búsqueda</h3>
+          <span className='text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-lg'>{totalItems} resultado{totalItems > 1 && 's'}</span>
         </div>
+        {(loggedInUser as Investor)?.investorType === InvestorType.COMPANY && (
+          <Button onClick={() => navigate('create')}>
+            Crear
+          </Button>
+        )}
+        <DialogTrigger asChild className='md:hidden ms-auto'>
+          <Button variant='outline'>
+            Filtrar
+            <ListFilterIcon />
+          </Button>
+        </DialogTrigger>
       </div>
-      <div className='overflow-x-scroll rounded-md border shadow-sm'>
+      <div className='overflow-x-scroll'>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className='bg-accent'>
+                    <TableHead key={header.id} className='bg-accent first:ps-6 last:pe-6'>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -85,7 +88,7 @@ export function DataTable<TData, TValue> ({
                   }
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className='first:ps-6 last:pe-6'>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -101,6 +104,6 @@ export function DataTable<TData, TValue> ({
           </TableBody>
         </Table>
       </div>
-    </>
+    </div>
   )
 }
