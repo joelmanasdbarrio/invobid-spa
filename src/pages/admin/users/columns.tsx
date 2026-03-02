@@ -73,19 +73,19 @@ export const investorColumns: ColumnDef<Investor>[] = [
       switch (status) {
         case InvestorStatus.PENDING:
           return (
-            <StatusBadge status='pending' />
+            <StatusBadge color='yellow' />
           )
         case InvestorStatus.VERIFIED:
           return (
-            <StatusBadge status='verified' />
+            <StatusBadge color='green' />
           )
         case InvestorStatus.CORRECTION:
           return (
-            <StatusBadge status='correction' />
+            <StatusBadge color='red' />
           )
         case InvestorStatus.DENIED:
           return (
-            <StatusBadge status='denied' />
+            <StatusBadge color='gray' />
           )
         default:
           return status

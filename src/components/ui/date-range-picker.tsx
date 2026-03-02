@@ -21,7 +21,7 @@ export function DateRangePicker ({
   onFromChange,
   onToChange
 }: DateRangePickerProps) {
-  const { dateLocale } = useLocale()
+  const { locale } = useLocale()
 
   const [range, setRange] = React.useState<{ from?: Date; to?: Date }>({
     from: fromDate ? parseDateOnly(fromDate) : undefined,
@@ -52,13 +52,13 @@ export function DateRangePicker ({
       return 'Selecciona un rango'
     }
     if (range.from && !range.to) {
-      return formatDate(range.from, dateLocale)
+      return formatDate(range.from, locale)
     }
     if (range.from && range.to) {
-      return `${formatDate(range.from, dateLocale)} - ${formatDate(range.to, dateLocale)}`
+      return `${formatDate(range.from, locale)} - ${formatDate(range.to, locale)}`
     }
     return 'Selecciona un rango'
-  }, [range, dateLocale])
+  }, [range, locale])
 
   return (
     <Popover>
@@ -91,7 +91,7 @@ export function DateRangePicker ({
         />
         <Button
           variant='outline'
-          className='w-full'
+          className='w-full rounded-none'
           onClick={() => {
             setRange({ from: undefined, to: undefined })
             onFromChange(undefined)

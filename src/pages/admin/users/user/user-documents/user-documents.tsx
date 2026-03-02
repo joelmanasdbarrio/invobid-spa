@@ -1,13 +1,14 @@
 import { Button } from '@/components/ui/button.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
-import { documentColumns } from '@/pages/admin/users/user/user-documents/columns.tsx'
 import { DataTable } from '@/pages/admin/users/user/user-documents/data-table.tsx'
 import { getDocuments } from '@/services/document.api.ts'
 import { DocumentType } from '@/types/Document.ts'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useDocumentColumns } from './columns'
 
 export default function UserDocuments ({ investorId } : { investorId: string | undefined }) {
+  const documentColumns = useDocumentColumns()
   const [data, setData] = useState([])
   const [totalItems, setTotalItems] = useState(0)
 

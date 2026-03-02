@@ -1,21 +1,21 @@
 import { useState } from 'react'
 import { LocaleContext } from './locale.context'
 
-const LOCALE_STORAGE_KEY = 'date-locale'
+const LOCALE_STORAGE_KEY = 'locale'
 const DEFAULT_LOCALE = 'es-ES'
 
 export function LocaleProvider ({ children }: { children: React.ReactNode }) {
-  const [dateLocale, setDateLocaleState] = useState<string>(() => {
+  const [locale, setLocaleState] = useState<string>(() => {
     return localStorage.getItem(LOCALE_STORAGE_KEY) ?? DEFAULT_LOCALE
   })
 
-  function setDateLocale (locale: string) {
-    localStorage.setItem(LOCALE_STORAGE_KEY, locale)
-    setDateLocaleState(locale)
+  function setLocale (newLocale: string) {
+    localStorage.setItem(LOCALE_STORAGE_KEY, newLocale)
+    setLocaleState(newLocale)
   }
 
   return (
-    <LocaleContext.Provider value={{ dateLocale, setDateLocale }}>
+    <LocaleContext.Provider value={{ locale, setLocale }}>
       {children}
     </LocaleContext.Provider>
   )

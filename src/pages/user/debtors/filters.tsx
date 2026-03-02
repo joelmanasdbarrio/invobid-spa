@@ -132,13 +132,13 @@ export default function DebtorFilters (
                       <SelectTrigger>
                         {field.value ? (
                           field.value === DebtorStatus.PENDING ? (
-                            <StatusBadge status='pending' />
+                            <StatusBadge color='yellow' />
                           ) : field.value === DebtorStatus.VERIFIED ? (
-                            <StatusBadge status='verified' />
+                            <StatusBadge color='green' />
                           ) : field.value === DebtorStatus.CORRECTION ? (
-                            <StatusBadge status='correction' />
+                            <StatusBadge color='red' />
                           ) : (
-                            <StatusBadge status='denied' />
+                            <StatusBadge color='gray' />
                           )
                         ) : (
                           'Selecciona un estado'
@@ -155,16 +155,16 @@ export default function DebtorFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={DebtorStatus.PENDING}>
-                          <StatusBadge status='pending' />
+                          <StatusBadge color='yellow' />
                         </SelectItem>
                         <SelectItem value={DebtorStatus.VERIFIED}>
-                          <StatusBadge status='verified' />
+                          <StatusBadge color='green' />
                         </SelectItem>
                         <SelectItem value={DebtorStatus.CORRECTION}>
-                          <StatusBadge status='correction' />
+                          <StatusBadge color='red' />
                         </SelectItem>
                         <SelectItem value={DebtorStatus.DENIED}>
-                          <StatusBadge status='denied' />
+                          <StatusBadge color='gray' />
                         </SelectItem>
                       </SelectContent>
                     </Select>

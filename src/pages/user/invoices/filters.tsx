@@ -169,13 +169,13 @@ export default function InvoiceFilters (
                       <SelectTrigger>
                         {field.value ? (
                           field.value === InvoiceStatus.PENDING ? (
-                            <StatusBadge status='pending' />
+                            <StatusBadge color='yellow' />
                           ) : field.value === InvoiceStatus.VERIFIED ? (
-                            <StatusBadge status='verified' />
+                            <StatusBadge color='green' />
                           ) : field.value === InvoiceStatus.CORRECTION ? (
-                            <StatusBadge status='correction' />
+                            <StatusBadge color='red' />
                           ) : field.value === InvoiceStatus.DENIED ? (
-                            <StatusBadge status='denied' />
+                            <StatusBadge color='gray' />
                           ) : (
                             <span className='flex items-center gap-2'>
                               {field.value}
@@ -196,16 +196,16 @@ export default function InvoiceFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.PENDING}>
-                          <StatusBadge status='pending' />
+                          <StatusBadge color='yellow' />
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.VERIFIED}>
-                          <StatusBadge status='verified' />
+                          <StatusBadge color='green' />
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.CORRECTION}>
-                          <StatusBadge status='correction' />
+                          <StatusBadge color='red' />
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.DENIED}>
-                          <StatusBadge status='denied' />
+                          <StatusBadge color='gray' />
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -220,7 +220,7 @@ export default function InvoiceFilters (
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field className='self-end'>
-                    <Label className='h-min hover:bg-accent/50 flex items-start gap-3 border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                    <Label className='h-min rounded-lg hover:bg-accent/50 flex items-start gap-3 border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                       <Checkbox
                         id='toggle-include-deleted'
                         checked={field.value ?? false}

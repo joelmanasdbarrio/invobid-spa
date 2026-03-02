@@ -7,7 +7,7 @@ import UserFilters from '@/pages/admin/users/filters.tsx'
 import { getInvestors } from '@/services/investor.api.ts'
 import { InvestorStatus, InvestorType } from '@/types/User'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon, UserIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
@@ -120,6 +120,12 @@ export default function AdminUsersPage () {
 
   return (
     <div className='flex flex-col gap-4'>
+      <div className='flex items-center gap-2'>
+        <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+          <UserIcon className='w-6 h-6' />
+        </span>
+        <h2>Consultar usuarios</h2>
+      </div>
       <Dialog>
         <div className='hidden md:block'>
           <UserFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />

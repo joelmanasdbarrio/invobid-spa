@@ -224,13 +224,13 @@ export default function UserFilters (
                       <SelectTrigger className='grow'>
                         {field.value ? (
                           field.value === InvestorStatus.PENDING ? (
-                            <StatusBadge status='pending' />
+                            <StatusBadge color='yellow' />
                           ) : field.value === InvestorStatus.VERIFIED ? (
-                            <StatusBadge status='verified' />
+                            <StatusBadge color='green' />
                           ) : field.value === InvestorStatus.CORRECTION ? (
-                            <StatusBadge status='correction' />
+                            <StatusBadge color='red' />
                           ) : field.value === InvestorStatus.DENIED ? (
-                            <StatusBadge status='denied' />
+                            <StatusBadge color='gray' />
                           ) : (
                             <span className='flex items-center gap-2'>
                               {field.value}
@@ -251,16 +251,16 @@ export default function UserFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={InvestorStatus.PENDING}>
-                          <StatusBadge status='pending' />
+                          <StatusBadge color='yellow' />
                         </SelectItem>
                         <SelectItem value={InvestorStatus.VERIFIED}>
-                          <StatusBadge status='verified' />
+                          <StatusBadge color='green' />
                         </SelectItem>
                         <SelectItem value={InvestorStatus.CORRECTION}>
-                          <StatusBadge status='correction' />
+                          <StatusBadge color='red' />
                         </SelectItem>
                         <SelectItem value={InvestorStatus.DENIED}>
-                          <StatusBadge status='denied' />
+                          <StatusBadge color='gray' />
                         </SelectItem>
                       </SelectContent>
                     </Select>

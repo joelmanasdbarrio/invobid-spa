@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
-import { debtorColumns } from '@/pages/admin/users/user/user-debtors/columns.tsx'
 import { DataTable } from '@/pages/admin/users/user/user-debtors/data-table.tsx'
 import { getDebtors } from '@/services/debtor.api'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useDebtorColumns } from './columns'
 
 export default function UserDebtors ({ investorId } : { investorId: string | undefined }) {
+  const debtorColumns = useDebtorColumns()
   const [data, setData] = useState([])
   const [totalItems, setTotalItems] = useState(0)
 

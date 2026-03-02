@@ -3,10 +3,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
 import { getDocuments } from '@/services/document.api.ts'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { documentColumns } from './columns'
+import { useDocumentColumns } from './columns'
 import { DataTable } from './data-table'
 
 export default function InvoiceDocuments ({ invoiceId } : { invoiceId: string | undefined }) {
+  const documentColumns = useDocumentColumns()
   const [data, setData] = useState([])
   const [totalItems, setTotalItems] = useState(0)
 

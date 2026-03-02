@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card.tsx'
 import { FieldSeparator } from '@/components/ui/field.tsx'
 import type { Investor } from '@/types/User'
+import { HistoryIcon } from 'lucide-react'
 
 export function UserChangeHistory ({investor}: {investor: Investor | undefined}) {
   const createdAt = investor
@@ -29,9 +30,12 @@ export function UserChangeHistory ({investor}: {investor: Investor | undefined})
   }
 
   return (
-    <Card>
-      <CardHeader>
-        Historial de cambios
+    <Card >
+      <CardHeader className='flex items-center gap-2'>
+        <span className='rounded-md p-1 bg-primary/20 text-primary'>
+          <HistoryIcon className='w-4 h-4' />
+        </span>
+        <h4>Historial de cambios</h4>
       </CardHeader>
       <CardContent>
         <ul className='list-disc list-inside space-y-2'>

@@ -5,7 +5,7 @@ import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { getDebtors } from '@/services/debtor.api'
 import { DebtorStatus } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon, HandCoinsIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
@@ -123,6 +123,12 @@ export default function DebtorsPage () {
 
   return (
     <div className='flex flex-col gap-4'>
+      <div className='flex items-center gap-2'>
+        <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+          <HandCoinsIcon className='w-6 h-6' />
+        </span>
+        <h2>Consultar deudores</h2>
+      </div>
       <Dialog>
         <div className='hidden md:block'>
           <DebtorFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
