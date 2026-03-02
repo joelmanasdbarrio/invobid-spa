@@ -6,7 +6,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { AuthContext } from '@/contexts/auth.context.ts'
 import { createInvestor } from '@/services/investor.api.ts'
-import { InvestorType } from '@/types/User'
+import { InvestorType, type Investor } from '@/types/User'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Cookies from 'js-cookie'
 import {
@@ -40,8 +40,7 @@ const formSchema = z.object({
     .min(1, 'El CIF/NIF es obligatorio'),
   document: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
-    .transform((files) => files[0]),
+    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío'),
   investorType: z.enum(InvestorType)
 }).refine((data) => data.password === data.passwordRepeat, {
   message: 'Las contraseñas no coinciden',
@@ -91,11 +90,11 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
     formData.append('password', data.password)
     formData.append('passwordRepeat', data.passwordRepeat)
     formData.append('taxId', data.taxId)
-    formData.append('document', data.document)
+    formData.append('document', data.document[0])
 
     createInvestor(formData, (res) => {
       Cookies.set('logged-in-user', JSON.stringify(res.data), { expires: 1 })
-      setLoggedInUser(res.data)
+      setLoggedInUser(res.data as Investor)
 
       navigate('/')
     })

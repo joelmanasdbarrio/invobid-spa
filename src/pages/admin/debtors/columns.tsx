@@ -39,19 +39,19 @@ export const debtorColumns: ColumnDef<Debtor>[] = [
       switch (status) {
         case DebtorStatus.PENDING:
           return (
-            <StatusBadge status='pending' />
+            <StatusBadge color='yellow' />
           )
         case DebtorStatus.VERIFIED:
           return (
-            <StatusBadge status='verified' />
+            <StatusBadge color='green' />
           )
         case DebtorStatus.CORRECTION:
           return (
-            <StatusBadge status='correction' />
+            <StatusBadge color='red' />
           )
         case DebtorStatus.DENIED:
           return (
-            <StatusBadge status='denied' />
+            <StatusBadge color='gray' />
           )
         default:
           return status

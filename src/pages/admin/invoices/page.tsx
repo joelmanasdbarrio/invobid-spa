@@ -5,12 +5,12 @@ import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { getInvoices } from '@/services/invoice.api'
 import { InvoiceStatus } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon, FileTextIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
 import z from 'zod'
-import { invoiceColumns } from './columns'
+import { useInvoiceColumns } from './columns'
 import { DataTable } from './data-table'
 import InvoiceFilters from './filters'
 
@@ -72,6 +72,7 @@ export default function AdminInvoicesPage () {
 
   const [data, setData] = useState([])
   const [totalItems, setTotalItems] = useState(0)
+  const invoiceColumns = useInvoiceColumns()
 
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10))
   const [currentLimit, setCurrentLimit] = useState(parseInt(searchParams.get('limit') || '10', 10))
@@ -147,6 +148,12 @@ export default function AdminInvoicesPage () {
 
   return (
     <div className='flex flex-col gap-4'>
+      <div className='flex items-center gap-2'>
+        <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+          <FileTextIcon className='w-6 h-6' />
+        </span>
+        <h2>Consultar facturas</h2>
+      </div>
       <Dialog>
         <div className='hidden md:block'>
           <InvoiceFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />

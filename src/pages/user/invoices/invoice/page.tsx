@@ -8,8 +8,9 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
@@ -28,6 +29,7 @@ import {
   CircleQuestionMarkIcon,
   ClockIcon,
   FileIcon,
+  FileTextIcon,
   KeyRoundIcon,
   OctagonXIcon,
   RefreshCcwIcon,
@@ -201,208 +203,224 @@ export default function InvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (
   }
 
   return (
-    <section className='grid md:grid-cols-[1fr_200px] gap-4'>
-      <h3 className='text-lg font-bold'>Gestionar factura <span className='text-primary'>{invoice?.invoiceId}</span></h3>
-      <Form {...validateForm}>
-        <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='flex md:justify-end'>
+    <section className='flex flex-col gap-4'>
+      <div className='flex items-center gap-2'>
+        <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+          <FileTextIcon className='w-6 h-6' />
+        </span>
+        <h2>Gestionar factura</h2>
+      </div>
+      <Card>
+        <CardHeader>
+          <h3>Detalles de la factura <span className='text-primary'>{invoice?.invoiceId}</span></h3>
+        </CardHeader>
+        <CardContent className='grid md:grid-cols-[1fr_200px] gap-4'>
           {(invoice?.status === InvoiceStatus.CORRECTION || invoice?.status === InvoiceStatus.PENDING) && (
-            <Button
-              variant='outline'
-              className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
-              disabled={isFormDisabled}
-              onClick={() => {
-                validateForm.setValue('status', InvoiceStatus.PENDING)
-                validateForm.handleSubmit(onSubmitValidate)()
-              }}
-            >
-              <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-200' />
-              <span className='overflow-hidden'>
-                Solicitar verificación
-              </span>
-            </Button>
+            <Form {...validateForm}>
+              <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='flex md:justify-end'>
+                <Button
+                  variant='outline'
+                  className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
+                  disabled={isFormDisabled}
+                  onClick={() => {
+                    validateForm.setValue('status', InvoiceStatus.PENDING)
+                    validateForm.handleSubmit(onSubmitValidate)()
+                  }}
+                >
+                  <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-200' />
+                  <span className='overflow-hidden'>
+                    Solicitar verificación
+                  </span>
+                </Button>
+              </form>
+            </Form>
           )}
-        </form>
-      </Form>
-      <Form {...baseForm}>
-        <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='col-span-full flex flex-col gap-4'>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='debtorId'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Deudor:</FieldLabel>
-                  <Select
-                    value={verifiedDebtors?.find(debtor => debtor.id === field.value)?.id || invoice?.debtor?.id || '__NONE__'}
-                    onValueChange={(value) => field.onChange(value === '__NONE__' ? '' : value)}
-                    defaultValue={field.value || ''}
-                    disabled={isFormDisabled}
-                  >
-                    <SelectTrigger>
-                      {verifiedDebtors?.find(debtor => debtor.id === field.value)?.companyName || invoice?.debtor?.companyName || 'Selecciona un deudor'}
-                    </SelectTrigger>
-                    <SelectContent>
-                      <InputGroup className='border-0 border-b w-full'>
-                        <InputGroupInput
-                          value={debtorSearch}
-                          onChange={e => setDebtorSearch(e.target.value)}
-                          onKeyDown={e => e.stopPropagation()}
-                          onKeyUp={e => e.stopPropagation()}
-                          type='text'
-                          placeholder='Razón social del deudor...'
-                          autoComplete='off'
-                        />
-                        <InputGroupAddon>
-                          {isLoadingDebtors ? <Spinner /> : <SearchIcon />}
-                        </InputGroupAddon>
-                      </InputGroup>
-                      <SelectItem value='__NONE__'>
-                        <span className='text-muted-foreground'>
-                          Selecciona un deudor
-                        </span>
-                      </SelectItem>
-                      {verifiedDebtors?.map(debtor => (
-                        <SelectItem key={debtor.id} value={debtor.id}>
-                          {debtor.companyName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </FieldGroup>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='amount'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Importe:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='number' placeholder='1000' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      €
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='dueDate'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Fecha de vencimiento:</FieldLabel>
-                  <DatePicker
-                    id={field.name}
-                    value={field.value instanceof Date ? toDateOnlyString(field.value) : ''}
-                    onChange={(dateStr) => {
-                      const newDate = dateStr ? parseDateOnly(dateStr) : undefined
-                      field.onChange(newDate)
-                      baseForm.trigger('dueDate')
-                    }}
-                    disabled={isFormDisabled}
+          <Form {...baseForm}>
+            <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='col-span-full flex flex-col gap-4'>
+              <FieldSet>
+                <FieldLegend>Información básica</FieldLegend>
+                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                  <Controller
+                    name='debtorId'
+                    control={baseForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Deudor:</FieldLabel>
+                        <Select
+                          value={verifiedDebtors?.find(debtor => debtor.id === field.value)?.id || invoice?.debtor?.id || '__NONE__'}
+                          onValueChange={(value) => field.onChange(value === '__NONE__' ? '' : value)}
+                          defaultValue={field.value || ''}
+                          disabled={isFormDisabled}
+                        >
+                          <SelectTrigger>
+                            {verifiedDebtors?.find(debtor => debtor.id === field.value)?.companyName || invoice?.debtor?.companyName || 'Selecciona un deudor'}
+                          </SelectTrigger>
+                          <SelectContent>
+                            <InputGroup className='border-0 border-b w-full'>
+                              <InputGroupInput
+                                value={debtorSearch}
+                                onChange={e => setDebtorSearch(e.target.value)}
+                                onKeyDown={e => e.stopPropagation()}
+                                onKeyUp={e => e.stopPropagation()}
+                                type='text'
+                                placeholder='Razón social del deudor...'
+                                autoComplete='off'
+                              />
+                              <InputGroupAddon>
+                                {isLoadingDebtors ? <Spinner /> : <SearchIcon />}
+                              </InputGroupAddon>
+                            </InputGroup>
+                            <SelectItem value='__NONE__'>
+                              <span className='text-muted-foreground'>
+                                Selecciona un deudor
+                              </span>
+                            </SelectItem>
+                            {verifiedDebtors?.map(debtor => (
+                              <SelectItem key={debtor.id} value={debtor.id}>
+                                {debtor.companyName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
                   />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Button
-              className='w-min self-end justify-self-end'
-              disabled={JSON.stringify(originalInvoice) === JSON.stringify(invoice) && !baseForm.formState.isDirty}
-              title='Guardar cambios'
-            >
-              <SaveIcon />
-              <span className='lg:hidden'>
-                Guardar cambios
-              </span>
-            </Button>
-          </FieldGroup>
-        </form>
-      </Form>
-      <FieldSeparator className='col-span-full' />
-      <Form {...documentForm}>
-        <h4 className='text-md col-span-full font-bold'>Actualizar documento</h4>
-        <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='col-span-full flex flex-col gap-4'>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='invoiceId'
-              control={documentForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' placeholder='B12345678-F001-00001234-20260216-A9K3' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <KeyRoundIcon />
-                    </InputGroupAddon>
-                    <InputGroupAddon align={'inline-end'}>
-                      <Tooltip>
-                        <TooltipTrigger className='leading-1'>
-                          <CircleQuestionMarkIcon className='w-4 h-4'/>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className='text-center'>Identificador del Registro de Facturación:<br />NIF/CIF/DNI del emisor + Serie + Número factura<br />+ Fecha + Código de verificación</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='file'
-              control={documentForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput
-                      aria-invalid={fieldState.invalid}
-                      id={field.name}
-                      onChange={(e) => field.onChange(e.target.files)}
-                      onBlur={field.onBlur}
-                      ref={field.ref}
-                      type='file'
-                      accept='image/jpg,image/jpeg,image/png,.pdf'
-                      aria-description='Fotocopia que permita visualizar el documento completo'
-                      disabled={isFormDisabled}
-                    />
-                    <InputGroupAddon>
-                      <FileIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Button
-              className='w-min self-end justify-self-end'
-              disabled={!documentForm.formState.isDirty}
-              title='Actualizar documentos'
-            >
-              <SaveIcon />
-              <span className='lg:hidden'>
-                Actualizar documentos
-              </span>
-            </Button>
-          </FieldGroup>
-        </form>
-      </Form>
+                </FieldGroup>
+                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                  <Controller
+                    name='amount'
+                    control={baseForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Importe:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput {...field} id={field.name} type='number' placeholder='1000' disabled={isFormDisabled} />
+                          <InputGroupAddon>
+                            €
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name='dueDate'
+                    control={baseForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Fecha de vencimiento:</FieldLabel>
+                        <DatePicker
+                          id={field.name}
+                          value={field.value instanceof Date ? toDateOnlyString(field.value) : ''}
+                          onChange={(dateStr) => {
+                            const newDate = dateStr ? parseDateOnly(dateStr) : undefined
+                            field.onChange(newDate)
+                            baseForm.trigger('dueDate')
+                          }}
+                          disabled={isFormDisabled}
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Button
+                    className='w-min self-end justify-self-end'
+                    disabled={JSON.stringify(originalInvoice) === JSON.stringify(invoice) && !baseForm.formState.isDirty}
+                    title='Guardar cambios'
+                  >
+                    <SaveIcon />
+                    <span className='lg:hidden'>
+                      Guardar cambios
+                    </span>
+                  </Button>
+                </FieldGroup>
+              </FieldSet>
+            </form>
+          </Form>
+          <Form {...documentForm}>
+            <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='col-span-full flex flex-col gap-4'>
+              <FieldSet>
+                <FieldLegend>Actualizar documento</FieldLegend>
+                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                  <Controller
+                    name='invoiceId'
+                    control={documentForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput {...field} id={field.name} type='text' placeholder='B12345678-F001-00001234-20260216-A9K3' disabled={isFormDisabled} />
+                          <InputGroupAddon>
+                            <KeyRoundIcon />
+                          </InputGroupAddon>
+                          <InputGroupAddon align={'inline-end'}>
+                            <Tooltip>
+                              <TooltipTrigger className='leading-1'>
+                                <CircleQuestionMarkIcon className='w-4 h-4'/>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className='text-center'>Identificador del Registro de Facturación:<br />NIF/CIF/DNI del emisor + Serie + Número factura<br />+ Fecha + Código de verificación</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name='file'
+                    control={documentForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            aria-invalid={fieldState.invalid}
+                            id={field.name}
+                            onChange={(e) => field.onChange(e.target.files)}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                            type='file'
+                            accept='image/jpg,image/jpeg,image/png,.pdf'
+                            aria-description='Fotocopia que permita visualizar el documento completo'
+                            disabled={isFormDisabled}
+                          />
+                          <InputGroupAddon>
+                            <FileIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Button
+                    className='w-min self-end justify-self-end'
+                    disabled={!documentForm.formState.isDirty}
+                    title='Actualizar documentos'
+                  >
+                    <SaveIcon />
+                    <span className='lg:hidden'>
+                      Actualizar documentos
+                    </span>
+                  </Button>
+                </FieldGroup>
+              </FieldSet>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
 
       {(invoice?.status && invoice.status !== InvoiceStatus.VERIFIED) && (
         <AlertDialog defaultOpen>

@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
   Dialog,
   DialogClose,
@@ -149,66 +150,207 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
 
   return (
     <section className='flex flex-col gap-4'>
+      <div className='flex items-center gap-2'>
+        <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+          <HandCoinsIcon className='w-6 h-6' />
+        </span>
+        <h2>Gestionar deudor</h2>
+      </div>
       <div className='grid xl:grid-cols-3 gap-4'>
-        <Form {...form}>
-          <form id='debtor-form' onSubmit={form.handleSubmit(onSubmit)} className='xl:col-span-2 flex flex-col gap-4'>
-            <div className='flex flex-col xl:flex-row gap-2'>
-              <div className='flex items-center gap-2'>
-                <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-                  <HandCoinsIcon className='w-6 h-6' />
-                </span>
-                <h3 className='text-lg font-bold'>Gestionar deudor <span className='text-primary'>{debtor?.companyName}</span></h3>
-              </div>
-              <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
-                <ButtonGroup>
-                  {isFormDisabled
-                    ? (
-                      <Button type='button' variant='outline' onClick={() => setIsFormDisabled(false)}>
-                        <LockIcon />
-                      </Button>
-                    ) : (
-                      <Button type='button' variant='outline' onClick={() => setIsFormDisabled(true)}>
-                        <LockOpenIcon />
-                      </Button>
-                    )}
-                </ButtonGroup>
+        <Card className='xl:col-span-2'>
+          <Form {...form}>
+            <form id='debtor-form' onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+              <CardHeader className='flex flex-col xl:flex-row gap-2'>
+                <h3>Detalle del deudor <span className='text-primary'>{debtor?.companyName}</span></h3>
+                <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
+                  <ButtonGroup>
+                    {isFormDisabled
+                      ? (
+                        <Button type='button' variant='outline' onClick={() => setIsFormDisabled(false)}>
+                          <LockIcon />
+                        </Button>
+                      ) : (
+                        <Button type='button' variant='outline' onClick={() => setIsFormDisabled(true)}>
+                          <LockOpenIcon />
+                        </Button>
+                      )}
+                  </ButtonGroup>
 
-                <ButtonGroup>
-                  <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.DENIED})}>
-                    <OctagonXIcon className='rounded-full text-zinc-600'/>
-                    {debtor?.status === DebtorStatus.DENIED && 'Denegado'}
-                  </Button>
-                  <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.CORRECTION})}>
-                    <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                    {debtor?.status === DebtorStatus.CORRECTION && 'Corrección'}
-                  </Button>
-                  <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.PENDING})}>
-                    <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
-                    {debtor?.status === DebtorStatus.PENDING && 'Por verificar'}
-                  </Button>
-                  <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.VERIFIED})}>
-                    <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
-                    {debtor?.status === DebtorStatus.VERIFIED && 'Verificado'}
-                  </Button>
+                  <ButtonGroup>
+                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.DENIED})}>
+                      <OctagonXIcon className='rounded-full text-zinc-600'/>
+                      {debtor?.status === DebtorStatus.DENIED && 'Denegado'}
+                    </Button>
+                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.CORRECTION})}>
+                      <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
+                      {debtor?.status === DebtorStatus.CORRECTION && 'Corrección'}
+                    </Button>
+                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.PENDING})}>
+                      <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
+                      {debtor?.status === DebtorStatus.PENDING && 'Por verificar'}
+                    </Button>
+                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.VERIFIED})}>
+                      <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
+                      {debtor?.status === DebtorStatus.VERIFIED && 'Verificado'}
+                    </Button>
+                  </ButtonGroup>
                 </ButtonGroup>
-              </ButtonGroup>
-            </div>
+              </CardHeader>
 
-            <FieldSet>
-              <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
-                <Controller
-                  name='taxId'
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>CIF/NIF:</FieldLabel>
+              <CardContent className='flex flex-col gap-4'>
+                <FieldSet>
+                  <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                    <Controller
+                      name='taxId'
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>CIF/NIF:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='12345678A' required disabled={isFormDisabled} />
+                            <InputGroupAddon>
+                              <IdCardIcon />
+                            </InputGroupAddon>
+                            <InputGroupAddon align='inline-end'>
+                              <button onClick={(e) => copyToClipboard(e, debtor?.taxId ?? '')} className='group'>
+                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>
+                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className='relative -top-2 right-3'>
+                                    <p className='text-center'>¡Copiado!</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </button>
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      name='companyName'
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='ACME S.L.' required disabled={isFormDisabled} />
+                            <InputGroupAddon>
+                              <BuildingIcon />
+                            </InputGroupAddon>
+                            <InputGroupAddon align='inline-end'>
+                              <button onClick={(e) => copyToClipboard(e, debtor?.companyName ?? '')} className='group'>
+                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>
+                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className='relative -top-2 right-3'>
+                                    <p className='text-center'>¡Copiado!</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </button>
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      name='email'
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Correo:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='email' placeholder='m@example.com' required disabled={isFormDisabled} />
+                            <InputGroupAddon>
+                              <MailIcon />
+                            </InputGroupAddon>
+                            <InputGroupAddon align='inline-end'>
+                              <button onClick={(e) => copyToClipboard(e, debtor?.email ?? '')} className='group'>
+                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>
+                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className='relative -top-2 right-3'>
+                                    <p className='text-center'>¡Copiado!</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </button>
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      name='phoneNumber'
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='tel' placeholder='654987321' required disabled={isFormDisabled}/>
+                            <InputGroupAddon>
+                              <PhoneIcon />
+                            </InputGroupAddon>
+                            <InputGroupAddon align='inline-end'>
+                              <button onClick={(e) => copyToClipboard(e, debtor?.phoneNumber ?? '')} className='group'>
+                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>
+                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className='relative -top-2 right-3'>
+                                    <p className='text-center'>¡Copiado!</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </button>
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                  </FieldGroup>
+                </FieldSet>
+                <FieldSet>
+                  <FieldLegend>Información del inversor</FieldLegend>
+                  <FieldDescription>Inversor que publicó el deudor</FieldDescription>
+                  <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                    <Field>
+                      <FieldLabel htmlFor='investorTaxId'>CIF/NIF del inversor:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='12345678A' required disabled={isFormDisabled} />
+                        <InputGroupInput id='investorTaxId' value={debtor?.investor?.taxId} type='text' placeholder='12345678A' required disabled />
                         <InputGroupAddon>
                           <IdCardIcon />
                         </InputGroupAddon>
                         <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, debtor?.taxId ?? '')} className='group'>
+                          <button onClick={(e) => copyToClipboard(e, debtor?.investor?.taxId ?? '')} className='group'>
                             <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                             <Tooltip>
@@ -224,25 +366,16 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                           </button>
                         </InputGroupAddon>
                       </InputGroup>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
                     </Field>
-                  )}
-                />
-                <Controller
-                  name='companyName'
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
+                    <Field>
+                      <FieldLabel htmlFor='investorCompanyName'>Razón social del inversor:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='ACME S.L.' required disabled={isFormDisabled} />
+                        <InputGroupInput id='investorCompanyName' value={debtor?.investor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
                         <InputGroupAddon>
                           <BuildingIcon />
                         </InputGroupAddon>
                         <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, debtor?.companyName ?? '')} className='group'>
+                          <button onClick={(e) => copyToClipboard(e, debtor?.investor?.companyName ?? '')} className='group'>
                             <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                             <Tooltip>
@@ -258,199 +391,72 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                           </button>
                         </InputGroupAddon>
                       </InputGroup>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
                     </Field>
-                  )}
-                />
-                <Controller
-                  name='email'
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>Correo:</FieldLabel>
-                      <InputGroup>
-                        <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='email' placeholder='m@example.com' required disabled={isFormDisabled} />
-                        <InputGroupAddon>
-                          <MailIcon />
-                        </InputGroupAddon>
-                        <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, debtor?.email ?? '')} className='group'>
-                            <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
-
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span>
-                                  <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent className='relative -top-2 right-3'>
-                                <p className='text-center'>¡Copiado!</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </button>
-                        </InputGroupAddon>
-                      </InputGroup>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name='phoneNumber'
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
-                      <InputGroup>
-                        <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='tel' placeholder='654987321' required disabled={isFormDisabled}/>
-                        <InputGroupAddon>
-                          <PhoneIcon />
-                        </InputGroupAddon>
-                        <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, debtor?.phoneNumber ?? '')} className='group'>
-                            <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
-
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span>
-                                  <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent className='relative -top-2 right-3'>
-                                <p className='text-center'>¡Copiado!</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </button>
-                        </InputGroupAddon>
-                      </InputGroup>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              </FieldGroup>
-            </FieldSet>
-            <FieldSet>
-              <FieldLegend>Información del inversor</FieldLegend>
-              <FieldDescription>Inversor que publicó el deudor</FieldDescription>
-              <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
-                <Field>
-                  <FieldLabel htmlFor='investorTaxId'>CIF/NIF del inversor:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput id='investorTaxId' value={debtor?.investor?.taxId} type='text' placeholder='12345678A' required disabled />
-                    <InputGroupAddon>
-                      <IdCardIcon />
-                    </InputGroupAddon>
-                    <InputGroupAddon align='inline-end'>
-                      <button onClick={(e) => copyToClipboard(e, debtor?.investor?.taxId ?? '')} className='group'>
-                        <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent className='relative -top-2 right-3'>
-                            <p className='text-center'>¡Copiado!</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </button>
-                    </InputGroupAddon>
-                  </InputGroup>
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor='investorCompanyName'>Razón social del inversor:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput id='investorCompanyName' value={debtor?.investor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
-                    <InputGroupAddon>
-                      <BuildingIcon />
-                    </InputGroupAddon>
-                    <InputGroupAddon align='inline-end'>
-                      <button onClick={(e) => copyToClipboard(e, debtor?.investor?.companyName ?? '')} className='group'>
-                        <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent className='relative -top-2 right-3'>
-                            <p className='text-center'>¡Copiado!</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </button>
-                    </InputGroupAddon>
-                  </InputGroup>
-                </Field>
-              </FieldGroup>
-            </FieldSet>
-            <FieldSet>
-              <FieldGroup>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className='ms-auto w-min' disabled={JSON.stringify(originalDebtor) === JSON.stringify(debtor) && !form.formState.isDirty}>
-                      <SaveIcon />
-                      Guardar cambios
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>¿Estás seguro de que deseas guardar los cambios?</DialogTitle>
-                    </DialogHeader>
-                    <DialogDescription>Esta acción actualizará la información del deudor en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
-
-                    <Controller
-                      name='lastCommunication'
-                      control={form.control}
-                      render={({ field }) => (
-                        <Field className='mt-4'>
-                          <FieldLabel htmlFor={field.name}>Notas de la actualización:</FieldLabel>
-                          <InputGroup>
-                            <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
-                          </InputGroup>
-                          <div className='flex flex-wrap gap-1'>
-                            {Object.entries(updateNotesMap).map(([key, note]) => (
-                              <Badge
-                                key={key}
-                                variant='outline'
-                                className='hover:cursor-pointer border-dashed hover:bg-accent'
-                                onClick={() => {
-                                  form.setValue('lastCommunication', note)
-                                }}
-                              >
-                                {note}
-                              </Badge>
-                            ))}
-                          </div>
-                          <FieldDescription>
-                            Este mensaje le indicará al usuario próximas acciones que debe realizar o el motivo de la actualización.
-                          </FieldDescription>
-                        </Field>
-                      )}
-                    />
-
-                    <DialogFooter>
-                      <DialogClose asChild>
-                        <Button variant='outline' onClick={handleReset}>
-                          Cancelar
+                  </FieldGroup>
+                </FieldSet>
+                <FieldSet>
+                  <FieldGroup>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button className='ms-auto w-min' disabled={JSON.stringify(originalDebtor) === JSON.stringify(debtor) && !form.formState.isDirty}>
+                          <SaveIcon />
+                          Guardar cambios
                         </Button>
-                      </DialogClose>
-                      <Button type='submit' form='debtor-form' onClick={form.handleSubmit(onSubmit)}>
-                        Confirmar
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </FieldGroup>
-            </FieldSet>
-          </form>
-        </Form>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>¿Estás seguro de que deseas guardar los cambios?</DialogTitle>
+                        </DialogHeader>
+                        <DialogDescription>Esta acción actualizará la información del deudor en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
+
+                        <Controller
+                          name='lastCommunication'
+                          control={form.control}
+                          render={({ field }) => (
+                            <Field className='mt-4'>
+                              <FieldLabel htmlFor={field.name}>Notas de la actualización:</FieldLabel>
+                              <InputGroup>
+                                <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
+                              </InputGroup>
+                              <div className='flex flex-wrap gap-1'>
+                                {Object.entries(updateNotesMap).map(([key, note]) => (
+                                  <Badge
+                                    key={key}
+                                    variant='outline'
+                                    className='hover:cursor-pointer border-dashed hover:bg-accent'
+                                    onClick={() => {
+                                      form.setValue('lastCommunication', note)
+                                    }}
+                                  >
+                                    {note}
+                                  </Badge>
+                                ))}
+                              </div>
+                              <FieldDescription>
+                                Este mensaje le indicará al usuario próximas acciones que debe realizar o el motivo de la actualización.
+                              </FieldDescription>
+                            </Field>
+                          )}
+                        />
+
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button variant='outline' onClick={handleReset}>
+                              Cancelar
+                            </Button>
+                          </DialogClose>
+                          <Button type='submit' form='debtor-form' onClick={form.handleSubmit(onSubmit)}>
+                            Confirmar
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </FieldGroup>
+                </FieldSet>
+              </CardContent>
+            </form>
+          </Form>
+        </Card>
 
         <DebtorChangeHistory debtor={debtor} />
       </div>

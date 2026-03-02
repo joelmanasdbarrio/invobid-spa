@@ -54,18 +54,16 @@ export default function MainLayout ({
           {breadcrumbs && (
             <Breadcrumb>
               <BreadcrumbList>
-                {
-                  breadcrumbs.slice(0, -1).map((breadcrumb, index) => (
-                    <>
-                      <BreadcrumbItem key={index}>
-                        <BreadcrumbLink asChild>
-                          <Link to={breadcrumb.href}>{breadcrumb.label}</Link>
-                        </BreadcrumbLink>
-                      </BreadcrumbItem>
-                      <BreadcrumbSeparator />
-                    </>
-                  ))
-                }
+                {breadcrumbs.slice(0, -1).map((breadcrumb, index) => (
+                  <>
+                    <BreadcrumbItem key={index}>
+                      <BreadcrumbLink asChild>
+                        <Link to={breadcrumb.href}>{breadcrumb.label}</Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                  </>
+                ))}
                 <BreadcrumbItem className='text-foreground'>
                   {breadcrumbs[breadcrumbs.length - 1].label}
                 </BreadcrumbItem>

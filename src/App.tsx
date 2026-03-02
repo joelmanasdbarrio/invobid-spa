@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router'
 import { ThemeProvider } from './components/dark-mode/theme-provider'
 import { ProtectedRoute } from './components/protected-route'
 import MainLayout from './layouts/layout'
+import AdminAuctionsPage from './pages/admin/auctions/page'
 import AdminDebtorPage from './pages/admin/debtors/debtor/page'
 import AdminDebtorsPage from './pages/admin/debtors/page'
 import AdminInvoicePage from './pages/admin/invoices/invoice/page'
@@ -35,32 +36,8 @@ function App () {
           <Route path='/login' element={<Login />}/>
 
           {/* Protected Routes */}
-          <Route
-            path='/'
-            element={
-              <ProtectedRoute>
-                <MainLayout
-                  breadcrumbs={[
-                    { label: 'Dashboard', href: '/' }
-                  ]}
-                >
-                  <DashboardPage />
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/profile'
-            element={
-              <ProtectedRoute>
-                <MainLayout
-                  breadcrumbs={[{ label: 'Perfil', href: '/profile' }]}
-                >
-                  <ProfilePage />
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          />
+          <Route path='/' element={<ProtectedRoute><MainLayout breadcrumbs={[ { label: 'Dashboard', href: '/' } ]} ><DashboardPage /></MainLayout></ProtectedRoute> } />
+          <Route path='/profile' element={ <ProtectedRoute> <MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Perfil', href: '/profile' }]}><ProfilePage /></MainLayout></ProtectedRoute>} />
 
           <Route path='/admin/users'>
             <Route index element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de usuarios', href: '/admin/users' }]}><AdminUsersPage /></MainLayout></ProtectedRoute>} />
@@ -75,6 +52,10 @@ function App () {
           <Route path='/admin/invoices'>
             <Route index element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de facturas', href: '/admin/invoices' }]}><AdminInvoicesPage /></MainLayout></ProtectedRoute>} />
             <Route path=':invoiceId' element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de facturas', href: '/admin/invoices' }, { label: lastBreadcrumb, href: '/admin/invoices/:invoiceId' }]}><AdminInvoicePage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
+          </Route>
+
+          <Route path='/admin/auctions'>
+            <Route index element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de subastas', href: '/auctions' }]}><AdminAuctionsPage /></MainLayout></ProtectedRoute>} />
           </Route>
 
           <Route path='/debtors'>

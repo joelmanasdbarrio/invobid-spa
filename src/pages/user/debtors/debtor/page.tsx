@@ -1,13 +1,14 @@
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { getDebtorById, updateDebtorById } from '@/services/debtor.api'
 import { DebtorStatus, type Debtor } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CircleAlertIcon, ClockIcon, FileIcon, IdCardIcon, KeyRoundIcon, MailIcon, OctagonXIcon, PhoneIcon, RefreshCcwIcon, SaveIcon, UsersIcon } from 'lucide-react'
+import { CircleAlertIcon, ClockIcon, FileIcon, HandCoinsIcon, IdCardIcon, KeyRoundIcon, MailIcon, OctagonXIcon, PhoneIcon, RefreshCcwIcon, SaveIcon, UsersIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
@@ -163,232 +164,248 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
   }
 
   return (
-    <section className='grid md:grid-cols-[1fr_200px] gap-4'>
-      <h3 className='text-lg font-bold'>Gestionar deudor <span className='text-primary'>{debtor?.companyName}</span></h3>
-      <Form {...validateForm}>
-        <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='flex md:justify-end'>
+    <section className='flex flex-col gap-4'>
+      <div className='flex items-center gap-2'>
+        <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+          <HandCoinsIcon className='w-6 h-6' />
+        </span>
+        <h2>Gestionar deudor</h2>
+      </div>
+      <Card>
+        <CardHeader>
+          <h3>Detalle del deudor <span className='text-primary'>{debtor?.companyName}</span></h3>
+        </CardHeader>
+        <CardContent className='grid md:grid-cols-[1fr_200px] gap-4'>
           {(debtor?.status === DebtorStatus.CORRECTION || debtor?.status === DebtorStatus.PENDING) && (
-            <Button
-              variant='outline'
-              className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
-              disabled={isFormDisabled}
-              onClick={() => {
-                validateForm.setValue('status', DebtorStatus.PENDING)
-                validateForm.handleSubmit(onSubmitValidate)()
-              }}
-            >
-              <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-200' />
-              <span className='overflow-hidden'>
-                Solicitar verificación
-              </span>
-            </Button>
+            <Form {...validateForm}>
+              <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='flex md:justify-end'>
+                <Button
+                  variant='outline'
+                  className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
+                  disabled={isFormDisabled}
+                  onClick={() => {
+                    validateForm.setValue('status', DebtorStatus.PENDING)
+                    validateForm.handleSubmit(onSubmitValidate)()
+                  }}
+                >
+                  <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-200' />
+                  <span className='overflow-hidden'>
+                    Solicitar verificación
+                  </span>
+                </Button>
+              </form>
+            </Form>
           )}
-        </form>
-      </Form>
-      <Form {...baseForm}>
-        <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='col-span-full flex flex-col gap-4'>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='taxId'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>NIF/CIF:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <IdCardIcon/>
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='companyName'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <UsersIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </FieldGroup>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='email'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Correo electrónico:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='email' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <MailIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='phoneNumber'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='number' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <PhoneIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Button
-              className='w-min self-end justify-self-end'
-              disabled={JSON.stringify(originalDebtor) === JSON.stringify(debtor) && !baseForm.formState.isDirty}
-              title='Guardar cambios'
-            >
-              <SaveIcon />
-              <span className='lg:hidden'>
-                Guardar cambios
-              </span>
-            </Button>
-          </FieldGroup>
-        </form>
-      </Form>
-      <FieldSeparator className='col-span-full' />
-      <Form {...documentForm}>
-        <h4 className='text-md col-span-full font-bold'>Actualizar documentos</h4>
-        <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='col-span-full flex flex-col gap-4'>
-          <h5 className='text-md col-span-full'>Modelo 111</h5>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='modelo111Csv'
-              control={documentForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <KeyRoundIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='modelo111'
-              control={documentForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput
-                      aria-invalid={fieldState.invalid}
-                      id={field.name}
-                      onChange={(e) => field.onChange(e.target.files)}
-                      onBlur={field.onBlur}
-                      ref={field.ref}
-                      type='file'
-                      accept='image/jpg,image/jpeg,image/png,.pdf'
-                      aria-description='Fotocopia que permita visualizar el documento completo'
-                      disabled={isFormDisabled}
-                    />
-                    <InputGroupAddon>
-                      <FileIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </FieldGroup>
-          <h5 className='text-md col-span-full'>Modelo 303</h5>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='modelo303Csv'
-              control={documentForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <KeyRoundIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='modelo303'
-              control={documentForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput
-                      aria-invalid={fieldState.invalid}
-                      id={field.name}
-                      onChange={(e) => field.onChange(e.target.files)}
-                      onBlur={field.onBlur}
-                      ref={field.ref}
-                      type='file'
-                      accept='image/jpg,image/jpeg,image/png,.pdf'
-                      aria-description='Fotocopia que permita visualizar el documento completo'
-                      disabled={isFormDisabled}
-                    />
-                    <InputGroupAddon>
-                      <FileIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Button
-              className='w-min self-end justify-self-end'
-              disabled={!documentForm.formState.isDirty}
-              title='Actualizar documentos'
-            >
-              <SaveIcon />
-              <span className='lg:hidden'>
-                Actualizar documentos
-              </span>
-            </Button>
-          </FieldGroup>
-        </form>
-      </Form>
+          <Form {...baseForm}>
+            <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='col-span-full flex flex-col gap-4'>
+              <FieldSet>
+                <FieldLegend>Información de contacto</FieldLegend>
+                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                  <Controller
+                    name='taxId'
+                    control={baseForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>NIF/CIF:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput {...field} id={field.name} type='text' disabled={isFormDisabled} />
+                          <InputGroupAddon>
+                            <IdCardIcon/>
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name='companyName'
+                    control={baseForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput {...field} id={field.name} type='text' disabled={isFormDisabled} />
+                          <InputGroupAddon>
+                            <UsersIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </FieldGroup>
+                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                  <Controller
+                    name='email'
+                    control={baseForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Correo electrónico:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput {...field} id={field.name} type='email' disabled={isFormDisabled} />
+                          <InputGroupAddon>
+                            <MailIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name='phoneNumber'
+                    control={baseForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput {...field} id={field.name} type='number' disabled={isFormDisabled} />
+                          <InputGroupAddon>
+                            <PhoneIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Button
+                    className='w-min self-end justify-self-end'
+                    disabled={JSON.stringify(originalDebtor) === JSON.stringify(debtor) && !baseForm.formState.isDirty}
+                    title='Guardar cambios'
+                  >
+                    <SaveIcon />
+                    <span className='lg:hidden'>
+                      Guardar cambios
+                    </span>
+                  </Button>
+                </FieldGroup>
+              </FieldSet>
+            </form>
+          </Form>
+          <Form {...documentForm}>
+            <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='col-span-full flex flex-col gap-4'>
+              <FieldSet>
+                <FieldLegend>Actualizar documentos</FieldLegend>
+                <FieldDescription>Modelo 111</FieldDescription>
+                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                  <Controller
+                    name='modelo111Csv'
+                    control={documentForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' disabled={isFormDisabled} />
+                          <InputGroupAddon>
+                            <KeyRoundIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name='modelo111'
+                    control={documentForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            aria-invalid={fieldState.invalid}
+                            id={field.name}
+                            onChange={(e) => field.onChange(e.target.files)}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                            type='file'
+                            accept='image/jpg,image/jpeg,image/png,.pdf'
+                            aria-description='Fotocopia que permita visualizar el documento completo'
+                            disabled={isFormDisabled}
+                          />
+                          <InputGroupAddon>
+                            <FileIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </FieldGroup>
+                <FieldDescription>Modelo 303</FieldDescription>
+                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                  <Controller
+                    name='modelo303Csv'
+                    control={documentForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' disabled={isFormDisabled} />
+                          <InputGroupAddon>
+                            <KeyRoundIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name='modelo303'
+                    control={documentForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            aria-invalid={fieldState.invalid}
+                            id={field.name}
+                            onChange={(e) => field.onChange(e.target.files)}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                            type='file'
+                            accept='image/jpg,image/jpeg,image/png,.pdf'
+                            aria-description='Fotocopia que permita visualizar el documento completo'
+                            disabled={isFormDisabled}
+                          />
+                          <InputGroupAddon>
+                            <FileIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Button
+                    className='w-min self-end justify-self-end'
+                    disabled={!documentForm.formState.isDirty}
+                    title='Actualizar documentos'
+                  >
+                    <SaveIcon />
+                    <span className='lg:hidden'>
+                      Actualizar documentos
+                    </span>
+                  </Button>
+                </FieldGroup>
+              </FieldSet>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
 
       {(debtor?.status && debtor.status !== DebtorStatus.VERIFIED) && (
         <AlertDialog defaultOpen>

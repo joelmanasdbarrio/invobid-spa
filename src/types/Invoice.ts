@@ -12,6 +12,7 @@ export type Invoice = {
   document: Document;
   debtor: Debtor;
   amount: number;
+  currency: Currency;
   dueDate: string;
   transactionFee: TransactionFee;
   rating?: number;
@@ -30,4 +31,9 @@ export enum InvoiceStatus {
   VERIFIED = 'verified',
   CORRECTION = 'correction',
   DENIED = 'denied'
+}
+
+export enum Currency {
+  EUR = 'EUR',
+  USD = 'USD',
 }

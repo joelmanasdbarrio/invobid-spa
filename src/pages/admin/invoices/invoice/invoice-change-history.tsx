@@ -1,6 +1,7 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card.tsx'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { FieldSeparator } from '@/components/ui/field.tsx'
 import type { Invoice } from '@/types/Invoice'
+import { HistoryIcon } from 'lucide-react'
 
 export function InvoiceChangeHistory ({invoice}: {invoice: Invoice | undefined}) {
   const createdAt = invoice
@@ -29,9 +30,12 @@ export function InvoiceChangeHistory ({invoice}: {invoice: Invoice | undefined})
   }
 
   return (
-    <Card>
-      <CardHeader>
-        Historial de cambios
+    <Card >
+      <CardHeader className='flex items-center gap-2'>
+        <span className='rounded-md p-1 bg-primary/20 text-primary'>
+          <HistoryIcon className='w-4 h-4' />
+        </span>
+        <h4>Historial de cambios</h4>
       </CardHeader>
       <CardContent>
         <ul className='list-disc list-inside space-y-2'>

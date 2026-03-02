@@ -126,19 +126,19 @@ export default function DebtorFilters (
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
                     <Select
                       value={field.value}
-                      onValueChange={(value) => field.onChange(value === '__NONE__' ? '' : value)}
-                      defaultValue={field.value || '__NONE__'}
+                      onValueChange={(value) => field.onChange(value )}
+                      defaultValue={field.value}
                     >
                       <SelectTrigger>
                         {field.value ? (
                           field.value === DebtorStatus.PENDING ? (
-                            <StatusBadge status='pending' />
+                            <StatusBadge color='yellow' />
                           ) : field.value === DebtorStatus.VERIFIED ? (
-                            <StatusBadge status='verified' />
+                            <StatusBadge color='green' />
                           ) : field.value === DebtorStatus.CORRECTION ? (
-                            <StatusBadge status='correction' />
+                            <StatusBadge color='red' />
                           ) : field.value === DebtorStatus.DENIED ? (
-                            <StatusBadge status='denied' />
+                            <StatusBadge color='gray' />
                           ) : (
                             <span className='flex items-center gap-2'>
                               {field.value}
@@ -149,7 +149,7 @@ export default function DebtorFilters (
                         )}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value='__NONE__'>
+                        <SelectItem>
                           <button
                             type='button'
                             onClick={() => field.onChange(undefined)}
@@ -159,16 +159,16 @@ export default function DebtorFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={DebtorStatus.PENDING}>
-                          <StatusBadge status='pending' />
+                          <StatusBadge color='yellow' />
                         </SelectItem>
                         <SelectItem value={DebtorStatus.VERIFIED}>
-                          <StatusBadge status='verified' />
+                          <StatusBadge color='green' />
                         </SelectItem>
                         <SelectItem value={DebtorStatus.CORRECTION}>
-                          <StatusBadge status='correction' />
+                          <StatusBadge color='red' />
                         </SelectItem>
                         <SelectItem value={DebtorStatus.DENIED}>
-                          <StatusBadge status='denied' />
+                          <StatusBadge color='gray' />
                         </SelectItem>
                       </SelectContent>
                     </Select>

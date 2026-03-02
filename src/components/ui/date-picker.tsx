@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
@@ -25,7 +26,7 @@ export function DatePicker ({
   disabled = false,
   placeholder = 'Selecciona una fecha'
 }: DatePickerProps) {
-  const { dateLocale } = useLocale()
+  const { locale } = useLocale()
 
   const [date, setDate] = React.useState<Date | undefined>(
     value ? parseDateOnly(value) : undefined
@@ -44,8 +45,8 @@ export function DatePicker ({
     if (!date) {
       return placeholder
     }
-    return formatDate(date, dateLocale)
-  }, [date, placeholder, dateLocale])
+    return formatDate(date, locale)
+  }, [date, placeholder, locale])
 
   return (
     <div>
@@ -60,7 +61,7 @@ export function DatePicker ({
               'disabled:pointer-events-none disabled:cursor-not-allowed',
               'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
               'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
-              'flex items-center',
+              'flex items-center rounded-lg',
               !date && 'text-muted-foreground'
             )}
           >
@@ -89,6 +90,15 @@ export function DatePicker ({
             selected={date}
             onSelect={handleSelect}
           />
+          <Button
+            variant='outline'
+            className='w-full rounded-none'
+            onClick={() => {
+              onChange?.(undefined)
+            }}
+          >
+            Limpiar
+          </Button>
         </PopoverContent>
       </Popover>
     </div>

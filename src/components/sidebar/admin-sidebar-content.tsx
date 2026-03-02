@@ -41,8 +41,6 @@ export function AdminSidebarContent () {
     })
   }, [])
 
-  const pendingAuctionsCount = 0 // TODO: fetch pending auctions count
-
   return (
     <SidebarGroup>
       <SidebarGroupContent>
@@ -163,30 +161,19 @@ export function AdminSidebarContent () {
           <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/admin/auctions')}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild className={'group/collapsible'}>
-                <SidebarMenuButton>
+                <SidebarMenuButton isActive={location.pathname.startsWith('/admin/auctions')}>
                   <GavelIcon /> Subastas
-                  {pendingAuctionsCount > 0 && (
-                    <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
-                  )}
                   <ChevronRightIcon className='ms-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub className={'m-0 pe-0'}>
                   <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Todas las subastas
-                    </SidebarMenuButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Subastas para validar
-                      {pendingAuctionsCount > 0 && (
-                        <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
-                          {pendingAuctionsCount > 99 ? '+99' : pendingAuctionsCount}
-                        </Badge>
-                      )}
-                    </SidebarMenuButton>
+                    <Link to='/admin/auctions'>
+                      <SidebarMenuButton>
+                        Todas las subastas
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>
               </CollapsibleContent>

@@ -1,13 +1,14 @@
 import { Button } from '@/components/ui/button.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
-import { invoiceColumns } from '@/pages/admin/users/user/user-invoices/columns.tsx'
 import { DataTable } from '@/pages/admin/users/user/user-invoices/data-table.tsx'
 import { getInvoices } from '@/services/invoice.api'
 import type { Invoice } from '@/types/Invoice'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useInvoiceColumns } from './columns'
 
 export default function UserInvoices ({ investorId } : { investorId: string | undefined }) {
+  const invoiceColumns = useInvoiceColumns()
   const [data, setData] = useState<Invoice[]>([])
   const [totalItems, setTotalItems] = useState(0)
 
