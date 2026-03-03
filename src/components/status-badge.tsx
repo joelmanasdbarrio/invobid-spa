@@ -1,24 +1,54 @@
-import { CheckCheckIcon, CircleAlertIcon, ClockIcon, OctagonXIcon } from 'lucide-react'
+import React from 'react'
+
+type Icon = React.ReactElement<{ className?: string }>
 
 interface StatusBadgeProps {
   color: 'yellow' | 'green' | 'red' | 'gray' | 'blue' | 'purple';
+  icon?: Icon;
   children?: React.ReactNode;
 }
 
-export default function StatusBadge ({ color, children }: StatusBadgeProps) {
+const BADGE_STYLES = {
+  yellow: {
+    spanClass: 'flex items-center gap-2 w-min border border-yellow-300/10 rounded-lg px-2 py-0.5 text-xs text-yellow-600 bg-yellow-300/10 dark:text-yellow-400 dark:bg-yellow-300/20',
+    iconClass: 'w-4 h-4 rounded-full text-yellow-600 bg-yellow-300/10 dark:text-yellow-400 dark:bg-yellow-300/20 p-0.5'
+  },
+  green: {
+    spanClass: 'flex items-center gap-2 w-min border border-green-300/10 rounded-lg px-2 py-0.5 text-xs text-green-600 bg-green-300/10 dark:text-green-400 dark:bg-green-300/20',
+    iconClass: 'w-4 h-4 rounded-full text-green-600 bg-green-300/10 dark:text-green-400 dark:bg-green-300/20 p-0.5'
+  },
+  red: {
+    spanClass: 'flex items-center gap-2 w-min border border-red-300/10 rounded-lg px-2 py-0.5 text-xs text-red-600 bg-red-300/10 dark:text-red-400 dark:bg-red-300/20',
+    iconClass: 'w-4 h-4 rounded-full text-red-600 bg-red-300/10 dark:text-red-400 dark:bg-red-300/20 p-0.5'
+  },
+  gray: {
+    spanClass: 'flex items-center gap-2 w-min border border-zinc-300/10 rounded-lg px-2 py-0.5 text-xs text-zinc-600 bg-zinc-300/10 dark:text-zinc-400 dark:bg-zinc-300/20',
+    iconClass: 'w-4 h-4 rounded-full text-zinc-600 bg-zinc-300/10 dark:text-zinc-400 dark:bg-zinc-300/20 p-0.5'
+  },
+  blue: {
+    spanClass: 'flex items-center gap-2 w-min border border-blue-300/10 rounded-lg px-2 py-0.5 text-xs text-blue-600 bg-blue-300/10 dark:text-blue-400 dark:bg-blue-300/20',
+    iconClass: 'w-4 h-4 rounded-full text-blue-600 bg-blue-300/10 dark:text-blue-400 dark:bg-blue-300/20 p-0.5'
+  },
+  purple: {
+    spanClass: 'flex items-center gap-2 w-min border border-violet-300/10 rounded-lg px-2 py-0.5 text-xs text-violet-600 bg-violet-300/10 dark:text-violet-400 dark:bg-violet-300/20',
+    iconClass: 'w-4 h-4 rounded-full text-violet-600 bg-violet-300/10 dark:text-violet-400 dark:bg-violet-300/20 p-0.5'
+  }
+} as const
+
+export default function ColorBadge ({ color, icon, children }: StatusBadgeProps) {
   switch (color) {
     case 'yellow':
-      return yellowBadge({ children })
+      return yellowBadge({ icon, children })
     case 'green':
-      return greenBadge({ children })
+      return greenBadge({ icon, children })
     case 'red':
-      return redBadge({ children })
+      return redBadge({ icon, children })
     case 'gray':
-      return grayBadge({ children })
+      return grayBadge({ icon, children })
     case 'blue':
-      return blueBadge({ children })
+      return blueBadge({ icon, children })
     case 'purple':
-      return purpleBadge({ children })
+      return purpleBadge({ icon, children })
     default:
       return (
         <span className='flex items-center gap-2 w-min border rounded-lg px-2 py-0.5 text-xs'>
@@ -28,56 +58,56 @@ export default function StatusBadge ({ color, children }: StatusBadgeProps) {
   }
 }
 
-function yellowBadge ({children}: {children?: React.ReactNode}) {
+function yellowBadge ({icon, children}: {icon?: Icon, children?: React.ReactNode}) {
   return (
-    <span className='flex items-center gap-2 w-min border border-yellow-300/10 rounded-lg px-2 py-0.5 text-xs text-yellow-600 bg-yellow-300/10 dark:text-yellow-400 dark:bg-yellow-300/20'>
-      <ClockIcon className='w-4 h-4 rounded-full text-yellow-600 bg-yellow-300/10 dark:text-yellow-400 dark:bg-yellow-300/20 p-0.5'/>
-      {children || 'Pendiente'}
+    <span className={BADGE_STYLES.yellow.spanClass}>
+      {icon && React.cloneElement(icon, { className: BADGE_STYLES.yellow.iconClass })}
+      {children}
     </span>
   )
 }
 
-function greenBadge ({children}: {children?: React.ReactNode}) {
+function greenBadge ({icon, children}: {icon?: Icon, children?: React.ReactNode}) {
   return (
-    <span className='flex items-center gap-2 w-min border border-green-300/10 rounded-lg px-2 py-0.5 text-xs text-green-600 bg-green-300/10 dark:text-green-400 dark:bg-green-300/20'>
-      <CheckCheckIcon className='w-4 h-4 rounded-full text-green-600 bg-green-300/10 dark:text-green-400 dark:bg-green-300/20 p-0.5'/>
-      {children || 'Verificado'}
+    <span className={BADGE_STYLES.green.spanClass}>
+      {icon && React.cloneElement(icon, { className: BADGE_STYLES.green.iconClass })}
+      {children}
     </span>
   )
 }
 
-function redBadge ({children}: {children?: React.ReactNode}) {
+function redBadge ({icon, children}: {icon?: Icon, children?: React.ReactNode}) {
   return (
-    <span className='flex items-center gap-2 w-min border border-red-300/10 rounded-lg px-2 py-0.5 text-xs text-red-600 bg-red-300/10 dark:text-red-400 dark:bg-red-300/20'>
-      <CircleAlertIcon className='w-4 h-4 rounded-full text-red-600 bg-red-300/10 dark:text-red-400 dark:bg-red-300/20 p-0.5'/>
-      {children || 'Corrección'}
+    <span className={BADGE_STYLES.red.spanClass}>
+      {icon && React.cloneElement(icon, { className: BADGE_STYLES.red.iconClass })}
+      {children}
     </span>
   )
 }
 
-function grayBadge ({children}: {children?: React.ReactNode}) {
+function grayBadge ({icon, children}: {icon?: Icon, children?: React.ReactNode}) {
   return (
-    <span className='flex items-center gap-2 w-min border border-zinc-300/10 rounded-lg px-2 py-0.5 text-xs text-zinc-600 bg-zinc-300/10 dark:text-zinc-400 dark:bg-zinc-300/20'>
-      <OctagonXIcon className='w-4 h-4 rounded-full text-zinc-600 bg-zinc-300/10 dark:text-zinc-400 dark:bg-zinc-300/20 p-0.5'/>
-      {children || 'Denegado'}
+    <span className={BADGE_STYLES.gray.spanClass}>
+      {icon && React.cloneElement(icon, { className: BADGE_STYLES.gray.iconClass })}
+      {children}
     </span>
   )
 }
 
-function blueBadge ({children}: {children?: React.ReactNode}) {
+function blueBadge ({icon, children}: {icon?: Icon, children?: React.ReactNode}) {
   return (
-    <span className='flex items-center gap-2 w-min border border-blue-300/10 rounded-lg px-2 py-0.5 text-xs text-blue-600 bg-blue-300/10 dark:text-blue-400 dark:bg-blue-300/20'>
-      <ClockIcon className='w-4 h-4 rounded-full text-blue-600 bg-blue-300/10 dark:text-blue-400 dark:bg-blue-300/20 p-0.5'/>
-      {children || 'Pausado'}
+    <span className={BADGE_STYLES.blue.spanClass}>
+      {icon && React.cloneElement(icon, { className: BADGE_STYLES.blue.iconClass })}
+      {children}
     </span>
   )
 }
 
-function purpleBadge ({children}: {children?: React.ReactNode}) {
+function purpleBadge ({icon, children}: {icon?: Icon, children?: React.ReactNode}) {
   return (
-    <span className='flex items-center gap-2 w-min border border-violet-300/10 rounded-lg px-2 py-0.5 text-xs text-violet-600 bg-violet-300/10 dark:text-violet-400 dark:bg-violet-300/20'>
-      <CheckCheckIcon className='w-4 h-4 rounded-full text-violet-600 bg-violet-300/10 dark:text-violet-400 dark:bg-violet-300/20 p-0.5'/>
-      {children || 'Finalizado'}
+    <span className={BADGE_STYLES.purple.spanClass}>
+      {icon && React.cloneElement(icon, { className: BADGE_STYLES.purple.iconClass })}
+      {children}
     </span>
   )
 }

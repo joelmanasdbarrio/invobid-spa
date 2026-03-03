@@ -1,7 +1,7 @@
-import StatusBadge from '@/components/status-badge'
+import ColorBadge from '@/components/status-badge'
 import { DebtorStatus, type Debtor } from '@/types/Debtor'
 import type { ColumnDef } from '@tanstack/react-table'
-import { ExternalLinkIcon } from 'lucide-react'
+import { CheckCheckIcon, CircleAlertIcon, ClockIcon, ExternalLinkIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link } from 'react-router'
 
@@ -42,19 +42,27 @@ export function useDebtorColumns (): ColumnDef<Debtor>[] {
         switch (status) {
           case DebtorStatus.PENDING:
             return (
-              <StatusBadge color='yellow' />
+              <ColorBadge color='yellow' icon={<ClockIcon />}>
+                Pendiente
+              </ColorBadge>
             )
           case DebtorStatus.VERIFIED:
             return (
-              <StatusBadge color='green' />
+              <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                Verificado
+              </ColorBadge>
             )
           case DebtorStatus.CORRECTION:
             return (
-              <StatusBadge color='red' />
+              <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                Corrección
+              </ColorBadge>
             )
           case DebtorStatus.DENIED:
             return (
-              <StatusBadge color='gray' />
+              <ColorBadge color='gray' icon={<CircleAlertIcon />}>
+                Denegado
+              </ColorBadge>
             )
           default:
             return status

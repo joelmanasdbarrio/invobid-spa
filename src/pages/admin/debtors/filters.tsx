@@ -1,4 +1,4 @@
-import StatusBadge from '@/components/status-badge'
+import ColorBadge from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -6,7 +6,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { DebtorStatus } from '@/types/Debtor'
-import { BuildingIcon, IdCardIcon, MailIcon, PhoneIcon } from 'lucide-react'
+import { BuildingIcon, CheckCheckIcon, CircleAlertIcon, ClockIcon, IdCardIcon, MailIcon, OctagonXIcon, PhoneIcon } from 'lucide-react'
 import { Controller, type UseFormReturn } from 'react-hook-form'
 
 export default function DebtorFilters (
@@ -132,13 +132,21 @@ export default function DebtorFilters (
                       <SelectTrigger>
                         {field.value ? (
                           field.value === DebtorStatus.PENDING ? (
-                            <StatusBadge color='yellow' />
+                            <ColorBadge color='yellow' icon={<ClockIcon />}>
+                              Pendiente
+                            </ColorBadge>
                           ) : field.value === DebtorStatus.VERIFIED ? (
-                            <StatusBadge color='green' />
+                            <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                              Verificado
+                            </ColorBadge>
                           ) : field.value === DebtorStatus.CORRECTION ? (
-                            <StatusBadge color='red' />
+                            <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                              Corrección
+                            </ColorBadge>
                           ) : field.value === DebtorStatus.DENIED ? (
-                            <StatusBadge color='gray' />
+                            <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                              Denegado
+                            </ColorBadge>
                           ) : (
                             <span className='flex items-center gap-2'>
                               {field.value}
@@ -159,16 +167,24 @@ export default function DebtorFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={DebtorStatus.PENDING}>
-                          <StatusBadge color='yellow' />
+                          <ColorBadge color='yellow' icon={<ClockIcon />}>
+                            Pendiente
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={DebtorStatus.VERIFIED}>
-                          <StatusBadge color='green' />
+                          <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                            Verificado
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={DebtorStatus.CORRECTION}>
-                          <StatusBadge color='red' />
+                          <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                            Corrección
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={DebtorStatus.DENIED}>
-                          <StatusBadge color='gray' />
+                          <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                            Denegado
+                          </ColorBadge>
                         </SelectItem>
                       </SelectContent>
                     </Select>

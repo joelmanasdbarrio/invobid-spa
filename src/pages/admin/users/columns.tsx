@@ -1,9 +1,13 @@
-import StatusBadge from '@/components/status-badge'
+import ColorBadge from '@/components/status-badge'
 import { type Investor, InvestorStatus, InvestorType } from '@/types/User'
 import { type ColumnDef } from '@tanstack/react-table'
 import {
   BuildingIcon,
+  CheckCheckIcon,
+  CircleAlertIcon,
+  ClockIcon,
   ExternalLinkIcon,
+  OctagonXIcon,
   UserIcon
 } from 'lucide-react'
 import { Link } from 'react-router'
@@ -73,19 +77,27 @@ export const investorColumns: ColumnDef<Investor>[] = [
       switch (status) {
         case InvestorStatus.PENDING:
           return (
-            <StatusBadge color='yellow' />
+            <ColorBadge color='yellow' icon={<ClockIcon />}>
+              Pendiente
+            </ColorBadge>
           )
         case InvestorStatus.VERIFIED:
           return (
-            <StatusBadge color='green' />
+            <ColorBadge color='green' icon={<CheckCheckIcon />}>
+              Verificado
+            </ColorBadge>
           )
         case InvestorStatus.CORRECTION:
           return (
-            <StatusBadge color='red' />
+            <ColorBadge color='red' icon={<CircleAlertIcon />}>
+              Corrección
+            </ColorBadge>
           )
         case InvestorStatus.DENIED:
           return (
-            <StatusBadge color='gray' />
+            <ColorBadge color='gray' icon={<OctagonXIcon />}>
+              Denegado
+            </ColorBadge>
           )
         default:
           return status

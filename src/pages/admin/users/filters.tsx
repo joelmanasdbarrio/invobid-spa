@@ -1,4 +1,4 @@
-import StatusBadge from '@/components/status-badge'
+import ColorBadge from '@/components/status-badge'
 import { Button } from '@/components/ui/button.tsx'
 import { Card, CardContent } from '@/components/ui/card.tsx'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
@@ -10,8 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
 import { InvestorStatus, InvestorType } from '@/types/User'
 import {
   BuildingIcon,
+  CheckCheckIcon,
+  CircleAlertIcon,
+  ClockIcon,
   IdCardIcon,
   MailIcon,
+  OctagonXIcon,
   PhoneIcon,
   UserIcon
 } from 'lucide-react'
@@ -224,13 +228,21 @@ export default function UserFilters (
                       <SelectTrigger className='grow'>
                         {field.value ? (
                           field.value === InvestorStatus.PENDING ? (
-                            <StatusBadge color='yellow' />
+                            <ColorBadge color='yellow' icon={<ClockIcon />}>
+                              Pendiente
+                            </ColorBadge>
                           ) : field.value === InvestorStatus.VERIFIED ? (
-                            <StatusBadge color='green' />
+                            <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                              Verificado
+                            </ColorBadge>
                           ) : field.value === InvestorStatus.CORRECTION ? (
-                            <StatusBadge color='red' />
+                            <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                              Corrección
+                            </ColorBadge>
                           ) : field.value === InvestorStatus.DENIED ? (
-                            <StatusBadge color='gray' />
+                            <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                              Denegado
+                            </ColorBadge>
                           ) : (
                             <span className='flex items-center gap-2'>
                               {field.value}
@@ -251,16 +263,24 @@ export default function UserFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={InvestorStatus.PENDING}>
-                          <StatusBadge color='yellow' />
+                          <ColorBadge color='yellow' icon={<ClockIcon />}>
+                            Pendiente
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvestorStatus.VERIFIED}>
-                          <StatusBadge color='green' />
+                          <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                            Verificado
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvestorStatus.CORRECTION}>
-                          <StatusBadge color='red' />
+                          <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                            Corrección
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvestorStatus.DENIED}>
-                          <StatusBadge color='gray' />
+                          <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                            Denegado
+                          </ColorBadge>
                         </SelectItem>
                       </SelectContent>
                     </Select>
