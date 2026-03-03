@@ -1,4 +1,4 @@
-import StatusBadge from '@/components/status-badge'
+import ColorBadge from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -9,7 +9,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { InvoiceStatus } from '@/types/Invoice'
-import { BuildingIcon } from 'lucide-react'
+import { BuildingIcon, CheckCheckIcon, CircleAlertIcon, ClockIcon, OctagonXIcon } from 'lucide-react'
 import { Controller, type UseFormReturn } from 'react-hook-form'
 
 export default function InvoiceFilters (
@@ -189,13 +189,21 @@ export default function InvoiceFilters (
                       <SelectTrigger>
                         {field.value ? (
                           field.value === InvoiceStatus.PENDING ? (
-                            <StatusBadge color='yellow' />
+                            <ColorBadge color='yellow' icon={<ClockIcon />}>
+                              Pendiente
+                            </ColorBadge>
                           ) : field.value === InvoiceStatus.VERIFIED ? (
-                            <StatusBadge color='green' />
+                            <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                              Verificada
+                            </ColorBadge>
                           ) : field.value === InvoiceStatus.CORRECTION ? (
-                            <StatusBadge color='red' />
+                            <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                              Corrección
+                            </ColorBadge>
                           ) : field.value === InvoiceStatus.DENIED ? (
-                            <StatusBadge color='gray' />
+                            <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                              Denegada
+                            </ColorBadge>
                           ) : (
                             <span className='flex items-center gap-2'>
                               {field.value}
@@ -216,16 +224,24 @@ export default function InvoiceFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.PENDING}>
-                          <StatusBadge color='yellow' />
+                          <ColorBadge color='yellow' icon={<ClockIcon />}>
+                            Pendiente
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.VERIFIED}>
-                          <StatusBadge color='green' />
+                          <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                            Verificada
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.CORRECTION}>
-                          <StatusBadge color='red' />
+                          <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                            Corrección
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.DENIED}>
-                          <StatusBadge color='gray' />
+                          <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                            Denegada
+                          </ColorBadge>
                         </SelectItem>
                       </SelectContent>
                     </Select>

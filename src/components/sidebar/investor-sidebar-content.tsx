@@ -40,7 +40,60 @@ export function InvestorSidebarContent () {
     <SidebarGroup>
       <SidebarGroupContent>
         <SidebarGroupLabel>Inversión</SidebarGroupLabel>
+        <SidebarMenu>
+          <Collapsible className='group/collapsible'>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton>
+                  <Gavel /> Subastas
+                  <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub className={'m-0 pe-0'}>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuButton>
+                      Disponibles
+                    </SidebarMenuButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuButton>
+                      Pujadas
+                    </SidebarMenuButton>
+                  </SidebarMenuSubItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+          <Collapsible className='group/collapsible'>
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton>
 
+                  <FileText /> Facturas
+                  <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub className={'m-0 pe-0'}>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuButton>
+                      Disponibles
+                    </SidebarMenuButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuButton>
+                      Invertidas
+                    </SidebarMenuButton>
+                  </SidebarMenuSubItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+        </SidebarMenu>
+      </SidebarGroupContent>
+      <SidebarGroupContent>
+        <SidebarGroupLabel>Gestión</SidebarGroupLabel>
         <SidebarMenu>
           {
             (loggedInUser && (loggedInUser as Investor).investorType === InvestorType.COMPANY) && (

@@ -1,5 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
+import { FileIcon } from 'lucide-react'
 import { useState } from 'react'
 
 interface DataTableProps<TData, TValue> {
@@ -30,7 +31,12 @@ export function DataTable<TData, TValue> ({
     <div className='rounded-xl border shadow-sm'>
       <div className='w-full flex flex-col sm:flex-row md:items-center justify-between gap-2 p-6'>
         <div className='flex gap-2 items-center justify-between sm:justify-start md:justify-between w-full'>
-          <h3>Resultados de la búsqueda</h3>
+          <div className='flex items-center gap-2'>
+            <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+              <FileIcon className='w-6 h-6' />
+            </span>
+            <h3>Documentos relacionados</h3>
+          </div>
           <span className='text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-lg'>{totalItems} resultado{totalItems > 1 && 's'}</span>
         </div>
       </div>

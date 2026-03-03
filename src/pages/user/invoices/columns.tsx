@@ -1,10 +1,10 @@
-import StatusBadge from '@/components/status-badge'
+import ColorBadge from '@/components/status-badge'
 import useLocale from '@/hooks/use-locale'
 import { formatCurrency } from '@/lib/format-currency'
 import { formatDate } from '@/lib/format-date'
 import { InvoiceStatus, type Invoice } from '@/types/Invoice'
 import type { ColumnDef } from '@tanstack/react-table'
-import { ExternalLinkIcon } from 'lucide-react'
+import { CheckCheckIcon, CircleAlertIcon, ClockIcon, ExternalLinkIcon, OctagonXIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link } from 'react-router'
 
@@ -52,19 +52,27 @@ export function useInvoiceColumns (): ColumnDef<Invoice>[] {
         switch (status) {
           case InvoiceStatus.PENDING:
             return (
-              <StatusBadge color='yellow' />
+              <ColorBadge color='yellow' icon={<ClockIcon />}>
+                Pendiente
+              </ColorBadge>
             )
           case InvoiceStatus.VERIFIED:
             return (
-              <StatusBadge color='green' />
+              <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                Verificado
+              </ColorBadge>
             )
           case InvoiceStatus.CORRECTION:
             return (
-              <StatusBadge color='red' />
+              <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                Corrección
+              </ColorBadge>
             )
           case InvoiceStatus.DENIED:
             return (
-              <StatusBadge color='gray' />
+              <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                Denegado
+              </ColorBadge>
             )
           default:
             return status
