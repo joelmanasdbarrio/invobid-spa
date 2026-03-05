@@ -81,8 +81,9 @@ export const deleteInvestorById = async (investorId: string) => {
 
 // Lookup service
 
-export const countPendingInvestors = async () => {
-  return fetchApi(`${base_url}/investors/lookup/countPending`, {
+export const countInvestors = async (queryParams?: Record<string, string>) => {
+  const queryString = new URLSearchParams(queryParams).toString()
+  return fetchApi(`${base_url}/investors/lookup/count?${queryString}`, {
     method: 'GET'
   })
 }

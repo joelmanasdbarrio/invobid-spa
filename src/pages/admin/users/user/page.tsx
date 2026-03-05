@@ -45,6 +45,7 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import { z } from 'zod'
+import UserAuctions from './user-auctions/user-auctions'
 import UserDebtors from './user-debtors/user-debtors'
 import UserInvoices from './user-invoices/user-invoices'
 
@@ -514,6 +515,7 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
           <TabsTrigger value={DocumentType.IDENTIFICATION}>Documentos</TabsTrigger>
           <TabsTrigger value={DocumentType.MODELO_111}>Deudores</TabsTrigger>
           <TabsTrigger value={DocumentType.INVOICE}>Facturas</TabsTrigger>
+          <TabsTrigger value={'Auctions'}>Subastas</TabsTrigger>
         </TabsList>
         <TabsContent value={DocumentType.IDENTIFICATION}>
           <UserDocuments investorId={investorId} />
@@ -523,6 +525,9 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
         </TabsContent>
         <TabsContent value={DocumentType.INVOICE}>
           <UserInvoices investorId={investorId} />
+        </TabsContent>
+        <TabsContent value={'Auctions'}>
+          <UserAuctions investorId={investorId} />
         </TabsContent>
       </Tabs>
     </section>

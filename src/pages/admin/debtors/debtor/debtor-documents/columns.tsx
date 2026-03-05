@@ -1,3 +1,4 @@
+import ColorBadge from '@/components/color-badge'
 import { Button } from '@/components/ui/button.tsx'
 import useLocale from '@/hooks/use-locale'
 import { formatDateTime } from '@/lib/format-date'
@@ -35,9 +36,17 @@ export function useDocumentColumns (): ColumnDef<Document>[] {
       cell: ({row}) => {
         switch (row.original.type) {
           case DocumentType.MODELO_111:
-            return 'Modelo 111'
+            return (
+              <ColorBadge color='blue'>
+                Modelo 111
+              </ColorBadge>
+            )
           case DocumentType.MODELO_303:
-            return 'Modelo 303'
+            return (
+              <ColorBadge color='green'>
+                Modelo 303
+              </ColorBadge>
+            )
           default:
             return row.original.type
         }

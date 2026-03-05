@@ -11,8 +11,10 @@ import {
   SidebarMenuSubItem
 } from '@/components/ui/sidebar.tsx'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
-import { countCorrectionDebtors } from '@/services/debtor.api'
-import { countCorrectionInvoices } from '@/services/invoice.api'
+import { countDebtors } from '@/services/debtor.api'
+import { countInvoices } from '@/services/invoice.api'
+import { DebtorStatus } from '@/types/Debtor'
+import { InvoiceStatus } from '@/types/Invoice'
 import { InvestorType, type Investor } from '@/types/User'
 import { ChevronRight, ChevronRightIcon, FileText, Gavel, HandCoinsIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -24,14 +26,14 @@ export function InvestorSidebarContent () {
 
   const [correctionDebtorsCount, setCorrectionDebtorsCount] = useState(0)
   useEffect(() => {
-    countCorrectionDebtors({ investorId: loggedInUser?.id ?? '' }).then(res => {
+    countDebtors({ status: DebtorStatus.CORRECTION, investorId: loggedInUser?.id ?? '' }).then(res => {
       setCorrectionDebtorsCount(res.data)
     })
   }, [loggedInUser?.id])
 
   const [correctionInvoicesCount, setCorrectionInvoicesCount] = useState(0)
   useEffect(() => {
-    countCorrectionInvoices({ investorId: loggedInUser?.id ?? '' }).then(res => {
+    countInvoices({ status: InvoiceStatus.CORRECTION, investorId: loggedInUser?.id ?? '' }).then(res => {
       setCorrectionInvoicesCount(res.data)
     })
   }, [loggedInUser?.id])

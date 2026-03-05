@@ -1,4 +1,4 @@
-import ColorBadge from '@/components/status-badge'
+import ColorBadge from '@/components/color-badge'
 import { type Investor, InvestorStatus, InvestorType } from '@/types/User'
 import { type ColumnDef } from '@tanstack/react-table'
 import {

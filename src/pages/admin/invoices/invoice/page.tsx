@@ -339,7 +339,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                       <AccordionContent>
                         <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
                           <Field>
-                            <FieldLabel htmlFor='investorTaxId'>CIF/NIF del cedente:</FieldLabel>
+                            <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
                               <InputGroupInput id='investorTaxId' value={invoice?.sellerInvestor?.taxId} type='text' placeholder='12345678A' required disabled />
                               <InputGroupAddon>
@@ -364,7 +364,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                             </InputGroup>
                           </Field>
                           <Field>
-                            <FieldLabel htmlFor='investorCompanyName'>Razón social del cedente:</FieldLabel>
+                            <FieldLabel htmlFor='investorCompanyName'>Razón social:</FieldLabel>
                             <InputGroup>
                               <InputGroupInput id='investorCompanyName' value={invoice?.sellerInvestor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
                               <InputGroupAddon>
@@ -409,7 +409,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                       <AccordionContent>
                         <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
                           <Field>
-                            <FieldLabel htmlFor='debtorTaxId'>CIF/NIF del deudor:</FieldLabel>
+                            <FieldLabel htmlFor='debtorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
                               <InputGroupInput id='debtorTaxId' value={invoice?.debtor?.taxId} type='text' placeholder='12345678A' required disabled />
                               <InputGroupAddon>
@@ -434,7 +434,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                             </InputGroup>
                           </Field>
                           <Field>
-                            <FieldLabel htmlFor='debtorCompanyName'>Razón social del deudor:</FieldLabel>
+                            <FieldLabel htmlFor='debtorCompanyName'>Razón social:</FieldLabel>
                             <InputGroup>
                               <InputGroupInput id='debtorCompanyName' value={invoice?.debtor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
                               <InputGroupAddon>

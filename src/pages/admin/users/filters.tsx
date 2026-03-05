@@ -1,4 +1,4 @@
-import ColorBadge from '@/components/status-badge'
+import ColorBadge from '@/components/color-badge'
 import { Button } from '@/components/ui/button.tsx'
 import { Card, CardContent } from '@/components/ui/card.tsx'
 import { Checkbox } from '@/components/ui/checkbox.tsx'

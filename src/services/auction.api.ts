@@ -34,17 +34,26 @@ export const updateAuctionById = async (auctionId: string, body: FormData | stri
   const fetchOptions: RequestInit = {
     method: 'PATCH'
   }
+
   if (body instanceof FormData) {
     fetchOptions.body = body
   } else {
-    fetchOptions.body = JSON.stringify(body)
-    fetchOptions.headers = {
-      'Content-Type': 'application/json'
-    }
+    fetchOptions.body = body
+    fetchOptions.headers = { 'Content-Type': 'application/json' }
   }
+
   return fetchApi(`${base_url}/auctions/${auctionId}`, fetchOptions, {
     promise: 'Actualizando subasta...',
     resolve: 'Subasta actualizada con éxito',
     reject: 'Error al actualizar la subasta'
+  })
+}
+
+// Lookup service
+
+export const countAuctions = async (queryParams?: Record<string, string>) => {
+  const queryString = new URLSearchParams(queryParams).toString()
+  return fetchApi(`${base_url}/auctions/lookup/count?${queryString}`, {
+    method: 'GET'
   })
 }

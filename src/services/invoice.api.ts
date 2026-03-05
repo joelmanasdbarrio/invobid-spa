@@ -51,14 +51,9 @@ export const updateInvoiceById = async (invoiceId: string, body: FormData | stri
 
 // Lookup service
 
-export const countPendingInvoices = async () => {
-  return fetchApi(`${base_url}/invoices/lookup/countPending`, {
-    method: 'GET'
-  })
-}
-
-export const countCorrectionInvoices = async ({ investorId }: { investorId: string }) => {
-  return fetchApi(`${base_url}/invoices/lookup/countCorrection/${investorId}`, {
+export const countInvoices = async (queryParams?: Record<string, string>) => {
+  const queryString = new URLSearchParams(queryParams).toString()
+  return fetchApi(`${base_url}/invoices/lookup/count?${queryString}`, {
     method: 'GET'
   })
 }

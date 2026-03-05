@@ -10,9 +10,14 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem
 } from '@/components/ui/sidebar.tsx'
-import { countPendingDebtors } from '@/services/debtor.api'
-import { countPendingInvestors } from '@/services/investor.api.ts'
-import { countPendingInvoices } from '@/services/invoice.api'
+import { countAuctions } from '@/services/auction.api'
+import { countDebtors } from '@/services/debtor.api'
+import { countInvestors } from '@/services/investor.api.ts'
+import { countInvoices } from '@/services/invoice.api'
+import { AuctionStatus } from '@/types/Auction'
+import { DebtorStatus } from '@/types/Debtor'
+import { InvoiceStatus } from '@/types/Invoice'
+import { InvestorStatus } from '@/types/User'
 import { ChevronRightIcon, FileTextIcon, GavelIcon, HandCoinsIcon, UserIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
@@ -22,22 +27,29 @@ export function AdminSidebarContent () {
 
   const [pendingInvestorsCount, setPendingInvestorsCount] = useState(0)
   useEffect(() => {
-    countPendingInvestors().then(res => {
+    countInvestors({ status: InvestorStatus.PENDING }).then(res => {
       setPendingInvestorsCount(res.data)
     })
   }, [])
 
   const [pendingDebtorsCount, setPendingDebtorsCount] = useState(0)
   useEffect(() => {
-    countPendingDebtors().then(res => {
+    countDebtors({ status: DebtorStatus.PENDING }).then(res => {
       setPendingDebtorsCount(res.data)
     })
   }, [])
 
   const [pendingInvoicesCount, setPendingInvoicesCount] = useState(0)
   useEffect(() => {
-    countPendingInvoices().then(res => {
+    countInvoices({ status: InvoiceStatus.PENDING }).then(res => {
       setPendingInvoicesCount(res.data)
+    })
+  }, [])
+
+  const [pausedAuctionsCount, setPausedAuctionsCount] = useState(0)
+  useEffect(() => {
+    countAuctions({ status: AuctionStatus.PAUSED }).then(res => {
+      setPausedAuctionsCount(res.data)
     })
   }, [])
 
@@ -163,6 +175,9 @@ export function AdminSidebarContent () {
               <CollapsibleTrigger asChild className={'group/collapsible'}>
                 <SidebarMenuButton isActive={location.pathname.startsWith('/admin/auctions')}>
                   <GavelIcon /> Subastas
+                  {pausedAuctionsCount > 0 && (
+                    <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
+                  )}
                   <ChevronRightIcon className='ms-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
@@ -172,6 +187,18 @@ export function AdminSidebarContent () {
                     <Link to='/admin/auctions'>
                       <SidebarMenuButton>
                         Todas las subastas
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <Link to='/admin/auctions?status=paused'>
+                      <SidebarMenuButton>
+                        Subastas pausadas
+                        {pausedAuctionsCount > 0 && (
+                          <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
+                            {pausedAuctionsCount > 99 ? '+99' : pausedAuctionsCount}
+                          </Badge>
+                        )}
                       </SidebarMenuButton>
                     </Link>
                   </SidebarMenuSubItem>
