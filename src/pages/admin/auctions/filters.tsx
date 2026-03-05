@@ -1,4 +1,4 @@
-import StatusBadge from '@/components/status-badge'
+import ColorBadge from '@/components/color-badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -7,7 +7,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { AuctionStatus } from '@/types/Auction'
-import { BuildingIcon } from 'lucide-react'
+import { BuildingIcon, CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CirclePauseIcon, CircleSlashIcon, GavelIcon } from 'lucide-react'
 import { Controller, type UseFormReturn } from 'react-hook-form'
 
 export default function AuctionFilters (
@@ -113,25 +113,29 @@ export default function AuctionFilters (
                       <SelectTrigger>
                         {field.value ? (
                           field.value === AuctionStatus.DRAFT ? (
-                            <StatusBadge color='yellow'>
+                            <ColorBadge color='yellow' icon={<CircleDashedIcon />}>
                               Borrador
-                            </StatusBadge>
+                            </ColorBadge>
                           ) : field.value === AuctionStatus.PUBLISHED ? (
-                            <StatusBadge color='green'>
-                              Publicado
-                            </StatusBadge>
-                          ) : field.value === AuctionStatus.CANCELLED ? (
-                            <StatusBadge color='red'>
-                              Cancelado
-                            </StatusBadge>
+                            <ColorBadge color='green' icon={<CircleCheckIcon />}>
+                              Publicada
+                            </ColorBadge>
+                          ) : field.value === AuctionStatus.LIVE ? (
+                            <ColorBadge color='blue' icon={<CircleGaugeIcon/>}>
+                              En curso
+                            </ColorBadge>
                           ) : field.value === AuctionStatus.PAUSED ? (
-                            <StatusBadge color='blue'>
-                              Pausado
-                            </StatusBadge>
+                            <ColorBadge color='slate' icon={<CirclePauseIcon />}>
+                              Pausada
+                            </ColorBadge>
+                          ) : field.value === AuctionStatus.CANCELLED ? (
+                            <ColorBadge color='red' icon={<CircleSlashIcon />}>
+                              Cancelada
+                            </ColorBadge>
                           ) : field.value === AuctionStatus.FINISHED ? (
-                            <StatusBadge color='purple'>
-                              Finalizado
-                            </StatusBadge>
+                            <ColorBadge color='purple' icon={<GavelIcon />}>
+                              Finalizada
+                            </ColorBadge>
                           ) : (
                             <span className='flex items-center gap-2'>
                               {field.value}
@@ -152,29 +156,34 @@ export default function AuctionFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={AuctionStatus.DRAFT}>
-                          <StatusBadge color='yellow'>
+                          <ColorBadge color='yellow' icon={<CircleDashedIcon />}>
                             Borrador
-                          </StatusBadge>
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={AuctionStatus.PUBLISHED}>
-                          <StatusBadge color='green'>
-                            Publicado
-                          </StatusBadge>
+                          <ColorBadge color='green' icon={<CircleCheckIcon />}>
+                            Publicada
+                          </ColorBadge>
                         </SelectItem>
-                        <SelectItem value={AuctionStatus.CANCELLED}>
-                          <StatusBadge color='red'>
-                            Cancelado
-                          </StatusBadge>
+                        <SelectItem value={AuctionStatus.LIVE}>
+                          <ColorBadge className='w-min' color='blue' icon={<CircleGaugeIcon />}>
+                            En curso
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={AuctionStatus.PAUSED}>
-                          <StatusBadge color='blue'>
-                            Pausado
-                          </StatusBadge>
+                          <ColorBadge color='slate' icon={<CirclePauseIcon />}>
+                            Pausada
+                          </ColorBadge>
+                        </SelectItem>
+                        <SelectItem value={AuctionStatus.CANCELLED}>
+                          <ColorBadge color='red' icon={<CircleSlashIcon />}>
+                            Cancelada
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={AuctionStatus.FINISHED}>
-                          <StatusBadge color='purple'>
-                            Finalizado
-                          </StatusBadge>
+                          <ColorBadge color='purple' icon={<GavelIcon />}>
+                            Finalizada
+                          </ColorBadge>
                         </SelectItem>
                       </SelectContent>
                     </Select>

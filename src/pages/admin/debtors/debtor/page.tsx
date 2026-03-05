@@ -352,7 +352,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                       <AccordionContent>
                         <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
                           <Field>
-                            <FieldLabel htmlFor='investorTaxId'>CIF/NIF del inversor:</FieldLabel>
+                            <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
                               <InputGroupInput id='investorTaxId' value={debtor?.investor?.taxId} type='text' placeholder='12345678A' required disabled />
                               <InputGroupAddon>
@@ -377,7 +377,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                             </InputGroup>
                           </Field>
                           <Field>
-                            <FieldLabel htmlFor='investorCompanyName'>Razón social del inversor:</FieldLabel>
+                            <FieldLabel htmlFor='investorCompanyName'>Razón social:</FieldLabel>
                             <InputGroup>
                               <InputGroupInput id='investorCompanyName' value={debtor?.investor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
                               <InputGroupAddon>

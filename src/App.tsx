@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router'
 import { ThemeProvider } from './components/dark-mode/theme-provider'
 import { ProtectedRoute } from './components/protected-route'
 import MainLayout from './layouts/layout'
+import AdminAuctionPage from './pages/admin/auctions/aution/page'
 import AdminAuctionsPage from './pages/admin/auctions/page'
 import AdminDebtorPage from './pages/admin/debtors/debtor/page'
 import AdminDebtorsPage from './pages/admin/debtors/page'
@@ -56,6 +57,7 @@ function App () {
 
           <Route path='/admin/auctions'>
             <Route index element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de subastas', href: '/auctions' }]}><AdminAuctionsPage /></MainLayout></ProtectedRoute>} />
+            <Route path=':auctionId' element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de subastas', href: '/auctions' }, { label: lastBreadcrumb, href: '/admin/auctions/:auctionId' }]}><AdminAuctionPage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
           </Route>
 
           <Route path='/debtors'>

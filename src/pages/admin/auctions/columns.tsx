@@ -1,10 +1,10 @@
-import StatusBadge from '@/components/status-badge'
+import ColorBadge from '@/components/color-badge'
 import useLocale from '@/hooks/use-locale'
 import { formatCurrency } from '@/lib/format-currency'
 import { formatDateTime } from '@/lib/format-date'
 import { AuctionStatus, type Auction } from '@/types/Auction'
 import type { ColumnDef } from '@tanstack/react-table'
-import { ExternalLinkIcon } from 'lucide-react'
+import { CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CirclePauseIcon, CircleSlashIcon, ExternalLinkIcon, GavelIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link } from 'react-router'
 
@@ -40,50 +40,54 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
       cell: ({row}) => formatCurrency(row.original.startingPrice, locale, row.original.invoice.currency)
     },
     {
-      accessorKey: 'auctionDate.auctionDateStart',
       header: 'Fecha de inicio',
       cell: ({row}) => formatDateTime(row.original.auctionDate.auctionDateStart, locale)
     },
     {
-      accessorKey: 'auctionDate.auctionDateEnd',
       header: 'Fecha de finalización',
       cell: ({row}) => formatDateTime(row.original.auctionDate.auctionDateEnd, locale)
     },
     {
-      accessorKey: 'status',
       header: 'Estado',
       cell: ({row}) => {
         const status = row.original.status
+
         switch (status) {
           case AuctionStatus.DRAFT:
             return (
-              <StatusBadge color='yellow'>
+              <ColorBadge color='yellow' icon={<CircleDashedIcon />}>
                 Borrador
-              </StatusBadge>
+              </ColorBadge>
             )
           case AuctionStatus.PUBLISHED:
             return (
-              <StatusBadge color='green'>
+              <ColorBadge color='green' icon={<CircleCheckIcon />}>
                 Publicado
-              </StatusBadge>
+              </ColorBadge>
             )
-          case AuctionStatus.CANCELLED:
+          case AuctionStatus.LIVE:
             return (
-              <StatusBadge color='red'>
-                Cancelado
-              </StatusBadge>
+              <ColorBadge className='motion-safe:animate-pulse motion-safe:animation-duration-[2s]' color='blue' icon={<CircleGaugeIcon className='motion-safe:animate-spin motion-safe:animation-duration-[4s]' />}>
+                En curso
+              </ColorBadge>
             )
           case AuctionStatus.PAUSED:
             return (
-              <StatusBadge color='blue'>
+              <ColorBadge color='slate' icon={<CirclePauseIcon />}>
                 Pausado
-              </StatusBadge>
+              </ColorBadge>
+            )
+          case AuctionStatus.CANCELLED:
+            return (
+              <ColorBadge color='red' icon={<CircleSlashIcon />}>
+                Cancelado
+              </ColorBadge>
             )
           case AuctionStatus.FINISHED:
             return (
-              <StatusBadge color='purple'>
+              <ColorBadge color='purple' icon={<GavelIcon />}>
                 Finalizado
-              </StatusBadge>
+              </ColorBadge>
             )
           default:
             return status
