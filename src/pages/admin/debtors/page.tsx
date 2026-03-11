@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
 import { getDebtors } from '@/services/debtor.api'
 import { DebtorStatus } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ChevronLeftIcon, ChevronRightIcon, HandCoinsIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
@@ -31,7 +32,7 @@ export default function AdminDebtorsPage () {
     companyName: searchParams.get('companyName') || '',
     taxId: searchParams.get('taxId') || '',
     investorId: searchParams.get('investorId') || '',
-    status: searchParams.has('status') ? (searchParams.get('status') as DebtorStatus) : undefined,
+    status: searchParams.get('status') as DebtorStatus | undefined,
     includeDeleted: searchParams.get('includeDeleted') ? searchParams.get('includeDeleted') === 'true' : undefined
   }), [searchParams])
 
@@ -116,6 +117,12 @@ export default function AdminDebtorsPage () {
 
   return (
     <div className='flex flex-col gap-4'>
+      <div className='flex items-center gap-2'>
+        <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+          <HandCoinsIcon className='w-6 h-6' />
+        </span>
+        <h2>Consultar deudores</h2>
+      </div>
       <Dialog>
         <div className='hidden md:block'>
           <DebtorFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
@@ -128,38 +135,43 @@ export default function AdminDebtorsPage () {
           <DebtorFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
         </DialogContent>
 
-        <DataTable columns={debtorColumns} data={data} />
+        <DataTable columns={debtorColumns} data={data} totalItems={totalItems} />
       </Dialog>
 
-      <div className='flex items-center justify-center gap-2'>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          Anterior
-        </Button>
-        Página {currentPage} de {Math.ceil(totalItems / currentLimit)}
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage * currentLimit >= totalItems}
-        >
-          Siguiente
-        </Button>
-        <Select value={String(currentLimit)} onValueChange={value => handleLimitChange(Number(value))}>
-          <SelectTrigger className='py-0! h-8!'>
-            {currentLimit}
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='5'>5</SelectItem>
-            <SelectItem value='10'>10</SelectItem>
-            <SelectItem value='20'>20</SelectItem>
-            <SelectItem value='50'>50</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className='flex items-center justify-between gap-2 text-accent-foreground'>
+        <div className='flex items-center justify-center gap-2'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeftIcon />
+          </Button>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage * currentLimit >= totalItems}
+          >
+            <ChevronRightIcon />
+          </Button>
+          Página {currentPage} de {Math.ceil(totalItems / currentLimit)}
+        </div>
+        <div className='flex items-center gap-2'>
+          <Select value={String(currentLimit)} onValueChange={value => handleLimitChange(Number(value))}>
+            <span className='text-sm'>Filas por página</span>
+            <SelectTrigger>
+              {currentLimit}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='5'>5</SelectItem>
+              <SelectItem value='10'>10</SelectItem>
+              <SelectItem value='20'>20</SelectItem>
+              <SelectItem value='50'>50</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   )

@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/alert-dialog.tsx'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
@@ -46,7 +46,7 @@ const baseFormSchema = z.object({
   companyName: z.string()
     .min(1, 'La razón social es obligatoria'),
   email: z.email('Correo electrónico no válido'),
-  phoneNumber: z.string()
+  phoneNumber: z.number()
     .min(6, 'El número de teléfono es obligatorio')
 })
 
@@ -230,57 +230,77 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
           )}
         </form>
       </Form>
-      <FieldSeparator className='md:hidden col-span-full' />
       <Form {...baseForm}>
         <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='col-span-full flex flex-col gap-4'>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='name'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>{
-                    user?.type === UserType.INVESTOR && user.investorType === InvestorType.COMPANY
-                      ? 'Nombre de la empresa:'
-                      : 'Nombre completo:'}
-                  </FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder={'ACME'} required disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled} />
-                    <InputGroupAddon>{
-                      user?.type === UserType.INVESTOR && user.investorType === InvestorType.COMPANY
-                        ? <UsersIcon />
-                        : <UserIcon />}
-                    </InputGroupAddon>
-                    {user?.type === UserType.INVESTOR && user.investorType === InvestorType.INDIVIDUAL && (
-                      <InputGroupAddon align={'inline-end'}>
-                        <Tooltip>
-                          <TooltipTrigger className='leading-1'>
-                            <CircleQuestionMarkIcon className='w-4 h-4'/>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className='text-center'>Nombre y apellidos según <br /> documento de identificación</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </InputGroupAddon>
-                    )}
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            {user.investorType !== InvestorType.INDIVIDUAL && (
+          <FieldSet>
+            <FieldLegend>Información de contacto</FieldLegend>
+            <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
               <Controller
-                name='companyName'
+                name='name'
                 control={baseForm.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{
+                      user?.type === UserType.INVESTOR && user.investorType === InvestorType.COMPANY
+                        ? 'Nombre de la empresa:'
+                        : 'Nombre completo:'}
+                    </FieldLabel>
                     <InputGroup>
-                      <InputGroupInput {...field} id={field.name} type='text' disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled || user.investorType === InvestorType.INDIVIDUAL} />
+                      <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder={'ACME'} required disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled} />
+                      <InputGroupAddon>{
+                        user?.type === UserType.INVESTOR && user.investorType === InvestorType.COMPANY
+                          ? <UsersIcon />
+                          : <UserIcon />}
+                      </InputGroupAddon>
+                      {user?.type === UserType.INVESTOR && user.investorType === InvestorType.INDIVIDUAL && (
+                        <InputGroupAddon align={'inline-end'}>
+                          <Tooltip>
+                            <TooltipTrigger className='leading-1'>
+                              <CircleQuestionMarkIcon className='w-4 h-4'/>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className='text-center'>Nombre y apellidos según <br /> documento de identificación</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </InputGroupAddon>
+                      )}
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              {user.investorType !== InvestorType.INDIVIDUAL && (
+                <Controller
+                  name='companyName'
+                  control={baseForm.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
+                      <InputGroup>
+                        <InputGroupInput {...field} id={field.name} type='text' disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled || user.investorType === InvestorType.INDIVIDUAL} />
+                        <InputGroupAddon>
+                          <UsersIcon />
+                        </InputGroupAddon>
+                      </InputGroup>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              )}
+              <Controller
+                name='email'
+                control={baseForm.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className='col-start-1'>
+                    <FieldLabel htmlFor={field.name}>Correo electrónico:</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput {...field} id={field.name} type='email' disabled={isFormDisabled} />
                       <InputGroupAddon>
-                        <UsersIcon />
+                        <MailIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
@@ -289,170 +309,154 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                   </Field>
                 )}
               />
-            )}
-            <Controller
-              name='email'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className='col-start-1'>
-                  <FieldLabel htmlFor={field.name}>Correo electrónico:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='email' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <MailIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='phoneNumber'
-              control={baseForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='tel' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <PhoneIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Button
-              className='w-min self-end justify-self-end'
-              disabled={
-                (
-                  name === user.name &&
+              <Controller
+                name='phoneNumber'
+                control={baseForm.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput {...field} id={field.name} type='tel' disabled={isFormDisabled} />
+                      <InputGroupAddon>
+                        <PhoneIcon />
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Button
+                className='w-min self-end justify-self-end'
+                disabled={
+                  (
+                    name === user.name &&
                   companyName === user.companyName &&
                   email === user.email &&
                   phoneNumber === user.phoneNumber
-                ) ||
+                  ) ||
                 isFormDisabled
-              }
-              title='Guardar cambios'
-            >
-              <SaveIcon />
-              <span className='lg:hidden'>
-                Guardar cambios
-              </span>
-            </Button>
-          </FieldGroup>
+                }
+                title='Guardar cambios'
+              >
+                <SaveIcon />
+                <span className='lg:hidden'>
+                  Guardar cambios
+                </span>
+              </Button>
+            </FieldGroup>
+          </FieldSet>
         </form>
       </Form>
-      <FieldSeparator className='col-span-full' />
       <Form {...passwordForm}>
         <form onSubmit={passwordForm.handleSubmit(onSubmitPassword)} className='col-span-full flex flex-col gap-4'>
-          <h4 className='text-md col-span-full font-bold'>Cambiar contraseña</h4>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='password'
-              control={passwordForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Nueva contraseña:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='password' autoComplete='off' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <EllipsisIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name='passwordRepeat'
-              control={passwordForm.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Repetir nueva contraseña:</FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput {...field} id={field.name} type='password' disabled={isFormDisabled} />
-                    <InputGroupAddon>
-                      <EllipsisIcon />
-                    </InputGroupAddon>
-                  </InputGroup>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Button
-              className='w-min self-end justify-self-end'
-              disabled={!(passwordForm.getValues('password')) || !(passwordForm.getValues('passwordRepeat')) || isFormDisabled}
-              title='Actualizar contraseña'
-            >
-              <SaveIcon />
-              <span className='lg:hidden'>
-                Actualizar contraseña
-              </span>
-            </Button>
-          </FieldGroup>
+          <FieldSet>
+            <FieldLegend>Cambiar contraseña</FieldLegend>
+            <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+              <Controller
+                name='password'
+                control={passwordForm.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Nueva contraseña:</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput {...field} id={field.name} type='password' autoComplete='off' disabled={isFormDisabled} />
+                      <InputGroupAddon>
+                        <EllipsisIcon />
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name='passwordRepeat'
+                control={passwordForm.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Repetir nueva contraseña:</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput {...field} id={field.name} type='password' disabled={isFormDisabled} />
+                      <InputGroupAddon>
+                        <EllipsisIcon />
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Button
+                className='w-min self-end justify-self-end'
+                disabled={!(passwordForm.getValues('password')) || !(passwordForm.getValues('passwordRepeat')) || isFormDisabled}
+                title='Actualizar contraseña'
+              >
+                <SaveIcon />
+                <span className='lg:hidden'>
+                  Actualizar contraseña
+                </span>
+              </Button>
+            </FieldGroup>
+          </FieldSet>
         </form>
       </Form>
-      <FieldSeparator className='col-span-full' />
       <Form {...notificationForm}>
         <form onSubmit={notificationForm.handleSubmit(onSubmitNotification)} className='col-span-full flex flex-col gap-4'>
-          <h4 className='text-md col-span-full font-bold'>Notificaciones</h4>
-          <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
-            <Controller
-              name='isOptedInNotificationsEmail'
-              control={notificationForm.control}
-              render={({field}) => (
-                <Label className='hover:bg-accent/50 flex items-start gap-3 border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
-                  <Checkbox
-                    id='toggle-email-notifications'
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className='data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700'
-                    disabled={isFormDisabled}
-                  />
-                  <div className='grid gap-1.5 font-normal'>
-                    <p className='text-sm leading-none font-medium'>
-                      Recibir notificaciones por correo electrónico
-                    </p>
-                    <p className='text-muted-foreground text-sm'>
-                      Notificaciones...
-                    </p>
-                  </div>
-                </Label>
-              )}
-            />
-            <Controller
-              name='isOptedInNotificationsSMS'
-              control={notificationForm.control}
-              render={({field}) => (
-                <Label className='hover:bg-accent/50 flex items-start gap-3 border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
-                  <Checkbox
-                    id='toggle-sms-notifications'
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className='data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700'
-                    disabled={isFormDisabled}
-                  />
-                  <div className='grid gap-1.5 font-normal'>
-                    <p className='text-sm leading-none font-medium'>
-                      Recibir notificaciones por SMS
-                    </p>
-                    <p className='text-muted-foreground text-sm'>
-                      Notificaciones...
-                    </p>
-                  </div>
-                </Label>
-              )}
-            />
-          </FieldGroup>
+          <FieldSet>
+            <FieldLegend>Notificaciones</FieldLegend>
+            <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+              <Controller
+                name='isOptedInNotificationsEmail'
+                control={notificationForm.control}
+                render={({field}) => (
+                  <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                    <Checkbox
+                      id='toggle-email-notifications'
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className='data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700'
+                      disabled={isFormDisabled}
+                    />
+                    <div className='grid gap-1.5 font-normal'>
+                      <p className='text-sm leading-none font-medium'>
+                        Recibir notificaciones por correo electrónico
+                      </p>
+                      <p className='text-muted-foreground text-sm'>
+                        Notificaciones...
+                      </p>
+                    </div>
+                  </Label>
+                )}
+              />
+              <Controller
+                name='isOptedInNotificationsSMS'
+                control={notificationForm.control}
+                render={({field}) => (
+                  <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                    <Checkbox
+                      id='toggle-sms-notifications'
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className='data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700'
+                      disabled={isFormDisabled}
+                    />
+                    <div className='grid gap-1.5 font-normal'>
+                      <p className='text-sm leading-none font-medium'>
+                        Recibir notificaciones por SMS
+                      </p>
+                      <p className='text-muted-foreground text-sm'>
+                        Notificaciones...
+                      </p>
+                    </div>
+                  </Label>
+                )}
+              />
+            </FieldGroup>
+          </FieldSet>
         </form>
       </Form>
       {(user.status !== InvestorStatus.VERIFIED && user.status !== InvestorStatus.DENIED) && (
@@ -460,7 +464,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
           <FieldSeparator className='col-span-full' />
           <Form {...documentForm}>
             <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='col-span-full flex flex-col gap-4'>
-              <h4 className='text-md col-span-full font-bold'>Documento de identidad</h4>
+              <h4 className='col-span-full'>Documento de identidad</h4>
               <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
                 <Controller
                   name='taxId'

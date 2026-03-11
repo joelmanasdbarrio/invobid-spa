@@ -7,20 +7,20 @@ import {
   AlertDialogFooter,
   AlertDialogHeader
 } from '@/components/ui/alert-dialog'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { type Investor, InvestorStatus, UserType } from '@/types/User'
 import { AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import { CircleAlertIcon, ClockIcon, OctagonXIcon } from 'lucide-react'
+import { Link } from 'react-router'
 
 export default function MainLayout ({
-  header,
   breadcrumbs,
   children
 }: Readonly<{
-  header?: string;
-  breadcrumbs?: [{ label: string; href: string }],
+  breadcrumbs?: { label: string; href: string }[],
   children: React.ReactNode;
 }>) {
   const loggedInUser = useLoggedInUser()
@@ -45,15 +45,33 @@ export default function MainLayout ({
   }
 
   return (
-    <SidebarProvider className='w-dvw! h-dvh!'>
+    <SidebarProvider className='w-dvw h-dvh'>
       <AppSidebar />
-      <div className='grow flex flex-col bg-background text-foreground md:m-2 md:shadow-md'>
+      <div className='grow flex flex-col bg-background text-foreground md:m-2 md:rounded-lg md:shadow-md'>
         <div className='flex items-center gap-2 border-b p-2'>
           <SidebarTrigger className='p-2' />
           <span className='h-8 border-s'/>
-          {header && <h1 className='text-2xl font-bold'>{header}</h1>}
+          {breadcrumbs && (
+            <Breadcrumb>
+              <BreadcrumbList>
+                {breadcrumbs.slice(0, -1).map((breadcrumb, index) => (
+                  <>
+                    <BreadcrumbItem key={index}>
+                      <BreadcrumbLink asChild>
+                        <Link to={breadcrumb.href}>{breadcrumb.label}</Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                  </>
+                ))}
+                <BreadcrumbItem className='text-foreground'>
+                  {breadcrumbs[breadcrumbs.length - 1].label}
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          )}
         </div>
-        <section className='grow p-4 overflow-scroll'>
+        <section className='grow p-4 overflow-scroll max-w-dvw'>
           {children}
         </section>
       </div>
@@ -65,7 +83,7 @@ export default function MainLayout ({
             <AlertDialogHeader>
               <AlertDialogTitle>Actualización de la cuenta</AlertDialogTitle>
               <AlertDialogDescription>
-                Comprueba el estado de tu cuenta y ejecuta las acciones necesarias:
+                Compruebe el estado de su cuenta y ejecute las acciones necesarias. Una vez corregida la incidencia, solicite nuevamente la verificación.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Item variant='muted' className='gap-2'>

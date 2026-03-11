@@ -7,7 +7,7 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog.tsx'
 import { Button } from '@/components/ui/button'
-import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -81,102 +81,106 @@ export default function AdminProfileForm ({ user }: { user: Admin }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='col-span-full flex flex-col gap-4'>
-        <FieldGroup className='grid grid-cols-1 xl:grid-cols-2'>
-          <Controller
-            name='email'
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Correo electrónico:</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput {...field} id={field.name} type='email' />
-                  <InputGroupAddon>
-                    <MailIcon />
-                  </InputGroupAddon>
-                </InputGroup>
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            name='name'
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>{
-                  user?.type === UserType.INVESTOR && (user as Investor)?.investorType === InvestorType.COMPANY
-                    ? 'Nombre de la empresa:'
-                    : 'Nombre completo:'}
-                </FieldLabel>
-                <InputGroup>
-                  <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder={'ACME'} required />
-                  <InputGroupAddon>{
-                    user?.type === UserType.INVESTOR && (user as Investor)?.investorType === InvestorType.COMPANY
-                      ? <UsersIcon />
-                      : <UserIcon />}
-                  </InputGroupAddon>
-                  {user?.type === UserType.INVESTOR && (user as Investor)?.investorType === InvestorType.INDIVIDUAL && (
-                    <InputGroupAddon align={'inline-end'}>
-                      <Tooltip>
-                        <TooltipTrigger className='leading-1'>
-                          <CircleQuestionMarkIcon className='w-4 h-4'/>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className='text-center'>Nombre y apellidos según <br /> documento de identificación</p>
-                        </TooltipContent>
-                      </Tooltip>
+        <FieldSet>
+          <FieldLegend>Información de contacto</FieldLegend>
+          <FieldGroup className='grid grid-cols-1 xl:grid-cols-2'>
+            <Controller
+              name='email'
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Correo electrónico:</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput {...field} id={field.name} type='email' />
+                    <InputGroupAddon>
+                      <MailIcon />
                     </InputGroupAddon>
+                  </InputGroup>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
                   )}
-                </InputGroup>
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-        </FieldGroup>
-        <FieldSeparator className='col-span-full' />
-        <h4 className='text-md col-span-full font-bold'>Cambiar contraseña</h4>
-        <FieldGroup className='grid grid-cols-1 xl:grid-cols-2'>
-          <Controller
-            name='password'
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Nueva contraseña:</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput {...field} id={field.name} type='password' autoComplete='off' />
-                  <InputGroupAddon>
-                    <EllipsisIcon />
-                  </InputGroupAddon>
-                </InputGroup>
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            name='passwordRepeat'
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Repetir nueva contraseña:</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput {...field} id={field.name} type='password' />
-                  <InputGroupAddon>
-                    <EllipsisIcon />
-                  </InputGroupAddon>
-                </InputGroup>
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-        </FieldGroup>
+                </Field>
+              )}
+            />
+            <Controller
+              name='name'
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>{
+                    user?.type === UserType.INVESTOR && (user as Investor)?.investorType === InvestorType.COMPANY
+                      ? 'Nombre de la empresa:'
+                      : 'Nombre completo:'}
+                  </FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder={'ACME'} required />
+                    <InputGroupAddon>{
+                      user?.type === UserType.INVESTOR && (user as Investor)?.investorType === InvestorType.COMPANY
+                        ? <UsersIcon />
+                        : <UserIcon />}
+                    </InputGroupAddon>
+                    {user?.type === UserType.INVESTOR && (user as Investor)?.investorType === InvestorType.INDIVIDUAL && (
+                      <InputGroupAddon align={'inline-end'}>
+                        <Tooltip>
+                          <TooltipTrigger className='leading-1'>
+                            <CircleQuestionMarkIcon className='w-4 h-4'/>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className='text-center'>Nombre y apellidos según <br /> documento de identificación</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </InputGroupAddon>
+                    )}
+                  </InputGroup>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </FieldGroup>
+        </FieldSet>
+        <FieldSet>
+          <FieldLegend>Cambiar contraseña</FieldLegend>
+          <FieldGroup className='grid grid-cols-1 xl:grid-cols-2'>
+            <Controller
+              name='password'
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Nueva contraseña:</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput {...field} id={field.name} type='password' autoComplete='off' />
+                    <InputGroupAddon>
+                      <EllipsisIcon />
+                    </InputGroupAddon>
+                  </InputGroup>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              name='passwordRepeat'
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Repetir nueva contraseña:</FieldLabel>
+                  <InputGroup>
+                    <InputGroupInput {...field} id={field.name} type='password' />
+                    <InputGroupAddon>
+                      <EllipsisIcon />
+                    </InputGroupAddon>
+                  </InputGroup>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </FieldGroup>
+        </FieldSet>
         <FieldGroup className='flex flex-row gap-2 justify-end items-end'>
           <AlertDialog>
             <AlertDialogTrigger asChild>

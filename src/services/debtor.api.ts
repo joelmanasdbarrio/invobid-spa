@@ -51,14 +51,9 @@ export const updateDebtorById = async (debtorId: string, body: FormData | string
 
 // Lookup service
 
-export const countPendingDebtors = async () => {
-  return fetchApi(`${base_url}/debtors/lookup/countPending`, {
-    method: 'GET'
-  })
-}
-
-export const countCorrectionDebtors = async ({ investorId }: { investorId: string }) => {
-  return fetchApi(`${base_url}/debtors/lookup/countCorrection/${investorId}`, {
+export const countDebtors = async (queryParams?: Record<string, string>) => {
+  const queryString = new URLSearchParams(queryParams).toString()
+  return fetchApi(`${base_url}/debtors/lookup/count?${queryString}`, {
     method: 'GET'
   })
 }

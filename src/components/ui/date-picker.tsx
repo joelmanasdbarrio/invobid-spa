@@ -1,11 +1,13 @@
+import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover'
+import useLocale from '@/hooks/use-locale'
+import { formatDate, parseLocalDate, toDateOnlyString } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import * as React from 'react'
 
@@ -15,6 +17,8 @@ interface DatePickerProps {
   onChange?: (dateStr: string | undefined) => void
   disabled?: boolean
   placeholder?: string
+  minDate?: string
+  maxDate?: string
 }
 
 export function DatePicker ({
@@ -22,27 +26,31 @@ export function DatePicker ({
   value,
   onChange,
   disabled = false,
-  placeholder = 'Selecciona una fecha'
+  placeholder = 'Selecciona una fecha',
+  minDate,
+  maxDate
 }: DatePickerProps) {
+  const { locale } = useLocale()
+
   const [date, setDate] = React.useState<Date | undefined>(
-    value ? new Date(value) : undefined
+    value ? parseLocalDate(value) : undefined
   )
 
   React.useEffect(() => {
-    setDate(value ? new Date(value) : undefined)
+    setDate(value ? parseLocalDate(value) : undefined)
   }, [value])
 
   const handleSelect = (day: Date | undefined) => {
     setDate(day)
-    onChange?.(day ? format(day, 'yyyy-MM-dd') : undefined)
+    onChange?.(day ? toDateOnlyString(day) : undefined)
   }
 
   const displayText = React.useMemo(() => {
     if (!date) {
       return placeholder
     }
-    return format(date, 'dd/MM/yyyy')
-  }, [date, placeholder])
+    return formatDate(toDateOnlyString(date), locale)
+  }, [date, placeholder, locale])
 
   return (
     <div>
@@ -57,7 +65,7 @@ export function DatePicker ({
               'disabled:pointer-events-none disabled:cursor-not-allowed',
               'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
               'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
-              'flex items-center',
+              'flex items-center rounded-lg',
               !date && 'text-muted-foreground'
             )}
           >
@@ -85,7 +93,20 @@ export function DatePicker ({
             defaultMonth={date}
             selected={date}
             onSelect={handleSelect}
+            disabled={[
+              ...(minDate ? [{ before: new Date(minDate) }] : []),
+              ...(maxDate ? [{ after: new Date(maxDate) }] : [])
+            ]}
           />
+          <Button
+            variant='outline'
+            className='w-full rounded-none'
+            onClick={() => {
+              onChange?.(undefined)
+            }}
+          >
+            Limpiar
+          </Button>
         </PopoverContent>
       </Popover>
     </div>

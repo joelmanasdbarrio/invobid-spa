@@ -1,3 +1,4 @@
+import ColorBadge from '@/components/color-badge'
 import { type Debtor, DebtorStatus } from '@/types/Debtor'
 import type { ColumnDef } from '@tanstack/react-table'
 import { CheckCheckIcon, CircleAlertIcon, ClockIcon, ExternalLinkIcon, OctagonXIcon } from 'lucide-react'
@@ -38,31 +39,27 @@ export const debtorColumns: ColumnDef<Debtor>[] = [
       switch (status) {
         case DebtorStatus.PENDING:
           return (
-            <span className='flex items-center gap-2'>
-              <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
-              Por verificar
-            </span>
+            <ColorBadge color='yellow' icon={<ClockIcon />}>
+              Pendiente
+            </ColorBadge>
           )
         case DebtorStatus.VERIFIED:
           return (
-            <span className='flex items-center gap-2'>
-              <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
+            <ColorBadge color='green' icon={<CheckCheckIcon />}>
               Verificado
-            </span>
+            </ColorBadge>
           )
         case DebtorStatus.CORRECTION:
           return (
-            <span className='flex items-center gap-2'>
-              <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
-              Corrección requerida
-            </span>
+            <ColorBadge color='red' icon={<CircleAlertIcon />}>
+              Corrección
+            </ColorBadge>
           )
         case DebtorStatus.DENIED:
           return (
-            <span className='flex items-center gap-2'>
-              <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
+            <ColorBadge color='gray' icon={<OctagonXIcon />}>
               Denegado
-            </span>
+            </ColorBadge>
           )
         default:
           return status

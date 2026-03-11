@@ -1,3 +1,4 @@
+import ColorBadge from '@/components/color-badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -82,7 +83,7 @@ export default function InvoiceFilters (
                 )}
               />
               <Controller
-                name='dueDate'
+                name='dueDateFrom'
                 control={form.control}
                 render={() => (
                   <Field>
@@ -160,29 +161,29 @@ export default function InvoiceFilters (
                 render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
-                    <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''} >
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => field.onChange(value === '__NONE__' ? '' : value)}
+                      defaultValue={field.value || '__NONE__'}
+                    >
                       <SelectTrigger>
                         {field.value ? (
                           field.value === InvoiceStatus.PENDING ? (
-                            <span className='flex items-center gap-1'>
-                              <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
-                              Por verificar
-                            </span>
+                            <ColorBadge color='yellow' icon={<ClockIcon />}>
+                              Pendiente
+                            </ColorBadge>
                           ) : field.value === InvoiceStatus.VERIFIED ? (
-                            <span className='flex items-center gap-2'>
-                              <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
-                              Verificado
-                            </span>
+                            <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                              Verificada
+                            </ColorBadge>
                           ) : field.value === InvoiceStatus.CORRECTION ? (
-                            <span className='flex items-center gap-2'>
-                              <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
-                              Corrección requerida
-                            </span>
+                            <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                              Corrección
+                            </ColorBadge>
                           ) : field.value === InvoiceStatus.DENIED ? (
-                            <span className='flex items-center gap-2'>
-                              <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
-                              Denegado
-                            </span>
+                            <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                              Denegada
+                            </ColorBadge>
                           ) : (
                             <span className='flex items-center gap-2'>
                               {field.value}
@@ -193,7 +194,7 @@ export default function InvoiceFilters (
                         )}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem>
+                        <SelectItem value='__NONE__'>
                           <button
                             type='button'
                             onClick={() => field.onChange(undefined)}
@@ -203,28 +204,24 @@ export default function InvoiceFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.PENDING}>
-                          <span className='flex items-center gap-1'>
-                            <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
-                            Por verificar
-                          </span>
+                          <ColorBadge color='yellow' icon={<ClockIcon />}>
+                            Pendiente
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.VERIFIED}>
-                          <span className='flex items-center gap-2'>
-                            <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
-                            Verificado
-                          </span>
+                          <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                            Verificada
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.CORRECTION}>
-                          <span className='flex items-center gap-2'>
-                            <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
-                            Corrección requerida
-                          </span>
+                          <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                            Corrección
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvoiceStatus.DENIED}>
-                          <span className='flex items-center gap-2'>
-                            <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
-                            Denegado
-                          </span>
+                          <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                            Denegada
+                          </ColorBadge>
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -239,7 +236,7 @@ export default function InvoiceFilters (
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field className='self-end'>
-                    <Label className='h-min hover:bg-accent/50 flex items-start gap-3 border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                    <Label className='h-min rounded-lg hover:bg-accent/50 flex items-start gap-3 border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                       <Checkbox
                         id='toggle-include-deleted'
                         checked={field.value ?? false}

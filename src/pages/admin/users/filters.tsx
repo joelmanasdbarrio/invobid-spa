@@ -1,3 +1,4 @@
+import ColorBadge from '@/components/color-badge'
 import { Button } from '@/components/ui/button.tsx'
 import { Card, CardContent } from '@/components/ui/card.tsx'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
@@ -155,7 +156,11 @@ export default function UserFilters (
                 render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Tipo de inversor</FieldLabel>
-                    <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''}>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => field.onChange(value === '__NONE__' ? '' : value)}
+                      defaultValue={field.value || '__NONE__'}
+                    >
                       <SelectTrigger className='grow'>
                         {field.value ?
                           (
@@ -180,7 +185,7 @@ export default function UserFilters (
                           )}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem>
+                        <SelectItem value='__NONE__'>
                           <button
                             type='button'
                             onClick={() => field.onChange(undefined)}
@@ -215,29 +220,29 @@ export default function UserFilters (
                 render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
-                    <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''} >
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => field.onChange(value === '__NONE__' ? '' : value)}
+                      defaultValue={field.value || '__NONE__'}
+                    >
                       <SelectTrigger className='grow'>
                         {field.value ? (
                           field.value === InvestorStatus.PENDING ? (
-                            <span className='flex items-center gap-1'>
-                              <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
-                              Por verificar
-                            </span>
+                            <ColorBadge color='yellow' icon={<ClockIcon />}>
+                              Pendiente
+                            </ColorBadge>
                           ) : field.value === InvestorStatus.VERIFIED ? (
-                            <span className='flex items-center gap-2'>
-                              <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
+                            <ColorBadge color='green' icon={<CheckCheckIcon />}>
                               Verificado
-                            </span>
+                            </ColorBadge>
                           ) : field.value === InvestorStatus.CORRECTION ? (
-                            <span className='flex items-center gap-2'>
-                              <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
-                              Corrección requerida
-                            </span>
+                            <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                              Corrección
+                            </ColorBadge>
                           ) : field.value === InvestorStatus.DENIED ? (
-                            <span className='flex items-center gap-2'>
-                              <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
+                            <ColorBadge color='gray' icon={<OctagonXIcon />}>
                               Denegado
-                            </span>
+                            </ColorBadge>
                           ) : (
                             <span className='flex items-center gap-2'>
                               {field.value}
@@ -248,7 +253,7 @@ export default function UserFilters (
                         )}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem>
+                        <SelectItem value='__NONE__'>
                           <button
                             type='button'
                             onClick={() => field.onChange(undefined)}
@@ -258,28 +263,24 @@ export default function UserFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={InvestorStatus.PENDING}>
-                          <span className='flex items-center gap-1'>
-                            <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
-                            Por verificar
-                          </span>
+                          <ColorBadge color='yellow' icon={<ClockIcon />}>
+                            Pendiente
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvestorStatus.VERIFIED}>
-                          <span className='flex items-center gap-2'>
-                            <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
+                          <ColorBadge color='green' icon={<CheckCheckIcon />}>
                             Verificado
-                          </span>
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvestorStatus.CORRECTION}>
-                          <span className='flex items-center gap-2'>
-                            <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
-                            Corrección requerida
-                          </span>
+                          <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                            Corrección
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={InvestorStatus.DENIED}>
-                          <span className='flex items-center gap-2'>
-                            <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
+                          <ColorBadge color='gray' icon={<OctagonXIcon />}>
                             Denegado
-                          </span>
+                          </ColorBadge>
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -293,7 +294,7 @@ export default function UserFilters (
                 name='includeDeleted'
                 control={form.control}
                 render={({ field }) => (
-                  <Label className='h-min self-end hover:bg-accent/50 flex items-start gap-3 border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                  <Label className='h-min self-end hover:bg-accent/50 flex items-start gap-3 rounded-md border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                     <Checkbox
                       id='toggle-include-deleted'
                       checked={field.value ?? false}

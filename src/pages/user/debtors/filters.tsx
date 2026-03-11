@@ -1,3 +1,4 @@
+import ColorBadge from '@/components/color-badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -36,6 +37,7 @@ export default function DebtorFilters (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
             <FieldGroup className='grid md:grid-cols-2 xl:grid-cols-4 gap-4'>
+              {/* Form fields go here */}
               <Controller
                 name='companyName'
                 control={form.control}
@@ -122,36 +124,36 @@ export default function DebtorFilters (
                 render={({ field, fieldState }) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
-                    <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''} >
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => field.onChange(value === '__NONE__' ? '' : value)}
+                      defaultValue={field.value || '__NONE__'}
+                    >
                       <SelectTrigger>
                         {field.value ? (
                           field.value === DebtorStatus.PENDING ? (
-                            <span className='flex items-center gap-1'>
-                              <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
-                              Por verificar
-                            </span>
+                            <ColorBadge color='yellow' icon={<ClockIcon />}>
+                              Pendiente
+                            </ColorBadge>
                           ) : field.value === DebtorStatus.VERIFIED ? (
-                            <span className='flex items-center gap-2'>
-                              <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
+                            <ColorBadge color='green' icon={<CheckCheckIcon />}>
                               Verificado
-                            </span>
+                            </ColorBadge>
                           ) : field.value === DebtorStatus.CORRECTION ? (
-                            <span className='flex items-center gap-2'>
-                              <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
-                              Corrección requerida
-                            </span>
+                            <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                              Corrección
+                            </ColorBadge>
                           ) : (
-                            <span className='flex items-center gap-2'>
-                              <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
+                            <ColorBadge color='gray' icon={<OctagonXIcon />}>
                               Denegado
-                            </span>
+                            </ColorBadge>
                           )
                         ) : (
                           'Selecciona un estado'
                         )}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem>
+                        <SelectItem value='__NONE__'>
                           <button
                             type='button'
                             onClick={() => field.onChange(undefined)}
@@ -161,28 +163,24 @@ export default function DebtorFilters (
                           </button>
                         </SelectItem>
                         <SelectItem value={DebtorStatus.PENDING}>
-                          <span className='flex items-center gap-1'>
-                            <ClockIcon className='w-5 h-5 rounded-full text-yellow-600 bg-yellow-300/25 p-0.5'/>
-                            Por verificar
-                          </span>
+                          <ColorBadge color='yellow' icon={<ClockIcon />}>
+                            Pendiente
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={DebtorStatus.VERIFIED}>
-                          <span className='flex items-center gap-2'>
-                            <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600 bg-green-300/25 p-0.5'/>
+                          <ColorBadge color='green' icon={<CheckCheckIcon />}>
                             Verificado
-                          </span>
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={DebtorStatus.CORRECTION}>
-                          <span className='flex items-center gap-2'>
-                            <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600 bg-red-300/25 p-0.5'/>
-                            Corrección requerida
-                          </span>
+                          <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                            Corrección
+                          </ColorBadge>
                         </SelectItem>
                         <SelectItem value={DebtorStatus.DENIED}>
-                          <span className='flex items-center gap-2'>
-                            <OctagonXIcon className='w-5 h-5 rounded-full text-zinc-600 bg-zinc-300/25 p-0.5'/>
+                          <ColorBadge color='gray' icon={<OctagonXIcon />}>
                             Denegado
-                          </span>
+                          </ColorBadge>
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -196,7 +194,7 @@ export default function DebtorFilters (
                 name='includeDeleted'
                 control={form.control}
                 render={({ field }) => (
-                  <Label className='h-min self-end hover:bg-accent/50 flex items-start gap-3 border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                  <Label className='h-min self-end hover:bg-accent/50 flex items-start gap-3 rounded-md border p-2.5 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                     <Checkbox
                       id='toggle-include-deleted'
                       checked={field.value ?? false}
