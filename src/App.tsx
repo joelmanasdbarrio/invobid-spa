@@ -16,6 +16,9 @@ import Login from './pages/login/page'
 import NotFoundPage from './pages/not-found'
 import ProfilePage from './pages/profile/page'
 import Register from './pages/register/page'
+import AuctionPage from './pages/user/auctions/auction/page'
+import CreateAuctionPage from './pages/user/auctions/create-auction/page'
+import AuctionsPage from './pages/user/auctions/page'
 import CreateDebtorPage from './pages/user/debtors/create-debtor/page'
 import DebtorPage from './pages/user/debtors/debtor/page'
 import DebtorsPage from './pages/user/debtors/page'
@@ -70,6 +73,12 @@ function App () {
             <Route index element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis facturas', href: '/invoices' }]}><InvoicesPage /></MainLayout></ProtectedRoute>} />
             <Route path=':invoiceId' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis facturas', href: '/invoices' }, { label: lastBreadcrumb, href: '/invoices/:invoiceId' }]}><InvoicePage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
             <Route path='create' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis facturas', href: '/invoices' }, { label: 'Crear factura', href: '/invoices/create' }]}><CreateInvoicePage /></MainLayout></ProtectedRoute>} />
+          </Route>
+
+          <Route path='/auctions'>
+            <Route index element={<ProtectedRoute userType={InvestorType.COMPANY}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis subastas', href: '/auctions' }]}><AuctionsPage /></MainLayout></ProtectedRoute>} />
+            <Route path=':auctionId' element={<ProtectedRoute userType={InvestorType.COMPANY}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis subastas', href: '/auctions' }, { label: lastBreadcrumb, href: '/auctions/:auctionId' }]}><AuctionPage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
+            <Route path='create' element={<ProtectedRoute userType={InvestorType.COMPANY}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis subastas', href: '/auctions' }, { label: 'Crear subasta', href: '/auctions/create' }]}><CreateAuctionPage /></MainLayout></ProtectedRoute>} />
           </Route>
 
           <Route path='*' element={<ProtectedRoute><MainLayout><NotFoundPage /></MainLayout></ProtectedRoute>} />

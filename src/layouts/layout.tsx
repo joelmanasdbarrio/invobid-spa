@@ -83,7 +83,7 @@ export default function MainLayout ({
             <AlertDialogHeader>
               <AlertDialogTitle>Actualización de la cuenta</AlertDialogTitle>
               <AlertDialogDescription>
-                Comprueba el estado de tu cuenta y ejecuta las acciones necesarias:
+                Compruebe el estado de su cuenta y ejecute las acciones necesarias. Una vez corregida la incidencia, solicite nuevamente la verificación.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Item variant='muted' className='gap-2'>

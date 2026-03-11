@@ -27,12 +27,12 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
       header: 'Cedente'
     },
     {
-      accessorKey: 'invoice.buyerInvestor.companyName',
-      header: 'Inversor'
-    },
-    {
       accessorKey: 'invoice.debtor.companyName',
       header: 'Deudor'
+    },
+    {
+      accessorKey: 'invoice.buyerInvestor.companyName',
+      header: 'Inversor'
     },
     {
       accessorKey: 'startingPrice',

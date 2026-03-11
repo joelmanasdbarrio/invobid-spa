@@ -45,6 +45,7 @@ import { DebtorChangeHistory } from './debtor-change-history'
 import DebtorDocuments from './debtor-documents/debtor-documents'
 
 const formSchema = z.object({
+  status: z.enum(DebtorStatus).optional(),
   email: z.string().optional(),
   phoneNumber: z.coerce.number<number>().optional(),
   companyName: z.string().optional(),
@@ -79,6 +80,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
+      status: debtor?.status ?? undefined,
       email: debtor?.email,
       phoneNumber: debtor?.phoneNumber,
       companyName: debtor?.companyName,
@@ -89,6 +91,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
 
   useEffect(() => {
     form.reset({
+      status: debtor?.status ?? undefined,
       email: debtor?.email,
       phoneNumber: debtor?.phoneNumber,
       companyName: debtor?.companyName,
@@ -105,7 +108,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
       phoneNumber: data.phoneNumber,
       companyName: data.companyName,
       taxId: data.taxId,
-      status: debtor.status,
+      status: data.status ?? debtor.status,
       ...(data.lastCommunication && { lastCommunication: data.lastCommunication })
     }
 
@@ -115,6 +118,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
         setDebtor(updatedDebtor)
         setOriginalDebtor(updatedDebtor)
         form.reset({
+          status: updatedDebtor.status ?? undefined,
           email: updatedDebtor.email,
           phoneNumber: updatedDebtor.phoneNumber,
           companyName: updatedDebtor.companyName,
@@ -179,21 +183,21 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                   </ButtonGroup>
 
                   <ButtonGroup>
-                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.DENIED})}>
+                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => form.setValue('status', DebtorStatus.DENIED)}>
                       <OctagonXIcon className='rounded-full text-zinc-600'/>
-                      {debtor?.status === DebtorStatus.DENIED && 'Denegado'}
+                      {form.watch('status') === DebtorStatus.DENIED && 'Denegado'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.CORRECTION})}>
+                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', DebtorStatus.CORRECTION)}>
                       <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                      {debtor?.status === DebtorStatus.CORRECTION && 'Corrección'}
+                      {form.watch('status') === DebtorStatus.CORRECTION && 'Corrección'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.PENDING})}>
+                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', DebtorStatus.PENDING)}>
                       <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
-                      {debtor?.status === DebtorStatus.PENDING && 'Por verificar'}
+                      {form.watch('status') === DebtorStatus.PENDING && 'Por verificar'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => debtor && setDebtor({...debtor, status: DebtorStatus.VERIFIED})}>
+                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', DebtorStatus.VERIFIED)}>
                       <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
-                      {debtor?.status === DebtorStatus.VERIFIED && 'Verificado'}
+                      {form.watch('status') === DebtorStatus.VERIFIED && 'Verificado'}
                     </Button>
                   </ButtonGroup>
                 </ButtonGroup>

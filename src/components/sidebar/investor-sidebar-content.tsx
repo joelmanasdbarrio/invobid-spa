@@ -15,7 +15,7 @@ import { countDebtors } from '@/services/debtor.api'
 import { countInvoices } from '@/services/invoice.api'
 import { DebtorStatus } from '@/types/Debtor'
 import { InvoiceStatus } from '@/types/Invoice'
-import { InvestorType, type Investor } from '@/types/User'
+import { InvestorStatus, InvestorType, type Investor } from '@/types/User'
 import { ChevronRight, ChevronRightIcon, FileText, Gavel, HandCoinsIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
@@ -23,6 +23,7 @@ import { Link, useLocation } from 'react-router'
 export function InvestorSidebarContent () {
   const location = useLocation()
   const loggedInUser = useLoggedInUser()
+  const [isDisabled] = useState(!(loggedInUser as Investor)?.status.includes(InvestorStatus.VERIFIED))
 
   const [correctionDebtorsCount, setCorrectionDebtorsCount] = useState(0)
   useEffect(() => {
@@ -43,7 +44,7 @@ export function InvestorSidebarContent () {
       <SidebarGroupContent>
         <SidebarGroupLabel>Inversión</SidebarGroupLabel>
         <SidebarMenu>
-          <Collapsible className='group/collapsible'>
+          <Collapsible className='group/collapsible' disabled={isDisabled}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton>
@@ -67,11 +68,10 @@ export function InvestorSidebarContent () {
               </CollapsibleContent>
             </SidebarMenuItem>
           </Collapsible>
-          <Collapsible className='group/collapsible'>
+          <Collapsible className='group/collapsible' disabled={isDisabled}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton>
-
                   <FileText /> Facturas
                   <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                 </SidebarMenuButton>
@@ -99,7 +99,7 @@ export function InvestorSidebarContent () {
         <SidebarMenu>
           {
             (loggedInUser && (loggedInUser as Investor).investorType === InvestorType.COMPANY) && (
-              <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/debtors')}>
+              <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/debtors')} disabled={isDisabled}>
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild className={'group/collapsible'}>
                     <SidebarMenuButton>
@@ -138,7 +138,7 @@ export function InvestorSidebarContent () {
             )
           }
 
-          <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/invoices')}>
+          <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/invoices')} disabled={isDisabled}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild className={'group/collapsible'}>
                 <SidebarMenuButton>
@@ -177,7 +177,7 @@ export function InvestorSidebarContent () {
             </SidebarMenuItem>
           </Collapsible>
 
-          <Collapsible className='group/collapsible'>
+          <Collapsible className='group/collapsible' disabled={isDisabled}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild className={'group/collapsible'}>
                 <SidebarMenuButton>
@@ -188,19 +188,18 @@ export function InvestorSidebarContent () {
               <CollapsibleContent>
                 <SidebarMenuSub className={'m-0 pe-0'}>
                   <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Disponibles
-                    </SidebarMenuButton>
+                    <Link to='/auctions'>
+                      <SidebarMenuButton isActive={location.pathname === '/auctions'}>
+                        Mis subastas
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Publicadas
-                    </SidebarMenuButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Invertidas
-                    </SidebarMenuButton>
+                    <Link to='/auctions/create'>
+                      <SidebarMenuButton isActive={location.pathname === '/auctions/create'}>
+                        Nueva subasta
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>
               </CollapsibleContent>

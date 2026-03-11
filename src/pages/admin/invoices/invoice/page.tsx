@@ -46,6 +46,7 @@ import { InvoiceChangeHistory } from './invoice-change-history'
 import InvoiceDocuments from './invoice-documents/invoice-documents'
 
 const formSchema = z.object({
+  status: z.enum(InvoiceStatus).optional(),
   rating: z.coerce.number<number>().optional(),
   lastCommunication: z.string().optional()
 })
@@ -78,6 +79,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
+      status: invoice?.status ?? undefined,
       rating: invoice?.rating ?? undefined,
       lastCommunication: invoice?.lastCommunication ?? ''
     }
@@ -85,6 +87,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
 
   useEffect(() => {
     form.reset({
+      status: invoice?.status ?? undefined,
       rating: invoice?.rating ?? undefined,
       lastCommunication: invoice?.lastCommunication ?? ''
     })
@@ -95,7 +98,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
 
     const updateData = {
       ...invoice,
-      status: invoice.status,
+      status: data.status ?? invoice.status,
       rating: data.rating,
       ...(data.lastCommunication && { lastCommunication: data.lastCommunication })
     }
@@ -106,6 +109,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
         setInvoice(updatedInvoice)
         setOriginalInvoice(updatedInvoice)
         form.reset({
+          status: updatedInvoice.status ?? undefined,
           rating: updatedInvoice.rating ?? undefined,
           lastCommunication: updatedInvoice.lastCommunication ?? ''})
         setIsFormDisabled(true)
@@ -164,21 +168,21 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                   </ButtonGroup>
 
                   <ButtonGroup>
-                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => invoice && setInvoice({...invoice, status: InvoiceStatus.DENIED})}>
+                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => form.setValue('status', InvoiceStatus.DENIED)}>
                       <OctagonXIcon className='rounded-full text-zinc-600'/>
-                      {invoice?.status === InvoiceStatus.DENIED && 'Denegado'}
+                      {form.watch('status') === InvoiceStatus.DENIED && 'Denegado'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => invoice && setInvoice({...invoice, status: InvoiceStatus.CORRECTION})}>
+                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', InvoiceStatus.CORRECTION)}>
                       <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                      {invoice?.status === InvoiceStatus.CORRECTION && 'Corrección'}
+                      {form.watch('status') === InvoiceStatus.CORRECTION && 'Corrección'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => invoice && setInvoice({...invoice, status: InvoiceStatus.PENDING})}>
+                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', InvoiceStatus.PENDING)}>
                       <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
-                      {invoice?.status === InvoiceStatus.PENDING && 'Por verificar'}
+                      {form.watch('status') === InvoiceStatus.PENDING && 'Por verificar'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => invoice && setInvoice({...invoice, status: InvoiceStatus.VERIFIED})}>
+                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', InvoiceStatus.VERIFIED)}>
                       <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
-                      {invoice?.status === InvoiceStatus.VERIFIED && 'Verificado'}
+                      {form.watch('status') === InvoiceStatus.VERIFIED && 'Verificado'}
                     </Button>
                   </ButtonGroup>
                 </ButtonGroup>

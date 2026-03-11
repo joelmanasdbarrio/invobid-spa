@@ -6,7 +6,7 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 import useLocale from '@/hooks/use-locale'
-import { formatDate, parseDateOnly, toDateOnlyString } from '@/lib/format-date'
+import { formatDate, parseLocalDate, toDateOnlyString } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
 import { CalendarIcon } from 'lucide-react'
 import * as React from 'react'
@@ -17,6 +17,8 @@ interface DatePickerProps {
   onChange?: (dateStr: string | undefined) => void
   disabled?: boolean
   placeholder?: string
+  minDate?: string
+  maxDate?: string
 }
 
 export function DatePicker ({
@@ -24,16 +26,18 @@ export function DatePicker ({
   value,
   onChange,
   disabled = false,
-  placeholder = 'Selecciona una fecha'
+  placeholder = 'Selecciona una fecha',
+  minDate,
+  maxDate
 }: DatePickerProps) {
   const { locale } = useLocale()
 
   const [date, setDate] = React.useState<Date | undefined>(
-    value ? parseDateOnly(value) : undefined
+    value ? parseLocalDate(value) : undefined
   )
 
   React.useEffect(() => {
-    setDate(value ? parseDateOnly(value) : undefined)
+    setDate(value ? parseLocalDate(value) : undefined)
   }, [value])
 
   const handleSelect = (day: Date | undefined) => {
@@ -45,7 +49,7 @@ export function DatePicker ({
     if (!date) {
       return placeholder
     }
-    return formatDate(date, locale)
+    return formatDate(toDateOnlyString(date), locale)
   }, [date, placeholder, locale])
 
   return (
@@ -89,6 +93,10 @@ export function DatePicker ({
             defaultMonth={date}
             selected={date}
             onSelect={handleSelect}
+            disabled={[
+              ...(minDate ? [{ before: new Date(minDate) }] : []),
+              ...(maxDate ? [{ after: new Date(maxDate) }] : [])
+            ]}
           />
           <Button
             variant='outline'

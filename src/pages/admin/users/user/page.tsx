@@ -50,6 +50,7 @@ import UserDebtors from './user-debtors/user-debtors'
 import UserInvoices from './user-invoices/user-invoices'
 
 const formSchema = z.object({
+  status: z.enum(InvestorStatus).optional(),
   name: z.string()
     .min(2, 'El nombre debe tener al menos 2 caracteres'),
   companyName: z.string()
@@ -88,6 +89,7 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
+      status: investor?.status ?? undefined,
       name: investor?.name,
       companyName: investor?.companyName,
       email: investor?.email,
@@ -100,6 +102,7 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
 
   useEffect(() => {
     form.reset({
+      status: investor?.status ?? undefined,
       name: investor?.name,
       companyName: investor?.companyName,
       email: investor?.email,
@@ -122,7 +125,7 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
       phoneNumber: data.phoneNumber,
       taxId: data.taxId,
       investorType: data.investorType,
-      status: investor?.status ?? InvestorStatus.VERIFIED,
+      status: data.status ?? investor?.status ?? InvestorStatus.VERIFIED,
       ...(data.lastCommunication && { lastCommunication: data.lastCommunication })
     }
 
@@ -132,6 +135,7 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
         setInvestor(updatedInvestor)
         setOriginalInvestor(updatedInvestor)
         form.reset({
+          status: updatedInvestor.status ?? undefined,
           name: updatedInvestor.name,
           companyName: updatedInvestor.companyName,
           email: updatedInvestor.email,
@@ -196,21 +200,21 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                   </ButtonGroup>
 
                   <ButtonGroup>
-                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/10' onClick={() => investor && setInvestor({...investor, status: InvestorStatus.DENIED})}>
+                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/10' onClick={() => form.setValue('status', InvestorStatus.DENIED)}>
                       <OctagonXIcon className='rounded-full text-zinc-600'/>
-                      {investor?.status === InvestorStatus.DENIED && 'Denegado'}
+                      {form.watch('status') === InvestorStatus.DENIED && 'Denegado'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/15' onClick={() => investor && setInvestor({...investor, status: InvestorStatus.CORRECTION})}>
+                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/15' onClick={() => form.setValue('status', InvestorStatus.CORRECTION)}>
                       <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                      {investor?.status === InvestorStatus.CORRECTION && 'Corrección'}
+                      {form.watch('status') === InvestorStatus.CORRECTION && 'Corrección'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/15' onClick={() => investor && setInvestor({...investor, status: InvestorStatus.PENDING})}>
+                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/15' onClick={() => form.setValue('status', InvestorStatus.PENDING)}>
                       <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
-                      {investor?.status === InvestorStatus.PENDING && 'Por verificar'}
+                      {form.watch('status') === InvestorStatus.PENDING && 'Por verificar'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/15' onClick={() => investor && setInvestor({...investor, status: InvestorStatus.VERIFIED})}>
+                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/15' onClick={() => form.setValue('status', InvestorStatus.VERIFIED)}>
                       <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
-                      {investor?.status === InvestorStatus.VERIFIED && 'Verificado'}
+                      {form.watch('status') === InvestorStatus.VERIFIED && 'Verificado'}
                     </Button>
                   </ButtonGroup>
                 </ButtonGroup>

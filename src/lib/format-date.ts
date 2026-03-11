@@ -53,12 +53,51 @@ export function toDateOnlyString (date: Date): string {
 
 /**
  * Parse a "yyyy-MM-dd" string into a Date at UTC midnight.
- * This avoids the off-by-one day bug caused by `new Date("yyyy-MM-dd")` which,
- * per the JS spec, already parses as UTC midnight — but this is explicit and safe.
+ * Intended for display via `formatDate` (which formats in UTC to avoid day shifts).
+ * Do NOT use this for calendar picker state — use `parseLocalDate` instead.
  *
  * @param dateStr - A "yyyy-MM-dd" string
  * @returns A Date object representing UTC midnight of that date
  */
 export function parseDateOnly (dateStr: string): Date {
   return new Date(dateStr + 'T00:00:00Z')
+}
+
+/**
+ * Parse a "yyyy-MM-dd" string into a Date at local midnight.
+ * Use this for calendar picker state so react-day-picker highlights the correct day
+ * regardless of the user's timezone offset.
+ *
+ * @param dateStr - A "yyyy-MM-dd" string
+ * @returns A Date object representing local midnight of that date
+ */
+export function parseLocalDate (dateStr: string): Date {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+/**
+ * Parse an ISO datetime string (or any string accepted by `new Date()`) into a Date.
+ * Returns `undefined` when the string is empty or not parseable, instead of an
+ * invalid Date object.
+ *
+ * @param value - An ISO datetime string (e.g. "2026-04-10T14:30:00.000Z")
+ * @returns A valid Date object, or undefined
+ */
+export function parseDateTime (value: string): Date | undefined {
+  const d = new Date(value)
+  return isNaN(d.getTime()) ? undefined : d
+}
+
+/**
+ * Format a Date as "HH:mm" using local hours and minutes.
+ * Intended for use as the `value` prop of `<input type="time">`, which requires
+ * exactly this format. Do NOT use `formatDateTime` for this — it produces a
+ * locale-dependent string that is not valid for time inputs.
+ *
+ * @param date - A Date object
+ * @returns A "HH:mm" string in the user's local timezone
+ */
+export function toTimeString (date: Date): string {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
