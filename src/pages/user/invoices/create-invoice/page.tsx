@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
 import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
-import { parseDateOnly, toDateOnlyString } from '@/lib/format-date'
+import { parseLocalDate, toDateOnlyString } from '@/lib/format-date'
 import { getDebtors } from '@/services/debtor.api.ts'
 import { createInvoice } from '@/services/invoice.api'
 import { type Debtor, DebtorStatus } from '@/types/Debtor.ts'
@@ -37,6 +37,17 @@ const formSchema = z.object({
     return selectedDate > today
   }, {
     message: 'La fecha de vencimiento debe ser posterior a la fecha actual'
+  }).refine((date) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const minDueDate = new Date(today)
+    minDueDate.setMonth(minDueDate.getMonth() + 1)
+    minDueDate.setDate(minDueDate.getDate() + 7)
+    const selectedDate = new Date(date)
+    selectedDate.setHours(0, 0, 0, 0)
+    return selectedDate >= minDueDate
+  }, {
+    message: 'La fecha de vencimiento debe ser al menos 5 semanas en el futuro'
   }),
   invoiceId: z.string()
     .min(1, 'El identificador de factura es obligatorio')
@@ -55,6 +66,14 @@ export default function CreateInvoicePage () {
   const [verifiedDebtors, setVerifiedDebtors] = useState<[Debtor]>()
   const [debtorSearch, setDebtorSearch] = useState('')
   const [isLoadingDebtors, setIsLoadingDebtors] = useState(false)
+
+  const minDueDate = (() => {
+    const d = new Date()
+    d.setMonth(d.getMonth() + 1)
+    d.setDate(d.getDate() + 7)
+    d.setHours(0, 0, 0, 0)
+    return d.toISOString()
+  })()
 
   const baseForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -173,7 +192,22 @@ export default function CreateInvoicePage () {
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>Importe:</FieldLabel>
                         <InputGroup>
-                          <InputGroupInput {...field} id={field.name} type='number' placeholder='1000' />
+                          <InputGroupInput
+                            name={field.name}
+                            id={field.name}
+                            type='number'
+                            step='0.01'
+                            placeholder='1000'
+                            value={field.value ?? ''}
+                            onChange={e => field.onChange(e.target.valueAsNumber)}
+                            onBlur={() => {
+                              if (field.value !== undefined && !isNaN(field.value)) {
+                                field.onChange(Math.round(field.value * 100) / 100)
+                              }
+                              field.onBlur()
+                            }}
+                            ref={field.ref}
+                          />
                           <InputGroupAddon>
                             €
                           </InputGroupAddon>
@@ -193,8 +227,9 @@ export default function CreateInvoicePage () {
                         <DatePicker
                           id={field.name}
                           value={field.value instanceof Date ? toDateOnlyString(field.value) : ''}
+                          minDate={minDueDate}
                           onChange={(dateStr) => {
-                            const newDate = dateStr ? parseDateOnly(dateStr) : undefined
+                            const newDate = dateStr ? parseLocalDate(dateStr) : undefined
                             field.onChange(newDate)
                             baseForm.trigger('dueDate')
                           }}

@@ -172,13 +172,11 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
         <h2>Gestionar deudor</h2>
       </div>
       <Card>
-        <CardHeader>
+        <CardHeader className='md:grid-cols-[auto_1fr]'>
           <h3>Detalle del deudor <span className='text-primary'>{debtor?.companyName}</span></h3>
-        </CardHeader>
-        <CardContent className='grid md:grid-cols-[1fr_200px] gap-4'>
           {(debtor?.status === DebtorStatus.CORRECTION || debtor?.status === DebtorStatus.PENDING) && (
             <Form {...validateForm}>
-              <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='flex md:justify-end'>
+              <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
                 <Button
                   variant='outline'
                   className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
@@ -196,6 +194,8 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
               </form>
             </Form>
           )}
+        </CardHeader>
+        <CardContent className='grid md:grid-cols-[1fr_200px] gap-4'>
           <Form {...baseForm}>
             <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='col-span-full flex flex-col gap-4'>
               <FieldSet>
@@ -413,7 +413,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
             <AlertDialogHeader>
               <AlertDialogTitle>Actualización del deudor</AlertDialogTitle>
               <AlertDialogDescription>
-                Comprueba el estado del deudor y ejecuta las acciones necesarias:
+                Compruebe el estado del deudor y ejecute las acciones necesarias. Una vez corregida la incidencia, solicite nuevamente la verificación.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Item variant='muted' className='gap-2'>

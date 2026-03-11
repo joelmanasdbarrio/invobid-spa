@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogHeader } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
-import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { getAuctions } from '@/services/auction.api'
 import { AuctionStatus } from '@/types/Auction'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -29,6 +28,7 @@ const formSchema = z.object({
 })
 
 export default function AdminAuctionsPage () {
+  const auctionColumns = useAuctionColumns()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const defaultForm = useMemo(() => ({
@@ -56,8 +56,6 @@ export default function AdminAuctionsPage () {
 
   const [data, setData] = useState([])
   const [totalItems, setTotalItems] = useState(0)
-  const auctionColumns = useAuctionColumns()
-
 
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10))
   const [currentLimit, setCurrentLimit] = useState(parseInt(searchParams.get('limit') || '10', 10))
@@ -73,8 +71,6 @@ export default function AdminAuctionsPage () {
     newParams.set('limit', currentLimit.toString())
     setSearchParams(newParams)
   }
-
-  const loggedInUser = useLoggedInUser()
 
   useEffect(() => {
     const filters: Record<string, string> = {}
@@ -96,7 +92,7 @@ export default function AdminAuctionsPage () {
       setData(res.data)
       setTotalItems(res['_metadata'].total)
     })
-  }, [loggedInUser, searchParams, currentPage, currentLimit])
+  }, [searchParams, currentPage, currentLimit])
 
   function handleClear () {
     form.reset({

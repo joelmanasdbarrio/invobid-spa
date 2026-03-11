@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import useLocale from '@/hooks/use-locale'
-import { formatDate, parseDateOnly, toDateOnlyString } from '@/lib/format-date'
+import { formatDate, parseLocalDate, toDateOnlyString } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
 import { CalendarIcon } from 'lucide-react'
 import * as React from 'react'
@@ -13,25 +13,29 @@ interface DateRangePickerProps {
   toDate?: string
   onFromChange: (dateStr: string | undefined) => void
   onToChange: (dateStr: string | undefined) => void
+  minDate?: string
+  maxDate?: string
 }
 
 export function DateRangePicker ({
   fromDate,
   toDate,
   onFromChange,
-  onToChange
+  onToChange,
+  minDate,
+  maxDate
 }: DateRangePickerProps) {
   const { locale } = useLocale()
 
-  const [range, setRange] = React.useState<{ from?: Date; to?: Date }>({
-    from: fromDate ? parseDateOnly(fromDate) : undefined,
-    to: toDate ? parseDateOnly(toDate) : undefined
+  const [range, setRange] = React.useState<DateRange>({
+    from: fromDate ? parseLocalDate(fromDate) : undefined,
+    to: toDate ? parseLocalDate(toDate) : undefined
   })
 
   React.useEffect(() => {
     setRange({
-      from: fromDate ? parseDateOnly(fromDate) : undefined,
-      to: toDate ? parseDateOnly(toDate) : undefined
+      from: fromDate ? parseLocalDate(fromDate) : undefined,
+      to: toDate ? parseLocalDate(toDate) : undefined
     })
   }, [fromDate, toDate])
 
@@ -52,10 +56,10 @@ export function DateRangePicker ({
       return 'Selecciona un rango'
     }
     if (range.from && !range.to) {
-      return formatDate(range.from, locale)
+      return formatDate(toDateOnlyString(range.from), locale)
     }
     if (range.from && range.to) {
-      return `${formatDate(range.from, locale)} - ${formatDate(range.to, locale)}`
+      return `${formatDate(toDateOnlyString(range.from), locale)} - ${formatDate(toDateOnlyString(range.to), locale)}`
     }
     return 'Selecciona un rango'
   }, [range, locale])
@@ -88,6 +92,10 @@ export function DateRangePicker ({
             }
           }}
           numberOfMonths={2}
+          disabled={[
+            ...(minDate ? [{ before: new Date(minDate) }] : []),
+            ...(maxDate ? [{ after: new Date(maxDate) }] : [])
+          ]}
         />
         <Button
           variant='outline'

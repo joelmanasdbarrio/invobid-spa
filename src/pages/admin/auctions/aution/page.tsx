@@ -26,6 +26,7 @@ import z from 'zod'
 import { AuctionChangeHistory } from './auction-change-history'
 
 const formSchema = z.object({
+  status: z.enum(AuctionStatus).optional(),
   lastCommunication: z.string().optional()
 })
 
@@ -56,14 +57,23 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
+      status: auction?.status ?? undefined,
       lastCommunication: ''
     }
   })
+
+  useEffect(() => {
+    form.reset({
+      status: auction?.status ?? undefined,
+      lastCommunication: ''
+    })
+  }, [auction, form])
 
   function onSubmit (data: z.infer<typeof formSchema>) {
     if (!auction) return
 
     const updateData = {
+      status: data.status ?? auction.status,
       ...(data.lastCommunication && { lastCommunication: data.lastCommunication })
     }
 
@@ -72,7 +82,10 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
       .then(updatedAuction => {
         setAuction(updatedAuction)
         setOriginalAuction(updatedAuction)
-        form.reset()
+        form.reset({
+          status: updatedAuction.status ?? undefined,
+          lastCommunication: ''
+        })
         setIsDialogOpen(false)
       })
       .then(() => navigate(`/admin/auctions/${auction.id}`))
@@ -112,29 +125,29 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                   <h3>Detalle de la subasta <span className='text-primary'>{auction.invoice.invoiceId}</span></h3>
                   <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                     <ButtonGroup>
-                      <Button type='button' title='Borrador' disabled variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => auction && setAuction({...auction, status: AuctionStatus.DRAFT})}>
+                      <Button type='button' title='Borrador' disabled variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', AuctionStatus.DRAFT)}>
                         <CircleDashedIcon className='w-5 h-5 rounded-full text-yellow-600'/>
-                        {auction.status === AuctionStatus.DRAFT && 'Borrador'}
+                        {form.watch('status') === AuctionStatus.DRAFT && 'Borrador'}
                       </Button>
-                      <Button type='button' title='Publicada' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => auction && setAuction({...auction, status: AuctionStatus.PUBLISHED})}>
+                      <Button type='button' title='Publicada' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', AuctionStatus.PUBLISHED)}>
                         <CircleCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
-                        {auction.status === AuctionStatus.PUBLISHED && 'Publicada'}
+                        {form.watch('status') === AuctionStatus.PUBLISHED && 'Publicada'}
                       </Button>
-                      <Button type='button' title='En curso' disabled variant='outline' className='bg-blue-300/25 dark:bg-blue-300/25' onClick={() => auction && setAuction({...auction, status: AuctionStatus.LIVE})}>
+                      <Button type='button' title='En curso' disabled variant='outline' className='bg-blue-300/25 dark:bg-blue-300/25' onClick={() => form.setValue('status', AuctionStatus.LIVE)}>
                         <CircleGaugeIcon className='w-5 h-5 rounded-full text-blue-600'/>
-                        {auction.status === AuctionStatus.LIVE && 'En curso'}
+                        {form.watch('status') === AuctionStatus.LIVE && 'En curso'}
                       </Button>
-                      <Button type='button' title='Pausada' variant='outline' className='bg-slate-300/25 dark:bg-slate-300/25' onClick={() => auction && setAuction({...auction, status: AuctionStatus.PAUSED})}>
+                      <Button type='button' title='Pausada' variant='outline' className='bg-slate-300/25 dark:bg-slate-300/25' onClick={() => form.setValue('status', AuctionStatus.PAUSED)}>
                         <CirclePauseIcon className='w-5 h-5 rounded-full text-slate-600'/>
-                        {auction.status === AuctionStatus.PAUSED && 'Pausada'}
+                        {form.watch('status') === AuctionStatus.PAUSED && 'Pausada'}
                       </Button>
-                      <Button type='button' title='Cancelada' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => auction && setAuction({...auction, status: AuctionStatus.CANCELLED})}>
+                      <Button type='button' title='Cancelada' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', AuctionStatus.CANCELLED)}>
                         <CircleSlashIcon className='w-5 h-5 rounded-full text-red-600'/>
-                        {auction.status === AuctionStatus.CANCELLED && 'Cancelada'}
+                        {form.watch('status') === AuctionStatus.CANCELLED && 'Cancelada'}
                       </Button>
-                      <Button type='button' title='Finalizada' disabled variant='outline' className='bg-violet-300/25 dark:bg-violet-300/25' onClick={() => auction && setAuction({...auction, status: AuctionStatus.FINISHED})}>
+                      <Button type='button' title='Finalizada' disabled variant='outline' className='bg-violet-300/25 dark:bg-violet-300/25' onClick={() => form.setValue('status', AuctionStatus.FINISHED)}>
                         <GavelIcon className='w-5 h-5 rounded-full text-violet-600'/>
-                        {auction.status === AuctionStatus.FINISHED && 'Finalizada'}
+                        {form.watch('status') === AuctionStatus.FINISHED && 'Finalizada'}
                       </Button>
                     </ButtonGroup>
                   </ButtonGroup>
@@ -386,13 +399,13 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                               </InputGroup>
                             </Field>
                             <Field>
-                              <FieldLabel htmlFor='dueDate'>Fecha de vencimiento:</FieldLabel>
-                              <DatePicker id='dueDate' value={auction.invoice?.dueDate ?? ''} disabled />
+                              <FieldLabel htmlFor='invoiceDueDate'>Fecha de vencimiento:</FieldLabel>
+                              <DatePicker id='invoiceDueDate' value={auction.invoice?.dueDate ?? ''} disabled />
                             </Field>
                             <Field>
-                              <FieldLabel htmlFor='invoiceDueDate'>Importe:</FieldLabel>
+                              <FieldLabel htmlFor='invoiceAmount'>Importe:</FieldLabel>
                               <InputGroup>
-                                <InputGroupInput id='amount' value={formatCurrency(auction.invoice?.amount ?? 0, locale, auction.invoice?.currency)} type='text' placeholder='0' required disabled />
+                                <InputGroupInput id='invoiceAmount' value={formatCurrency(auction.invoice?.amount ?? 0, locale, auction.invoice?.currency)} type='text' placeholder='0' required disabled />
                                 <InputGroupAddon>
                                   €
                                 </InputGroupAddon>
@@ -577,7 +590,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                     Seleccione <ColorBadge className='inline' color='green'>publicar</ColorBadge> si está todo correcto para reanudar la subasta (aprox. 1 minuto).
                   </li>
                   <li>
-                    Seleccione <ColorBadge className='inline' color='red'>cancelar</ColorBadge> para finalizar la subasta inmediatamente sin adjudicar la factura a ningún inversor (las pujas ejercidas por los inversores serán devueltas).
+                    Seleccione <ColorBadge className='inline' color='red'>cancelar</ColorBadge> para finalizar la subasta inmediatamente sin adjudicar la factura a ningún inversor (las pujas ejercidas por los inversores serán revertidas).
                   </li>
                 </ul>
               </AlertDialogDescription>

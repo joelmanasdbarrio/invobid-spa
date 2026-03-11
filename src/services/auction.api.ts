@@ -2,11 +2,19 @@ import fetchApi from '@/lib/fetchApi'
 
 const base_url = import.meta.env.VITE_BASE_URL
 
-export const createAuction = async (body: FormData) => {
-  return fetchApi(`${base_url}/auctions`, {
-    method: 'POST',
-    body
-  }, {
+export const createAuction = async (body: FormData | string) => {
+  const fetchOptions: RequestInit = {
+    method: 'POST'
+  }
+
+  if (body instanceof FormData) {
+    fetchOptions.body = body
+  } else {
+    fetchOptions.body = body
+    fetchOptions.headers = { 'Content-Type': 'application/json' }
+  }
+
+  return fetchApi(`${base_url}/auctions`, fetchOptions, {
     promise: 'Creando subasta...',
     resolve: 'Subasta creada con éxito',
     reject: 'Error al crear la subasta'

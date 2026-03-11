@@ -6,7 +6,7 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 import useLocale from '@/hooks/use-locale'
-import { formatDateTime } from '@/lib/format-date'
+import { formatDateTime, parseDateTime, toTimeString } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
 import { CalendarIcon, ClockIcon } from 'lucide-react'
 import * as React from 'react'
@@ -17,20 +17,8 @@ interface DateTimePickerProps {
   onChange?: (isoStr: string | undefined) => void
   disabled?: boolean
   placeholder?: string
-}
-
-/**
- * Parse an ISO datetime string into a Date.
- * Falls back to undefined when the string is empty / not parseable.
- */
-function parseDateTime (value: string): Date | undefined {
-  const d = new Date(value)
-  return isNaN(d.getTime()) ? undefined : d
-}
-
-/** Format a Date as "HH:mm" for the time input. */
-function toTimeString (date: Date): string {
-  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+  minDate?: string
+  maxDate?: string
 }
 
 export function DateTimePicker ({
@@ -38,7 +26,9 @@ export function DateTimePicker ({
   value,
   onChange,
   disabled = false,
-  placeholder = 'Selecciona fecha y hora'
+  placeholder = 'Selecciona fecha y hora',
+  minDate,
+  maxDate
 }: DateTimePickerProps) {
   const { locale } = useLocale()
 
@@ -115,6 +105,10 @@ export function DateTimePicker ({
             defaultMonth={date}
             selected={date}
             onSelect={handleDaySelect}
+            disabled={[
+              ...(minDate ? [{ before: new Date(minDate) }] : []),
+              ...(maxDate ? [{ after: new Date(maxDate) }] : [])
+            ]}
           />
           <div className='border-t p-3 flex items-center gap-2'>
             <ClockIcon className='h-4 w-4 text-muted-foreground shrink-0' />

@@ -13,7 +13,7 @@ import {
   SidebarMenuItem
 } from '@/components/ui/sidebar.tsx'
 import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
-import { type Investor, InvestorStatus, UserType } from '@/types/User.ts'
+import { UserType } from '@/types/User.ts'
 import { Link, useLocation } from 'react-router'
 import { ModeToggle } from '../dark-mode/mode-toggle.tsx'
 import { AdminSidebarContent } from './admin-sidebar-content'
@@ -53,7 +53,7 @@ export function AppSidebar () {
           </SidebarGroupContent>
         </SidebarGroup>
         {
-          (loggedInUser?.type === UserType.INVESTOR && (loggedInUser as Investor)?.status === InvestorStatus.VERIFIED) &&
+          loggedInUser?.type === UserType.INVESTOR &&
           <InvestorSidebarContent />
         }
         {

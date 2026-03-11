@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
 import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
-import { parseDateOnly, toDateOnlyString } from '@/lib/format-date'
+import { parseLocalDate, toDateOnlyString } from '@/lib/format-date'
 import { getDebtors } from '@/services/debtor.api.ts'
 import { getInvoiceById, updateInvoiceById } from '@/services/invoice.api'
 import { type Debtor, DebtorStatus } from '@/types/Debtor.ts'
@@ -73,7 +73,7 @@ const documentFormSchema = z.object({
   return true
 })
 
-export default function InvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
+export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {invoiceId} = useParams<{ invoiceId: string }>()
   const [invoice, setInvoice] = useState<Invoice | undefined>()
   const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
@@ -97,7 +97,7 @@ export default function InvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (
     defaultValues: {
       debtorId: invoice?.debtor.id || '',
       amount: invoice?.amount || 0,
-      dueDate: invoice ? parseDateOnly(invoice.dueDate) : undefined
+      dueDate: invoice ? parseLocalDate(invoice.dueDate) : undefined
     }
   })
 
@@ -114,7 +114,7 @@ export default function InvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (
     baseForm.reset({
       debtorId: invoice?.debtor.id || '',
       amount: invoice?.amount || 0,
-      dueDate: invoice ? parseDateOnly(invoice.dueDate) : undefined
+      dueDate: invoice ? parseLocalDate(invoice.dueDate) : undefined
     })
   }, [invoice, baseForm])
 
@@ -211,13 +211,11 @@ export default function InvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (
         <h2>Gestionar factura</h2>
       </div>
       <Card>
-        <CardHeader>
+        <CardHeader className='md:grid-cols-[auto_1fr]'>
           <h3>Detalles de la factura <span className='text-primary'>{invoice?.invoiceId}</span></h3>
-        </CardHeader>
-        <CardContent className='grid md:grid-cols-[1fr_200px] gap-4'>
           {(invoice?.status === InvoiceStatus.CORRECTION || invoice?.status === InvoiceStatus.PENDING) && (
             <Form {...validateForm}>
-              <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='flex md:justify-end'>
+              <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
                 <Button
                   variant='outline'
                   className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
@@ -235,6 +233,8 @@ export default function InvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (
               </form>
             </Form>
           )}
+        </CardHeader>
+        <CardContent className='grid md:grid-cols-[1fr_200px] gap-4'>
           <Form {...baseForm}>
             <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='col-span-full flex flex-col gap-4'>
               <FieldSet>
@@ -297,7 +297,23 @@ export default function InvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>Importe:</FieldLabel>
                         <InputGroup>
-                          <InputGroupInput {...field} id={field.name} type='number' placeholder='1000' disabled={isFormDisabled} />
+                          <InputGroupInput
+                            name={field.name}
+                            id={field.name}
+                            type='number'
+                            step='0.01'
+                            placeholder='1000'
+                            value={field.value ?? ''}
+                            onChange={e => field.onChange(e.target.valueAsNumber)}
+                            onBlur={() => {
+                              if (field.value !== undefined && !isNaN(field.value)) {
+                                field.onChange(Math.round(field.value * 100) / 100)
+                              }
+                              field.onBlur()
+                            }}
+                            ref={field.ref}
+                            disabled={isFormDisabled}
+                          />
                           <InputGroupAddon>
                             €
                           </InputGroupAddon>
@@ -318,7 +334,7 @@ export default function InvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (
                           id={field.name}
                           value={field.value instanceof Date ? toDateOnlyString(field.value) : ''}
                           onChange={(dateStr) => {
-                            const newDate = dateStr ? parseDateOnly(dateStr) : undefined
+                            const newDate = dateStr ? parseLocalDate(dateStr) : undefined
                             field.onChange(newDate)
                             baseForm.trigger('dueDate')
                           }}
@@ -426,9 +442,9 @@ export default function InvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (
         <AlertDialog defaultOpen>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Actualización del deudor</AlertDialogTitle>
+              <AlertDialogTitle>Actualización de la factura</AlertDialogTitle>
               <AlertDialogDescription>
-                Comprueba el estado del deudor y ejecuta las acciones necesarias:
+                Compruebe el estado de la factura y ejecute las acciones necesarias. Una vez corregida la incidencia, solicite nuevamente la verificación.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Item variant='muted' className='gap-2'>
