@@ -5,9 +5,12 @@ export type Auction = {
   invoice: Invoice;
   startingPrice: number;
   endingPrice: number;
+  discount: number;
+  profitability: number;
   auctionDate: AuctionDate;
   status: AuctionStatus;
   lastCommunication?: string;
+  pausedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string;

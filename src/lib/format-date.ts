@@ -29,7 +29,7 @@ export function formatDateTime (date: string | Date, locale: string): string {
   const d = typeof date === 'string' ? new Date(date) : date
   return new Intl.DateTimeFormat(locale, {
     year: 'numeric',
-    month: '2-digit',
+    month: 'short',
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit'

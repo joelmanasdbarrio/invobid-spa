@@ -23,7 +23,7 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
 import z from 'zod'
-import { AuctionChangeHistory } from './auction-change-history'
+import { AuctionChangeHistory } from './components/auction-change-history'
 
 const formSchema = z.object({
   status: z.enum(AuctionStatus).optional(),

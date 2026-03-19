@@ -13,6 +13,8 @@ import AdminInvoicesPage from './pages/admin/invoices/page'
 import AdminUserPage from './pages/admin/users/user/page'
 import DashboardPage from './pages/dashboard/page'
 import Login from './pages/login/page'
+import MarketplaceAuctionPage from './pages/marketplace/auctions/auction/page'
+import MarketplaceAvailableAuctionsPage from './pages/marketplace/auctions/available/page'
 import NotFoundPage from './pages/not-found'
 import ProfilePage from './pages/profile/page'
 import Register from './pages/register/page'
@@ -79,6 +81,11 @@ function App () {
             <Route index element={<ProtectedRoute userType={InvestorType.COMPANY}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis subastas', href: '/auctions' }]}><AuctionsPage /></MainLayout></ProtectedRoute>} />
             <Route path=':auctionId' element={<ProtectedRoute userType={InvestorType.COMPANY}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis subastas', href: '/auctions' }, { label: lastBreadcrumb, href: '/auctions/:auctionId' }]}><AuctionPage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
             <Route path='create' element={<ProtectedRoute userType={InvestorType.COMPANY}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis subastas', href: '/auctions' }, { label: 'Crear subasta', href: '/auctions/create' }]}><CreateAuctionPage /></MainLayout></ProtectedRoute>} />
+          </Route>
+
+          <Route path='/marketplace/auctions'>
+            <Route index element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Subastas', href: '/marketplace/auctions' }]}><MarketplaceAvailableAuctionsPage /></MainLayout></ProtectedRoute>} />
+            <Route path=':auctionId' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Subastas', href: '/marketplace/auctions' }, { label: lastBreadcrumb, href: '/marketplace/auctions/:auctionId' }]}><MarketplaceAuctionPage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
           </Route>
 
           <Route path='*' element={<ProtectedRoute><MainLayout><NotFoundPage /></MainLayout></ProtectedRoute>} />

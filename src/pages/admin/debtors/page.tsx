@@ -9,9 +9,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
 import z from 'zod'
-import { debtorColumns } from './columns'
-import { DataTable } from './data-table'
-import DebtorFilters from './filters'
+import { debtorColumns } from './components/columns'
+import { DataTable } from './components/data-table'
+import DebtorFilters from './components/filters'
 
 const formSchema = z.object({
   email: z.string().optional(),

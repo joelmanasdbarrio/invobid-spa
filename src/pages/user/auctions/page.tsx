@@ -1,19 +1,18 @@
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogHeader } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { getAuctions } from '@/services/auction.api'
 import { AuctionStatus } from '@/types/Auction'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { DialogContent } from '@radix-ui/react-dialog'
 import { ChevronLeftIcon, ChevronRightIcon, GavelIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
 import z from 'zod'
-import { useAuctionColumns } from './columns'
-import { DataTable } from './data-table'
-import AuctionFilters from './filters'
+import { useAuctionColumns } from './components/columns'
+import { DataTable } from './components/data-table'
+import AuctionFilters from './components/filters'
 
 const formSchema = z.object({
   sellerCompanyName: z.string().optional(),
@@ -92,6 +91,7 @@ export default function AuctionsPage () {
     getAuctions({
       ...filters,
       sellerInvestorId: loggedInUser.id,
+      includeSelf: String(1),
       page: String(currentPage),
       limit: String(currentLimit)
     }).then(res => {
