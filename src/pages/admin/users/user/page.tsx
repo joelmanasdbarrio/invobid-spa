@@ -18,8 +18,8 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip.tsx'
-import { UserChangeHistory } from '@/pages/admin/users/user/user-change-history.tsx'
-import UserDocuments from '@/pages/admin/users/user/user-documents/user-documents.tsx'
+import { UserChangeHistory } from '@/pages/admin/users/user/components/user-change-history'
+import UserDocuments from '@/pages/admin/users/user/components/user-documents/user-documents'
 import { getInvestorById, updateInvestorById } from '@/services/investor.api.ts'
 import { DocumentType } from '@/types/Document.ts'
 import { type Investor, InvestorStatus, InvestorType } from '@/types/User'
@@ -45,9 +45,9 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import { z } from 'zod'
-import UserAuctions from './user-auctions/user-auctions'
-import UserDebtors from './user-debtors/user-debtors'
-import UserInvoices from './user-invoices/user-invoices'
+import UserAuctions from './components/user-auctions/user-auctions'
+import UserDebtors from './components/user-debtors/user-debtors'
+import UserInvoices from './components/user-invoices/user-invoices'
 
 const formSchema = z.object({
   status: z.enum(InvestorStatus).optional(),

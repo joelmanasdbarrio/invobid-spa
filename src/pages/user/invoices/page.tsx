@@ -10,9 +10,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
 import z from 'zod'
-import { useInvoiceColumns } from './columns'
-import { DataTable } from './data-table'
-import InvoiceFilters from './filters'
+import { useInvoiceColumns } from './components/columns'
+import { DataTable } from './components/data-table'
+import InvoiceFilters from './components/filters'
 
 const formSchema = z.object({
   buyerCompanyName: z.string().optional(),

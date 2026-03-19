@@ -10,9 +10,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
 import z from 'zod'
-import { useAuctionColumns } from './columns'
-import { DataTable } from './data-table'
-import AuctionFilters from './filters'
+import { useAuctionColumns } from './components/columns'
+import { DataTable } from './components/data-table'
+import AuctionFilters from './components/filters'
 
 const formSchema = z.object({
   sellerCompanyName: z.string().optional(),

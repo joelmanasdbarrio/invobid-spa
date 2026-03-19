@@ -42,8 +42,8 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
 import z from 'zod'
-import { InvoiceChangeHistory } from './invoice-change-history'
-import InvoiceDocuments from './invoice-documents/invoice-documents'
+import { InvoiceChangeHistory } from './components/invoice-change-history'
+import InvoiceDocuments from './components/invoice-documents/invoice-documents'
 
 const formSchema = z.object({
   status: z.enum(InvoiceStatus).optional(),
