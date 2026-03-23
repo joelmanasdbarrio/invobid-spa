@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button.tsx'
-import useLocale from '@/hooks/use-locale'
+import { useLocale } from '@/hooks/use-locale'
 import { formatDateTime } from '@/lib/format-date'
 import { downloadDocument } from '@/services/document.api.ts'
 import { type Document } from '@/types/Document.ts'

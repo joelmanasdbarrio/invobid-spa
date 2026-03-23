@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover'
-import useLocale from '@/hooks/use-locale'
+import { useLocale } from '@/hooks/use-locale'
 import { formatDate, parseLocalDate, toDateOnlyString } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
 import { CalendarIcon } from 'lucide-react'

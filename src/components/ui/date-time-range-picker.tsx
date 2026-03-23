@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import useLocale from '@/hooks/use-locale'
+import { useLocale } from '@/hooks/use-locale'
 import { formatDateTime, parseDateTime, toTimeString } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
 import { CalendarIcon, ClockIcon } from 'lucide-react'

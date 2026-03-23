@@ -8,7 +8,6 @@ import { AuthContext } from './auth.context'
 
 export function AuthProvider ({children}: {children: React.ReactNode}) {
   const userCookie = Cookies.get('logged-in-user')
-  const accessToken = Cookies.get('access-token')
   const [loggedInUser, setLoggedInUser] = useState(userCookie ? JSON.parse(userCookie) : null)
   const [loggedInUserId, setLoggedInUserId] = useState(userCookie ? JSON.parse(userCookie).id : null)
   const [isLoading, setIsLoading] = useState(!!loggedInUserId)
@@ -60,7 +59,7 @@ export function AuthProvider ({children}: {children: React.ReactNode}) {
   }, [loggedInUser?.type, loggedInUserId])
 
   return (
-    <AuthContext.Provider value={{ loggedInUser, setLoggedInUser, isLoading, accessToken }}>
+    <AuthContext.Provider value={{ loggedInUser, setLoggedInUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   )

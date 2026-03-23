@@ -1,5 +1,7 @@
 import fetchApi from '@/lib/fetchApi'
 
+// TODO: const base_url = import.meta.env.VITE_BASE_URL
+
 interface CreateAdminResponse {
   status: string
   data: {
