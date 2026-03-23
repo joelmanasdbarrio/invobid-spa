@@ -1,6 +1,6 @@
 import { Progress } from '@/components/ui/progress'
-import useLocale from '@/hooks/use-locale'
-import { formatDateTime } from '@/lib/format-date'
+import { useLocale } from '@/hooks/use-locale'
+import { formatCountdown, formatDateTime } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
 import { CirclePauseIcon, MoveRightIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -22,12 +22,7 @@ export function ProgressBar ({ dateStart, dateEnd, pausedAt }: { dateStart: stri
   const now = pausedAt ? new Date(pausedAt).getTime() : tick
 
   const progress = Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100))
-  const remaining = Math.max(0, end - now)
-  const days = Math.floor(remaining / 86_400_000)
-  const hours = Math.floor((remaining % 86_400_000) / 3_600_000)
-  const minutes = Math.floor((remaining % 3_600_000) / 60_000)
-  const seconds = Math.floor((remaining % 60_000) / 1_000)
-  const label = days > 0 ? `${days}d ${hours}h ${minutes}m ${seconds}s` : hours > 0 ? `${hours}h ${minutes}m ${seconds}s` : `${minutes}m ${seconds}s`
+  const label = formatCountdown(end - now)
 
   return (
     <div className='flex flex-col gap-1 w-full'>

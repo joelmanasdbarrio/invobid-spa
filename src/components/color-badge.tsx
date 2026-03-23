@@ -41,7 +41,7 @@ const BADGE_STYLES = {
   }
 } as const
 
-export default function ColorBadge ({ color, icon, children, className }: ColorBadgeProps) {
+export function ColorBadge ({ color, icon, children, className }: ColorBadgeProps) {
   switch (color) {
     case 'yellow':
       return yellowBadge({ icon, children, className })

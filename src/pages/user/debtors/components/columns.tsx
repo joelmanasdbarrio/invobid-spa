@@ -1,4 +1,4 @@
-import ColorBadge from '@/components/color-badge'
+import { ColorBadge } from '@/components/color-badge'
 import { type Debtor, DebtorStatus } from '@/types/Debtor'
 import type { ColumnDef } from '@tanstack/react-table'
 import { CheckCheckIcon, CircleAlertIcon, ClockIcon, ExternalLinkIcon, OctagonXIcon } from 'lucide-react'

@@ -101,3 +101,19 @@ export function parseDateTime (value: string): Date | undefined {
 export function toTimeString (date: Date): string {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
+
+/**
+ * Format a millisecond duration as a human-readable countdown string.
+ * Omits the days segment when zero, and the hours segment when both days and hours are zero.
+ *
+ * @param ms - Duration in milliseconds (negative values are treated as 0)
+ * @returns e.g. "2d 3h 4m 5s", "3h 4m 5s", or "4m 5s"
+ */
+export function formatCountdown (ms: number): string {
+  const rem = Math.max(0, ms)
+  const d = Math.floor(rem / 86_400_000)
+  const h = Math.floor((rem % 86_400_000) / 3_600_000)
+  const m = Math.floor((rem % 3_600_000) / 60_000)
+  const s = Math.floor((rem % 60_000) / 1_000)
+  return d > 0 ? `${d}d ${h}h ${m}m ${s}s` : h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`
+}

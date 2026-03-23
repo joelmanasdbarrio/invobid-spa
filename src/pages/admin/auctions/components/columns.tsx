@@ -1,5 +1,5 @@
-import ColorBadge from '@/components/color-badge'
-import useLocale from '@/hooks/use-locale'
+import { ColorBadge } from '@/components/color-badge'
+import { useLocale } from '@/hooks/use-locale'
 import { formatCurrency } from '@/lib/format-currency'
 import { formatDateTime } from '@/lib/format-date'
 import { AuctionStatus, type Auction } from '@/types/Auction'

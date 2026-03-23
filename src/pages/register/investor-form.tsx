@@ -20,7 +20,7 @@ import {
   UsersIcon
 } from 'lucide-react'
 import { useContext, useEffect } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router'
 import { z } from 'zod'
 
@@ -65,14 +65,16 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
     }
   })
 
+  const watchedName = useWatch({
+    control: form.control,
+    name: 'name'
+  })
+
   useEffect(() => {
-    const subscription = form.watch((data) => {
-      if (investorType === InvestorType.INDIVIDUAL && data.name && data.name !== data.companyName) {
-        form.setValue('companyName', data.name, { shouldValidate: false })
-      }
-    })
-    return () => subscription.unsubscribe()
-  }, [form, investorType])
+    if (investorType === InvestorType.INDIVIDUAL && watchedName && watchedName !== form.getValues('companyName')) {
+      form.setValue('companyName', watchedName, { shouldValidate: false })
+    }
+  }, [watchedName, investorType, form])
 
   const authContext = useContext(AuthContext)
   if (!authContext) {
@@ -110,7 +112,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
         </CardTitle>
         <CardDescription>{
           investorType === InvestorType.COMPANY
-            ? 'Subasta, invierte e intercanvia facturas con otras empresas e inversores.'
+            ? 'Subasta, invierte e intercambia facturas con otras empresas e inversores.'
             : 'Invierte en facturas comerciales y accede a oportunidades de inversión únicas.'}
         </CardDescription>
       </CardHeader>

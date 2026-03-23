@@ -2,6 +2,8 @@ import fetchApi from '@/lib/fetchApi'
 
 const base_url = import.meta.env.VITE_BASE_URL
 
+// TODO: response types
+
 export const createAuction = async (body: FormData | string) => {
   const fetchOptions: RequestInit = {
     method: 'POST'

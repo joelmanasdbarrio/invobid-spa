@@ -1,19 +1,43 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { getCoreRowModel, useReactTable, type ColumnDef, type VisibilityState } from '@tanstack/react-table'
-import { useState } from 'react'
+import { flexRender, getCoreRowModel, useReactTable, type ColumnDef, type VisibilityState } from '@tanstack/react-table'
+import { CrownIcon } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
-  data: TData[],
+  data: TData[]
   totalItems: number
+  onLoadMore?: () => void
 }
 
 export function DataTable<TData, TValue> ({
   columns,
   data,
-  totalItems
+  totalItems,
+  onLoadMore
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const containerRef = useRef<HTMLDivElement>(null)
+  const sentinelRef = useRef<HTMLTableRowElement>(null)
+  const hasMore = data.length < totalItems
+
+  useEffect(() => {
+    if (!hasMore || !sentinelRef.current || !onLoadMore) return
+
+    const scrollParent = containerRef.current?.querySelector('[data-slot="table-container"]') as Element | null
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMore()
+        }
+      },
+      { root: scrollParent, threshold: 0.1 }
+    )
+
+    observer.observe(sentinelRef.current)
+    return () => observer.disconnect()
+  }, [hasMore, onLoadMore])
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -27,66 +51,49 @@ export function DataTable<TData, TValue> ({
   })
 
   return (
-    <div className='*:data-[slot=table-container]:max-h-64 *:data-[slot=table-container]:overflow-auto border-y'>
+    <div ref={containerRef} className='*:data-[slot=table-container]:max-h-72 *:data-[slot=table-container]:overflow-auto border-y'>
       <Table className='table-padding'>
         <TableHeader className='bg-accent sticky top-0 z-10'>
-          <TableRow>
-            <TableHead>Inversor</TableHead>
-            <TableHead>Importe</TableHead>
-            <TableHead>Fecha</TableHead>
-          </TableRow>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
         </TableHeader>
         <TableBody>
-          <TableRow>
-            <TableCell>Corporación DEF</TableCell>
-            <TableCell>€ 2.000,00</TableCell>
-            <TableCell>2024-01-05 09:15:00</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Grupo Financiero QRS</TableCell>
-            <TableCell>€ 1.800,00</TableCell>
-            <TableCell>2024-01-04 14:20:00</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Inversiones ABC</TableCell>
-            <TableCell>€ 1.500,00</TableCell>
-            <TableCell>2024-01-03 10:45:00</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Compañía XYZ</TableCell>
-            <TableCell>€ 1.200,00</TableCell>
-            <TableCell>2024-01-02 15:30:00</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Empresa S.A.</TableCell>
-            <TableCell>€ 1.000,00</TableCell>
-            <TableCell>2024-01-01 12:00:00</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Finanzas Globales</TableCell>
-            <TableCell>€ 900,00</TableCell>
-            <TableCell>2023-12-30 11:00:00</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Inversiones LMN</TableCell>
-            <TableCell>€ 800,00</TableCell>
-            <TableCell>2023-12-29 16:45:00</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Corporación DEF</TableCell>
-            <TableCell>€ 700,00</TableCell>
-            <TableCell>2023-12-28 09:30:00</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Grupo Financiero QRS</TableCell>
-            <TableCell>€ 600,00</TableCell>
-            <TableCell>2023-12-27 14:15:00</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Inversiones ABC</TableCell>
-            <TableCell>€ 500,00</TableCell>
-            <TableCell>2023-12-26 10:00:00</TableCell>
-          </TableRow>
+          {table.getRowModel().rows.length ? (
+            <>
+              {table.getRowModel().rows.map((row, i) => (
+                <TableRow key={row.id} className='first-of-type:bg-yellow-500/15'>
+                  {row.getVisibleCells().map((cell, j) => (
+                    <TableCell key={cell.id}>
+                      {(i === 0 && j === 0) && <CrownIcon className='size-4 text-yellow-600' />}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+              {hasMore && (
+                <TableRow ref={sentinelRef}>
+                  <TableCell colSpan={columns.length} className='p-2 text-center'>
+                    Cargando más pujas...
+                  </TableCell>
+                </TableRow>
+              )}
+            </>
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className='h-24 text-center'>
+                No hay pujas aún.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>
