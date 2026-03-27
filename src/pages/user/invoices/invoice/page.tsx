@@ -212,7 +212,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       </div>
       <Card>
         <CardHeader className='md:grid-cols-[auto_1fr]'>
-          <h3>Detalles de la factura <span className='text-primary'>{invoice?.invoiceId}</span></h3>
+          <h3>Detalles de la factura <span className='text-primary'>{invoice?.invoiceUid}</span></h3>
           {(invoice?.status === InvoiceStatus.CORRECTION || invoice?.status === InvoiceStatus.PENDING) && (
             <Form {...validateForm}>
               <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>

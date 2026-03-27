@@ -2,7 +2,7 @@ import { Progress } from '@/components/ui/progress'
 import { useLocale } from '@/hooks/use-locale'
 import { formatCountdown, formatDateTime } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
-import { CirclePauseIcon, MoveRightIcon } from 'lucide-react'
+import { CirclePauseIcon, CrownIcon, MoveRightIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export function ProgressBar ({ dateStart, dateEnd, pausedAt }: { dateStart: string; dateEnd: string; pausedAt?: string | null }) {
@@ -29,12 +29,29 @@ export function ProgressBar ({ dateStart, dateEnd, pausedAt }: { dateStart: stri
       <div className='flex items-center justify-between text-xs text-muted-foreground'>
         <span title={`Fecha de inicio ${formatDateTime(dateStart, locale)}`}>{formatDateTime(dateStart, locale)}</span>
         <MoveRightIcon className='w-2 h-2' />
-        <span title={`Tiempo restante ${label}`} className='flex items-center gap-1'>
-          {pausedAt && (
-            <><CirclePauseIcon className='size-4 inline-block' /> Pausada - </>
+        {(end - now) < 0
+          ? (
+            <span title='Subasta finalizada' className='flex items-center gap-1'>
+              <CrownIcon className='size-4 inline-block' />
+              Finalizada
+            </span>
+          )
+          : (
+            <div className='relative'>
+              <span title={`Tiempo restante ${label}`} className='flex items-center gap-1'>
+                {pausedAt && (
+                  <><CirclePauseIcon className='size-4 inline-block' /> Pausada - </>
+                )}
+                {label} restantes
+              </span>
+              {!pausedAt && (end - now) < 60000 && (end - now) > 0 && (
+                <span title={`Tiempo restante ${label}`} className='flex items-center gap-1 animate-ping absolute top-0'>
+                  {label} restantes
+                </span>
+              )}
+            </div>
           )}
-          {label} restantes
-        </span>
+
         <MoveRightIcon className='w-2 h-2' />
         <span title={`Fecha de fin ${formatDateTime(dateEnd, locale)}`}>{formatDateTime(dateEnd, locale)}</span>
       </div>

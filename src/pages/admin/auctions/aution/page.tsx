@@ -122,7 +122,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
             <Form {...form}>
               <form id='auction-form' onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
                 <CardHeader className='flex flex-col xl:flex-row gap-2'>
-                  <h3>Detalle de la subasta <span className='text-primary'>{auction.invoice.invoiceId}</span></h3>
+                  <h3>Detalle de la subasta <span className='text-primary'>{auction.invoice.invoiceUid}</span></h3>
                   <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                     <ButtonGroup>
                       <Button type='button' title='Borrador' disabled variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', AuctionStatus.DRAFT)}>
@@ -351,12 +351,12 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                             <Field>
                               <FieldLabel htmlFor='invoiceId'>UID de factura:</FieldLabel>
                               <InputGroup>
-                                <InputGroupInput id='invoiceId' value={auction.invoice.invoiceId} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
+                                <InputGroupInput id='invoiceId' value={auction.invoice.invoiceUid} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
                                 <InputGroupAddon>
                                   #
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, auction.invoice.invoiceId ?? '')} className='group'>
+                                  <button onClick={(e) => copyToClipboard(e, auction.invoice.invoiceUid ?? '')} className='group'>
                                     <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>

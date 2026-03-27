@@ -34,9 +34,9 @@ export default function AuctionFilters (
     <Card>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
-            <FieldGroup className='grid xl:grid-cols-4 2xl:grid-cols-8 gap-4'>
-              <Field className='col-span-2'>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <FieldGroup className='grid grid-cols-1 md:grid-cols-4 2xl:grid-cols-8 gap-4'>
+              <Field className='md:col-span-2'>
                 <FieldLabel>Rango de fechas</FieldLabel>
                 <DateTimeRangePicker
                   fromValue={form.watch('auctionDateStart')}
@@ -46,60 +46,58 @@ export default function AuctionFilters (
                   minDate={new Date().toISOString()}
                 />
               </Field>
-              <div className='flex gap-2 col-span-2'>
-                <Controller
-                  name='minAmount'
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>Importe mínimo</FieldLabel>
-                      <InputGroup>
-                        <InputGroupInput
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
-                          id={field.name}
-                          type='number'
-                          placeholder='1000'
-                          autoComplete='off'
-                          min={0}
-                          step={0.01}
-                        />
-                        <InputGroupAddon>€</InputGroupAddon>
-                      </InputGroup>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name='maxAmount'
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>Importe máximo</FieldLabel>
-                      <InputGroup>
-                        <InputGroupInput
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
-                          id={field.name}
-                          type='number'
-                          placeholder='10000'
-                          autoComplete='off'
-                          min={0}
-                          step={0.01}
-                        />
-                        <InputGroupAddon>€</InputGroupAddon>
-                      </InputGroup>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-              </div>
+              <Controller
+                name='minAmount'
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>Importe mínimo</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                        id={field.name}
+                        type='number'
+                        placeholder='1000'
+                        autoComplete='off'
+                        min={0}
+                        step={0.01}
+                      />
+                      <InputGroupAddon>€</InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name='maxAmount'
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>Importe máximo</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                        id={field.name}
+                        type='number'
+                        placeholder='10000'
+                        autoComplete='off'
+                        min={0}
+                        step={0.01}
+                      />
+                      <InputGroupAddon>€</InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
               <Controller
                 name='minRating'
                 control={form.control}
@@ -113,11 +111,11 @@ export default function AuctionFilters (
                         onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                         id={field.name}
                         type='number'
-                        placeholder='5'
+                        placeholder='4.75'
                         autoComplete='off'
                         min={0}
                         max={5}
-                        step={0.1}
+                        step={0.01}
                       />
                       <InputGroupAddon>
                         <ShieldCheckIcon className='w-4 h-4' />
@@ -186,7 +184,7 @@ export default function AuctionFilters (
                   </Field>
                 )}
               />
-              <div className='md:col-start-4 xl:col-start-8 justify-end items-end flex gap-2'>
+              <div className='xl:col-start-4 2xl:col-start-8 justify-end items-end flex gap-2'>
                 <Button type='submit'>Filtrar</Button>
                 <Button type='button' variant='outline' onClick={handleClear}>Limpiar</Button>
               </div>

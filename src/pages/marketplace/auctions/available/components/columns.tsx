@@ -1,4 +1,5 @@
 import { ColorBadge } from '@/components/color-badge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLocale } from '@/hooks/use-locale'
 import { formatCurrency } from '@/lib/format-currency'
 import { formatDateTime } from '@/lib/format-date'
@@ -17,16 +18,35 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
       cell: ({row}) => (
         <div className='flex gap-2 items-center'>
           <FileText className='w-4 h-4 text-accent-foreground' />
-          <h4 title={`Factura ${row.original.invoice.invoiceId}`}>{row.original.invoice.invoiceId}</h4>
-          <ColorBadge
-            color={row.original.invoice.rating! >= 4.9 ? 'green' : row.original.invoice.rating! >= 4.5 ? 'yellow' : 'red'}
-            icon={<ShieldCheckIcon />}
-            className='px-1'
-          >
-            <span title={`Rating ${row.original.invoice.rating}`}>
-              {row.original.invoice.rating}
-            </span>
-          </ColorBadge>
+          <h4 title={`Factura ${row.original.invoice.invoiceUid}`}>{row.original.invoice.invoiceUid}</h4>
+          <Tooltip>
+            <TooltipTrigger>
+              <ColorBadge
+                color={row.original.invoice.rating >= 4.9 ? 'green' : row.original.invoice.rating >= 4.5 ? 'yellow' : 'red'}
+                icon={<ShieldCheckIcon/>}
+                className='px-1'
+              >
+                <span title={`Rating ${row.original.invoice.rating}`}>
+                  {row.original.invoice.rating}
+                </span>
+              </ColorBadge>
+            </TooltipTrigger>
+            <TooltipContent className='text-center'>Rating de la factura basado en el estudio de solvencia<br />del deudor, proporcionado por {import.meta.env.VITE_APP_NAME}.</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger>
+              <ColorBadge
+                color={row.original.invoice.extRating >= 4.9 ? 'green' : row.original.invoice.extRating >= 4.5 ? 'yellow' : 'red'}
+                icon={<ShieldCheckIcon/>}
+                className='px-1'
+              >
+                <span title={`Rating ${row.original.invoice.extRating}`}>
+                  {row.original.invoice.extRating}
+                </span>
+              </ColorBadge>
+            </TooltipTrigger>
+            <TooltipContent className='text-center'>Rating de la factura basado en el estudio de solvencia<br />del deudor, proporcionado por {import.meta.env.VITE_EXT_RATING_PROVIDER}.</TooltipContent>
+          </Tooltip>
         </div>
       )
     },

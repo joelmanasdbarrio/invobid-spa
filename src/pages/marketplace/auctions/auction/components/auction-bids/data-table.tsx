@@ -51,7 +51,7 @@ export function DataTable<TData, TValue> ({
   })
 
   return (
-    <div ref={containerRef} className='*:data-[slot=table-container]:max-h-72 *:data-[slot=table-container]:overflow-auto border-y'>
+    <div ref={containerRef} className='*:data-[slot=table-container]:max-h-72 *:data-[slot=table-container]:w-full *:data-[slot=table-container]:overflow-scroll border-y'>
       <Table className='table-padding'>
         <TableHeader className='bg-accent sticky top-0 z-10'>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -70,7 +70,7 @@ export function DataTable<TData, TValue> ({
           {table.getRowModel().rows.length ? (
             <>
               {table.getRowModel().rows.map((row, i) => (
-                <TableRow key={row.id} className='first-of-type:bg-yellow-500/15'>
+                <TableRow key={row.id} className='first-of-type:bg-yellow-500/15 min-h-24'>
                   {row.getVisibleCells().map((cell, j) => (
                     <TableCell key={cell.id}>
                       {(i === 0 && j === 0) && <CrownIcon className='size-4 text-yellow-600' />}
