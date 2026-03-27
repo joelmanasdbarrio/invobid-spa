@@ -43,7 +43,7 @@ export function DataTable<TData, TValue> ({
           </Button>
         </DialogTrigger>
       </div>
-      <div>
+      <div className='w-full'>
         {table.getRowModel().rows?.length ? (
           <div className='grid 2xl:grid-cols-2 gap-4'>
             {table.getRowModel().rows.map(row => (

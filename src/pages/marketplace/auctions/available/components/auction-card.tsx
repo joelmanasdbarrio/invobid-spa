@@ -5,8 +5,8 @@ import { Link } from 'react-router'
 
 export default function AuctionCard ({ row } : { row: Row<Auction>}) {
   return (
-    <Link to={`/marketplace/auctions/${row.original.id}`} className='block w-full h-full'>
-      <Card className='hover:bg-accent h-full block'>
+    <Link to={`/marketplace/auctions/${row.original.id}`} className='block w-full h-full overflow-hidden'>
+      <Card className='hover:bg-accent h-full block overflow-x-scroll'>
         <CardContent className='flex flex-col gap-4 justify-between h-full'>
           {row.getVisibleCells().map(cell => (
             flexRender(cell.column.columnDef.cell, cell.getContext())

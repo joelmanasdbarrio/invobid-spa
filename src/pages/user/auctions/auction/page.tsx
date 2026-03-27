@@ -180,7 +180,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       </div>
       <Card>
         <CardHeader className='md:grid-cols-[auto_1fr]'>
-          <h3>Detalles de la subasta <span className='text-primary'>{auction?.invoice?.invoiceId}</span></h3>
+          <h3>Detalles de la subasta <span className='text-primary'>{auction?.invoice?.invoiceUid}</span></h3>
           {(auction?.status === AuctionStatus.DRAFT || auction?.status === AuctionStatus.PUBLISHED) && (
             <Form {...validateForm}>
               <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
@@ -238,7 +238,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                           disabled={isFormDisabled}
                         >
                           <SelectTrigger>
-                            {verifiedInvoices?.find(inv => inv.id === field.value)?.invoiceId || auction?.invoice?.invoiceId || 'Selecciona una factura'}
+                            {verifiedInvoices?.find(inv => inv.id === field.value)?.invoiceUid || auction?.invoice?.invoiceUid || 'Selecciona una factura'}
                           </SelectTrigger>
                           <SelectContent>
                             <InputGroup className='border-0 border-b w-full'>
@@ -262,7 +262,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                             </SelectItem>
                             {verifiedInvoices?.map(inv => (
                               <SelectItem key={inv.id} value={inv.id}>
-                                {inv.invoiceId}
+                                {inv.invoiceUid}
                               </SelectItem>
                             ))}
                           </SelectContent>

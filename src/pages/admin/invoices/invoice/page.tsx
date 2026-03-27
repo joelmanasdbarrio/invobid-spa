@@ -152,7 +152,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
           <Form {...form}>
             <form id='debtor-form' onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
               <CardHeader className='flex flex-col xl:flex-row gap-2'>
-                <h3>Detalle de la factura <span className='text-primary'>{invoice?.invoiceId}</span></h3>
+                <h3>Detalle de la factura <span className='text-primary'>{invoice?.invoiceUid}</span></h3>
                 <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                   <ButtonGroup>
                     {isFormDisabled
@@ -228,12 +228,12 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                     <Field>
                       <FieldLabel htmlFor='invoiceId'>UID de factura:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput id='invoiceId' value={invoice?.invoiceId} type='text' placeholder='0' required disabled />
+                        <InputGroupInput id='invoiceId' value={invoice?.invoiceUid} type='text' placeholder='0' required disabled />
                         <InputGroupAddon>
                           #
                         </InputGroupAddon>
                         <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, invoice?.invoiceId ?? '')} className='group'>
+                          <button onClick={(e) => copyToClipboard(e, invoice?.invoiceUid ?? '')} className='group'>
                             <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                             <Tooltip>

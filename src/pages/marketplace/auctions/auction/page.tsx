@@ -7,7 +7,6 @@ import z from 'zod'
 
 import { getAuctionById } from '@/services/auction.api'
 
-import { ColorBadge } from '@/components/color-badge'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -17,7 +16,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { formatCurrency } from '@/lib/format-currency'
 import { AuctionStatus, type Auction } from '@/types/Auction'
-import { BuildingIcon, CirclePauseIcon, FileTextIcon, GavelIcon, IdCardIcon, ShieldCheckIcon } from 'lucide-react'
+import { BuildingIcon, CirclePauseIcon, FileTextIcon, GavelIcon, IdCardIcon } from 'lucide-react'
 import { ProgressBar } from '../components/progress-bar'
 import { MarketplaceAuctionBids } from './components/auction-bids/auction-bids'
 
@@ -75,9 +74,9 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
       {auction && (
         <div className='px-6'>
           <ProgressBar
-            dateStart={auction?.auctionDate.auctionDateStart ?? ''}
-            dateEnd={auction?.auctionDate.auctionDateEnd ?? ''}
-            pausedAt={auction?.pausedAt ?? undefined}
+            dateStart={auction.auctionDate.auctionDateStart}
+            dateEnd={auction.auctionDate.auctionDateEnd}
+            pausedAt={auction.pausedAt}
           />
         </div>
       )}
@@ -87,16 +86,7 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
           <Form {...form}>
             <form id='auction-form' className='flex flex-col gap-4'>
               <CardHeader className='flex flex-row items-center gap-2'>
-                <h3>Detalles de la subasta <span className='text-primary'>{auction.invoice.invoiceId}</span></h3>
-                <ColorBadge
-                  color={auction.invoice.rating! >= 4.9 ? 'green' : auction.invoice.rating! >= 4.5 ? 'yellow' : 'red'}
-                  icon={<ShieldCheckIcon />}
-                  className='px-1'
-                >
-                  <span title={`Rating ${auction.invoice.rating}`}>
-                    {auction.invoice.rating}
-                  </span>
-                </ColorBadge>
+                <h3>Detalles de la subasta <span className='text-primary'>{auction.invoice.invoiceUid}</span></h3>
               </CardHeader>
 
               <CardContent className='flex flex-col gap-4'>
@@ -179,24 +169,11 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
                           <Field>
                             <FieldLabel htmlFor='invoiceId'>UID de factura:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='invoiceId' value={auction.invoice.invoiceId} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
+                              <InputGroupInput id='invoiceId' value={auction.invoice.invoiceUid} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
                               <InputGroupAddon>
                                 #
                               </InputGroupAddon>
                             </InputGroup>
-                          </Field>
-                          <Field>
-                            <FieldLabel htmlFor='invoiceRating'>Rating:</FieldLabel>
-                            <InputGroup>
-                              <InputGroupInput id='invoiceRating' value={auction.invoice?.rating} type='text' placeholder='ACME S.L.' required disabled />
-                              <InputGroupAddon>
-                                %
-                              </InputGroupAddon>
-                            </InputGroup>
-                          </Field>
-                          <Field>
-                            <FieldLabel htmlFor='invoiceDueDate'>Fecha de vencimiento:</FieldLabel>
-                            <DatePicker id='invoiceDueDate' value={auction.invoice?.dueDate ?? ''} disabled />
                           </Field>
                           <Field>
                             <FieldLabel htmlFor='invoiceAmount'>Importe:</FieldLabel>
@@ -207,44 +184,32 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
                               </InputGroupAddon>
                             </InputGroup>
                           </Field>
+                          <Field>
+                            <FieldLabel htmlFor='invoiceRating'>Rating {import.meta.env.VITE_APP_NAME}:</FieldLabel>
+                            <InputGroup>
+                              <InputGroupInput id='invoiceRating' value={auction.invoice?.rating} type='text' required disabled />
+                              <InputGroupAddon>
+                                %
+                              </InputGroupAddon>
+                            </InputGroup>
+                          </Field>
+                          <Field>
+                            <FieldLabel htmlFor='invoiceExtRating'>Rating {import.meta.env.VITE_EXT_RATING_PROVIDER}:</FieldLabel>
+                            <InputGroup>
+                              <InputGroupInput id='invoiceExtRating' value={auction.invoice?.extRating} type='text' required disabled />
+                              <InputGroupAddon>
+                                %
+                              </InputGroupAddon>
+                            </InputGroup>
+                          </Field>
+                          <Field>
+                            <FieldLabel htmlFor='invoiceDueDate'>Fecha de vencimiento:</FieldLabel>
+                            <DatePicker id='invoiceDueDate' value={auction.invoice?.dueDate ?? ''} disabled />
+                          </Field>
                         </FieldGroup>
                       </AccordionContent>
                     </AccordionItem>
                   </FieldSet>
-                  {auction.invoice.buyerInvestor && (
-                    <FieldSet>
-                      <AccordionItem value='investor'>
-                        <AccordionTrigger>
-                          <div>
-                            <FieldLegend>Información del inversor</FieldLegend>
-                            <FieldDescription>Inversor que adquirió la factura</FieldDescription>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <FieldGroup className='flex flex-col gap-4 lg:grid lg:grid-cols-2'>
-                            <Field>
-                              <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
-                              <InputGroup>
-                                <InputGroupInput id='investorTaxId' value={auction.invoice.buyerInvestor?.taxId} type='text' placeholder='12345678A' required disabled />
-                                <InputGroupAddon>
-                                  <IdCardIcon />
-                                </InputGroupAddon>
-                              </InputGroup>
-                            </Field>
-                            <Field>
-                              <FieldLabel htmlFor='investorCompanyName'>Razón social:</FieldLabel>
-                              <InputGroup>
-                                <InputGroupInput id='investorCompanyName' value={auction.invoice.buyerInvestor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
-                                <InputGroupAddon>
-                                  <BuildingIcon />
-                                </InputGroupAddon>
-                              </InputGroup>
-                            </Field>
-                          </FieldGroup>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </FieldSet>
-                  )}
                 </Accordion>
               </CardContent>
             </form>
@@ -262,7 +227,7 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
               </AlertDialogTitle>
 
               <AlertDialogDescription>
-                La subasta <span className='font-bold'><FileTextIcon className='size-4 inline-block mb-1' /> {auction.invoice.invoiceId}</span> ha sido pausada por el equipo de Invobid para su revisión. Si tienes alguna duda, por favor contacta con soporte.
+                La subasta <span className='font-bold'><FileTextIcon className='size-4 inline-block mb-1' /> {auction.invoice.invoiceUid}</span> ha sido pausada por el equipo de Invobid para su revisión. Si tienes alguna duda, por favor contacta con soporte.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

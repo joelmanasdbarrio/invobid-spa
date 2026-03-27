@@ -163,7 +163,7 @@ export default function CreateAuctionPage () {
                           defaultValue='__NONE__'
                         >
                           <SelectTrigger>
-                            {verifiedInvoices?.find(inv => inv.id === field.value)?.invoiceId || 'Selecciona una factura'}
+                            {verifiedInvoices?.find(inv => inv.id === field.value)?.invoiceUid || 'Selecciona una factura'}
                           </SelectTrigger>
                           <SelectContent>
                             <InputGroup className='border-0 border-b w-full'>
@@ -187,7 +187,7 @@ export default function CreateAuctionPage () {
                             </SelectItem>
                             {verifiedInvoices?.map(inv => (
                               <SelectItem key={inv.id} value={inv.id}>
-                                {inv.invoiceId}
+                                {inv.invoiceUid}
                               </SelectItem>
                             ))}
                           </SelectContent>

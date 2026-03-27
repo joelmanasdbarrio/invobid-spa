@@ -115,5 +115,5 @@ export function formatCountdown (ms: number): string {
   const h = Math.floor((rem % 86_400_000) / 3_600_000)
   const m = Math.floor((rem % 3_600_000) / 60_000)
   const s = Math.floor((rem % 60_000) / 1_000)
-  return d > 0 ? `${d}d ${h}h ${m}m ${s}s` : h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`
+  return d > 0 ? `${d}d ${h}h ${m}m ${s}s` : h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`
 }
