@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
-import { DateTimeRangePicker } from '@/components/ui/date-time-range-picker'
+import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
@@ -26,34 +26,16 @@ import z from 'zod'
 const formSchema = z.object({
   invoiceId: z.string().min(1, 'La factura es obligatoria'),
   startingPrice: z.number().positive('El precio inicial debe ser mayor que 0'),
-  auctionDateStart: z.date('La fecha de inicio no es válida').refine((date) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const selectedDate = new Date(date)
-    selectedDate.setHours(0, 0, 0, 0)
-    return selectedDate > today
-  }, {
-    message: 'La fecha de inicio debe ser posterior a la fecha actual'
-  }),
   auctionDateEnd: z.date('La fecha de fin no es válida').refine((date) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const minDate = new Date()
+    minDate.setDate(minDate.getDate() + 2)
+    minDate.setHours(0, 0, 0, 0)
     const selectedDate = new Date(date)
     selectedDate.setHours(0, 0, 0, 0)
-    return selectedDate > today
+    return selectedDate >= minDate
   }, {
-    message: 'La fecha de fin debe ser posterior a la fecha actual'
+    message: 'La fecha de fin debe ser al menos 2 días desde hoy'
   })
-}).refine((data) => {
-  const startDate = new Date(data.auctionDateStart)
-  const endDate = new Date(data.auctionDateEnd)
-
-  const nextDay = new Date(startDate)
-  nextDay.setDate(nextDay.getDate() + 1)
-
-  return endDate >= nextDay
-}, {
-  message: 'La fecha de fin de la subasta debe ser al menos un día después de la fecha de inicio'
 })
 
 export default function CreateAuctionPage () {
@@ -68,13 +50,11 @@ export default function CreateAuctionPage () {
     defaultValues: {
       invoiceId: '',
       startingPrice: undefined,
-      auctionDateStart: undefined,
       auctionDateEnd: undefined
     }
   })
 
   const watchedInvoiceId = useWatch({ control: form.control, name: 'invoiceId' })
-  const watchedDateStart = useWatch({ control: form.control, name: 'auctionDateStart' })
   const watchedDateEnd = useWatch({ control: form.control, name: 'auctionDateEnd' })
 
   const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedInvoiceId)
@@ -84,7 +64,7 @@ export default function CreateAuctionPage () {
     ? (() => { const d = parseLocalDate(invoiceDueDate); d.setMonth(d.getMonth() - 1); return d.toISOString() })()
     : undefined
 
-  const auctionStartMinDate = (() => { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(0, 0, 0, 0); return d.toISOString() })()
+  const auctionEndMinDate = (() => { const d = new Date(); d.setDate(d.getDate() + 2); d.setHours(0, 0, 0, 0); return d.toISOString() })()
 
   const loggedInUser = useLoggedInUser()
   const navigate = useNavigate()
@@ -111,7 +91,6 @@ export default function CreateAuctionPage () {
     createAuction(JSON.stringify({
       invoiceId: data.invoiceId,
       startingPrice: data.startingPrice,
-      auctionDateStart: data.auctionDateStart.toISOString(),
       auctionDateEnd: data.auctionDateEnd.toISOString()
     }))
       .then(res => navigate(`/user/auctions/${res.data.id}`))
@@ -284,27 +263,19 @@ export default function CreateAuctionPage () {
                     )}
                   />
                   <Field
-                    data-invalid={!!(form.formState.errors.auctionDateStart || form.formState.errors.auctionDateEnd)}
+                    data-invalid={!!form.formState.errors.auctionDateEnd}
                   >
-                    <FieldLabel>Periodo de subasta:</FieldLabel>
-                    <DateTimeRangePicker
-                      fromValue={watchedDateStart instanceof Date ? watchedDateStart.toISOString() : undefined}
-                      toValue={watchedDateEnd instanceof Date ? watchedDateEnd.toISOString() : undefined}
-                      minDate={auctionStartMinDate}
+                    <FieldLabel>Fecha de fin de subasta:</FieldLabel>
+                    <DateTimePicker
+                      value={watchedDateEnd instanceof Date ? watchedDateEnd.toISOString() : undefined}
+                      minDate={auctionEndMinDate}
                       maxDate={auctionEndMaxDate}
-                      onFromChange={(isoStr) => {
-                        form.setValue('auctionDateStart', (isoStr ? new Date(isoStr) : undefined) as Date, { shouldDirty: true, shouldTouch: true })
-                        form.trigger('auctionDateStart')
-                        form.trigger('auctionDateEnd')
-                      }}
-                      onToChange={(isoStr) => {
+                      onChange={(isoStr) => {
                         form.setValue('auctionDateEnd', (isoStr ? new Date(isoStr) : undefined) as Date, { shouldDirty: true, shouldTouch: true })
-                        form.trigger('auctionDateStart')
                         form.trigger('auctionDateEnd')
                       }}
                       disabled={!watchedInvoiceId}
                     />
-                    {form.formState.errors.auctionDateStart && <FieldError errors={[form.formState.errors.auctionDateStart]} />}
                     {form.formState.errors.auctionDateEnd && <FieldError errors={[form.formState.errors.auctionDateEnd]} />}
                   </Field>
                   <div className='flex gap-2'>

@@ -2,10 +2,10 @@ import { Progress } from '@/components/ui/progress'
 import { useLocale } from '@/hooks/use-locale'
 import { formatCountdown, formatDateTime } from '@/lib/format-date'
 import { cn } from '@/lib/utils'
-import { CirclePauseIcon, CrownIcon, MoveRightIcon } from 'lucide-react'
+import { CrownIcon, MoveRightIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-export function ProgressBar ({ dateStart, dateEnd, pausedAt }: { dateStart: string; dateEnd: string; pausedAt?: string | null }) {
+export function ProgressBar ({ dateStart, dateEnd }: { dateStart: string; dateEnd: string }) {
   const { locale } = useLocale()
 
   const start = new Date(dateStart).getTime()
@@ -14,12 +14,11 @@ export function ProgressBar ({ dateStart, dateEnd, pausedAt }: { dateStart: stri
   const [tick, setTick] = useState(() => Date.now())
 
   useEffect(() => {
-    if (pausedAt) return
     const id = setInterval(() => setTick(Date.now()), 1000)
     return () => clearInterval(id)
-  }, [pausedAt])
+  }, [])
 
-  const now = pausedAt ? new Date(pausedAt).getTime() : tick
+  const now = tick
 
   const progress = Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100))
   const label = formatCountdown(end - now)
@@ -39,12 +38,9 @@ export function ProgressBar ({ dateStart, dateEnd, pausedAt }: { dateStart: stri
           : (
             <div className='relative'>
               <span title={`Tiempo restante ${label}`} className='flex items-center gap-1'>
-                {pausedAt && (
-                  <><CirclePauseIcon className='size-4 inline-block' /> Pausada - </>
-                )}
                 {label} restantes
               </span>
-              {!pausedAt && (end - now) < 60000 && (end - now) > 0 && (
+              {(end - now) < 60000 && (end - now) > 0 && (
                 <span title={`Tiempo restante ${label}`} className='flex items-center gap-1 animate-ping absolute top-0'>
                   {label} restantes
                 </span>
@@ -55,7 +51,7 @@ export function ProgressBar ({ dateStart, dateEnd, pausedAt }: { dateStart: stri
         <MoveRightIcon className='w-2 h-2' />
         <span title={`Fecha de fin ${formatDateTime(dateEnd, locale)}`}>{formatDateTime(dateEnd, locale)}</span>
       </div>
-      <Progress value={progress} className={cn(pausedAt && '*:data-[slot="progress-indicator"]:bg-gray-500')} />
+      <Progress value={progress} className={cn()} />
     </div>
   )
 }

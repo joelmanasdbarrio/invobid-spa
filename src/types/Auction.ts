@@ -9,8 +9,6 @@ export type Auction = {
   profitability: number;
   auctionDate: AuctionDate;
   status: AuctionStatus;
-  lastCommunication?: string;
-  pausedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string;
@@ -24,8 +22,7 @@ export type AuctionDate = {
 export enum AuctionStatus {
   DRAFT = 'draft',
   PUBLISHED = 'published',
-  LIVE = 'live',
-  PAUSED = 'paused',
+  TRANSITIONING = 'transitioning',
   FINISHED = 'finished',
   CANCELLED = 'cancelled',
 }

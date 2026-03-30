@@ -4,7 +4,7 @@ import { formatCurrency } from '@/lib/format-currency'
 import { formatDateTime } from '@/lib/format-date'
 import { AuctionStatus, type Auction } from '@/types/Auction'
 import type { ColumnDef } from '@tanstack/react-table'
-import { CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CirclePauseIcon, CircleSlashIcon, ExternalLinkIcon, GavelIcon } from 'lucide-react'
+import { CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CircleSlashIcon, ExternalLinkIcon, GavelIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link } from 'react-router'
 
@@ -37,7 +37,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
     },
     {
       header: 'Fecha de inicio',
-      cell: ({row}) => formatDateTime(row.original.auctionDate.auctionDateStart, locale)
+      cell: ({row}) => row.original.auctionDate.auctionDateStart && formatDateTime(row.original.auctionDate.auctionDateStart, locale)
     },
     {
       header: 'Fecha de finalización',
@@ -61,16 +61,10 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
                 Publicado
               </ColorBadge>
             )
-          case AuctionStatus.LIVE:
+          case AuctionStatus.TRANSITIONING:
             return (
-              <ColorBadge className='motion-safe:animate-pulse motion-safe:animation-duration-[2s]' color='blue' icon={<CircleGaugeIcon className='motion-safe:animate-spin motion-safe:animation-duration-[4s]' />}>
-                En curso
-              </ColorBadge>
-            )
-          case AuctionStatus.PAUSED:
-            return (
-              <ColorBadge color='slate' icon={<CirclePauseIcon />}>
-                Pausado
+              <ColorBadge color='blue' icon={<CircleGaugeIcon />}>
+                En transición
               </ColorBadge>
             )
           case AuctionStatus.CANCELLED:

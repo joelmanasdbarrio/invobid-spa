@@ -7,7 +7,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { AuctionStatus } from '@/types/Auction'
-import { BuildingIcon, CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CirclePauseIcon, CircleSlashIcon, GavelIcon } from 'lucide-react'
+import { BuildingIcon, CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CircleSlashIcon, GavelIcon } from 'lucide-react'
 import { Controller, type UseFormReturn } from 'react-hook-form'
 
 export default function AuctionFilters (
@@ -120,13 +120,9 @@ export default function AuctionFilters (
                             <ColorBadge color='green' icon={<CircleCheckIcon />}>
                               Publicada
                             </ColorBadge>
-                          ) : field.value === AuctionStatus.LIVE ? (
+                          ) : field.value === AuctionStatus.TRANSITIONING ? (
                             <ColorBadge color='blue' icon={<CircleGaugeIcon/>}>
-                              En curso
-                            </ColorBadge>
-                          ) : field.value === AuctionStatus.PAUSED ? (
-                            <ColorBadge color='slate' icon={<CirclePauseIcon />}>
-                              Pausada
+                              En transición
                             </ColorBadge>
                           ) : field.value === AuctionStatus.CANCELLED ? (
                             <ColorBadge color='red' icon={<CircleSlashIcon />}>
@@ -165,14 +161,9 @@ export default function AuctionFilters (
                             Publicada
                           </ColorBadge>
                         </SelectItem>
-                        <SelectItem value={AuctionStatus.LIVE}>
+                        <SelectItem value={AuctionStatus.TRANSITIONING}>
                           <ColorBadge color='blue' icon={<CircleGaugeIcon />}>
-                            En curso
-                          </ColorBadge>
-                        </SelectItem>
-                        <SelectItem value={AuctionStatus.PAUSED}>
-                          <ColorBadge color='slate' icon={<CirclePauseIcon />}>
-                            Pausada
+                            En transición
                           </ColorBadge>
                         </SelectItem>
                         <SelectItem value={AuctionStatus.CANCELLED}>
