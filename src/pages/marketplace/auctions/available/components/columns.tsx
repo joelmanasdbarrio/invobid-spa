@@ -100,7 +100,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
       header: 'datetime',
       cell: ({row}) => (
         <div className='grid grid-cols-[auto_1fr] gap-2 text-xs text-muted-foreground items-end'>
-          {row.original.status === AuctionStatus.LIVE
+          {row.original.status === AuctionStatus.PUBLISHED
             ? (
               <>
                 <CalendarIcon className='w-4 h-4 inline-block' />
@@ -112,30 +112,16 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
                 {formatDateTime(row.original.invoice.dueDate, locale)}
               </>
             ) : (
-              row.original.status === AuctionStatus.PAUSED
-                ? (
-                  <>
-                    <CalendarIcon className='w-4 h-4 inline-block' />
-                    <ProgressBar
-                      dateStart={row.original.auctionDate.auctionDateStart}
-                      dateEnd={row.original.auctionDate.auctionDateEnd}
-                      pausedAt={row.original.pausedAt}
-                    />
-                    <CalendarXIcon className='w-4 h-4 inline-block' />
-                    {formatDateTime(row.original.invoice.dueDate, locale)}
-                  </>
-                ) : (
-                  <>
-                    <span className='flex gap-2 items-center'>
-                      <CalendarIcon className='w-4 h-4 inline-block' />
-                      {formatDateTime(row.original.auctionDate.auctionDateStart, locale)} <MoveRightIcon className='w-2 h-2' /> {formatDateTime(row.original.auctionDate.auctionDateEnd, locale)}
-                    </span>
-                    <span className='text-xs text-muted-foreground flex items-center gap-2 justify-end'>
-                      <CalendarXIcon className='w-4 h-4 inline-block' />
-                      {formatDateTime(row.original.invoice.dueDate, locale)}
-                    </span>
-                  </>
-                )
+              <>
+                <span className='flex gap-2 items-center'>
+                  <CalendarIcon className='w-4 h-4 inline-block' />
+                  {formatDateTime(row.original.auctionDate.auctionDateStart, locale)} <MoveRightIcon className='w-2 h-2' /> {formatDateTime(row.original.auctionDate.auctionDateEnd, locale)}
+                </span>
+                <span className='text-xs text-muted-foreground flex items-center gap-2 justify-end'>
+                  <CalendarXIcon className='w-4 h-4 inline-block' />
+                  {formatDateTime(row.original.invoice.dueDate, locale)}
+                </span>
+              </>
             )}
         </div>
       )

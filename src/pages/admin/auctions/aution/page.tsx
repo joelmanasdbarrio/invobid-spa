@@ -1,6 +1,4 @@
-import { ColorBadge } from '@/components/color-badge'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
@@ -11,14 +9,13 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
-import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLocale } from '@/hooks/use-locale'
 import { formatCurrency } from '@/lib/format-currency'
 import { getAuctionById, updateAuctionById } from '@/services/auction.api'
 import { AuctionStatus, type Auction } from '@/types/Auction'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { BuildingIcon, CheckIcon, CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CirclePauseIcon, CircleSlashIcon, CopyIcon, ExternalLinkIcon, GavelIcon, IdCardIcon, SaveIcon } from 'lucide-react'
+import { BuildingIcon, CheckIcon, CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CircleSlashIcon, CopyIcon, ExternalLinkIcon, GavelIcon, IdCardIcon, SaveIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
@@ -129,23 +126,19 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         <CircleDashedIcon className='w-5 h-5 rounded-full text-yellow-600'/>
                         {form.watch('status') === AuctionStatus.DRAFT && 'Borrador'}
                       </Button>
-                      <Button type='button' title='Publicada' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', AuctionStatus.PUBLISHED)}>
+                      <Button type='button' title='Publicada' disabled variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', AuctionStatus.PUBLISHED)}>
                         <CircleCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
                         {form.watch('status') === AuctionStatus.PUBLISHED && 'Publicada'}
                       </Button>
-                      <Button type='button' title='En curso' disabled variant='outline' className='bg-blue-300/25 dark:bg-blue-300/25' onClick={() => form.setValue('status', AuctionStatus.LIVE)}>
+                      <Button type='button' title='En transición' disabled variant='outline' className='bg-blue-300/25 dark:bg-blue-300/25' onClick={() => form.setValue('status', AuctionStatus.TRANSITIONING)}>
                         <CircleGaugeIcon className='w-5 h-5 rounded-full text-blue-600'/>
-                        {form.watch('status') === AuctionStatus.LIVE && 'En curso'}
-                      </Button>
-                      <Button type='button' title='Pausada' variant='outline' className='bg-slate-300/25 dark:bg-slate-300/25' onClick={() => form.setValue('status', AuctionStatus.PAUSED)}>
-                        <CirclePauseIcon className='w-5 h-5 rounded-full text-slate-600'/>
-                        {form.watch('status') === AuctionStatus.PAUSED && 'Pausada'}
+                        {form.watch('status') === AuctionStatus.TRANSITIONING && 'En transición'}
                       </Button>
                       <Button type='button' title='Cancelada' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', AuctionStatus.CANCELLED)}>
                         <CircleSlashIcon className='w-5 h-5 rounded-full text-red-600'/>
                         {form.watch('status') === AuctionStatus.CANCELLED && 'Cancelada'}
                       </Button>
-                      <Button type='button' title='Finalizada' disabled variant='outline' className='bg-violet-300/25 dark:bg-violet-300/25' onClick={() => form.setValue('status', AuctionStatus.FINISHED)}>
+                      <Button type='button' title='Finalizada' variant='outline' className='bg-violet-300/25 dark:bg-violet-300/25' onClick={() => form.setValue('status', AuctionStatus.FINISHED)}>
                         <GavelIcon className='w-5 h-5 rounded-full text-violet-600'/>
                         {form.watch('status') === AuctionStatus.FINISHED && 'Finalizada'}
                       </Button>
@@ -514,7 +507,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                     <FieldGroup>
                       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
-                          <Button className='ms-auto w-min' disabled={JSON.stringify(originalAuction) === JSON.stringify(auction) && !form.formState.isDirty}>
+                          <Button className='ms-auto w-min' disabled={JSON.stringify(originalAuction) === JSON.stringify(auction) || !form.formState.isDirty}>
                             <SaveIcon />
                             Guardar cambios
                           </Button>
@@ -577,41 +570,6 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
 
         <AuctionChangeHistory auction={auction} />
       </div>
-
-      {(auction && auction.status === AuctionStatus.PAUSED) && (
-        <AlertDialog defaultOpen>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Actualización de la subasta</AlertDialogTitle>
-              <AlertDialogDescription>
-                Compruebe el estado de la subasta y ejecute las acciones necesarias:
-                <ul className='list-disc list-inside wrap-break-word'>
-                  <li>
-                    Seleccione <ColorBadge className='inline' color='green'>publicar</ColorBadge> si está todo correcto para reanudar la subasta (aprox. 1 minuto).
-                  </li>
-                  <li>
-                    Seleccione <ColorBadge className='inline' color='red'>cancelar</ColorBadge> para finalizar la subasta inmediatamente sin adjudicar la factura a ningún inversor (las pujas ejercidas por los inversores serán revertidas).
-                  </li>
-                </ul>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <Item variant='muted' className='gap-2'>
-              <ItemMedia className='self-center! w-10 h-10'>
-                <CirclePauseIcon className='w-full h-full rounded-full text-slate-600 bg-slate-300/25 p-2'/>
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle>Subasta pausada</ItemTitle>
-                <ItemDescription className='line-clamp-none'>
-                  {auction.lastCommunication}
-                </ItemDescription>
-              </ItemContent>
-            </Item>
-            <AlertDialogFooter>
-              <AlertDialogAction>Aceptar</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
     </section>
   )
 }

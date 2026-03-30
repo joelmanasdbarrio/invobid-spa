@@ -7,7 +7,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useLocale } from '@/hooks/use-locale'
 import { calcDiscount, calcProfitability, invertProfitability } from '@/lib/auction-metrics'
 import { formatCurrency } from '@/lib/format-currency'
-import { formatCountdown } from '@/lib/format-date'
 import { connectSocketIO, socketEmit } from '@/lib/socket.io'
 import { getBids } from '@/services/bid.api'
 import { AuctionStatus, type Auction } from '@/types/Auction'
@@ -21,7 +20,7 @@ import { DataTable } from './data-table'
 export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined}) {
   const { locale } = useLocale()
 
-  const isAuctionLive = auction?.status === AuctionStatus.LIVE
+  const isAuctionActive = auction?.status === AuctionStatus.PUBLISHED
 
   const [bidInput, setBidInput] = useState('')
   const [bidInputInvalid, setBidInputInvalid] = useState(false)
@@ -37,18 +36,6 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
 
   const [currentPage, setCurrentPage] = useState(1)
   const [currentLimit] = useState(10)
-
-  function handlePageChange (newPage: number) {
-    setCurrentPage(newPage)
-    setSearchParams(newParams)
-  }
-
-  const [now, setNow] = useState(() => Date.now())
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(id)
-  }, [])
 
   useEffect(() => {
     if (!auction?.id) return
@@ -156,9 +143,6 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
     setPreviewProfitability(null)
   }
 
-  const auctionStartMs = new Date(auction?.auctionDate.auctionDateStart || '').getTime()
-  const countdownLabel = formatCountdown(auctionStartMs - now)
-
   return (
     <Card className='flex flex-col lg:grid lg:grid-cols-[65%_auto] lg:grid-rows-1 flex-wrap gap-0 lg:divide-x pt-0 overflow-hidden relative'>
       <div className='w-full'>
@@ -250,7 +234,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
         <div className='grow flex flex-col gap-2 p-4 pb-0'>
           <div className='grid grid-cols-2 grid-rows-1 gap-2'>
             <InputGroup>
-              <InputGroupInput placeholder='Valor final' type='number' min={latestBidAmount} step={100} disabled={!isAuctionLive} value={bidInput} aria-invalid={bidInputInvalid} onChange={e => handleBidInputChange(e.target.value)} />
+              <InputGroupInput placeholder='Valor final' type='number' min={latestBidAmount} step={100} disabled={!isAuctionActive} value={bidInput} aria-invalid={bidInputInvalid} onChange={e => handleBidInputChange(e.target.value)} />
               <InputGroupAddon align='inline-end'>
                 €
               </InputGroupAddon>
@@ -261,7 +245,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
               </InputGroupAddon>
             </InputGroup>
             <InputGroup>
-              <InputGroupInput placeholder='Rentabilidad' type='number' min={profitabilityReductions[0]} step={0.01} disabled={!isAuctionLive} value={profitabilityInput} aria-invalid={profitabilityInputInvalid} onChange={e => handleProfitabilityInputChange(e.target.value)} />
+              <InputGroupInput placeholder='Rentabilidad' type='number' min={profitabilityReductions[0]} step={0.01} disabled={!isAuctionActive} value={profitabilityInput} aria-invalid={profitabilityInputInvalid} onChange={e => handleProfitabilityInputChange(e.target.value)} />
               <InputGroupAddon>
                 -
               </InputGroupAddon>
@@ -282,7 +266,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
                 <Button
                   key={delta}
                   variant='outline'
-                  disabled={!isAuctionLive}
+                  disabled={!isAuctionActive}
                   onClick={() => handleBidInputChange(String(profitabilityReductionAmounts[i]))}
                   onMouseEnter={() => calcPreview(profitabilityReductionAmounts[i])}
                   onMouseLeave={clearPreview}
@@ -294,7 +278,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
           </div>
           <Button
             className='w-full mt-auto'
-            disabled={!isAuctionLive || !bidInput}
+            disabled={!isAuctionActive || !bidInput}
             onClick={handlePlaceBid}
           >
             Realizar oferta
@@ -302,17 +286,15 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
         </div>
       </div>
 
-      {(!auction || auction.status === AuctionStatus.PUBLISHED) && (
+      {(!auction || !isAuctionActive) && auction !== undefined && (
         <div className='absolute top-0 w-full h-full bg-white/20 backdrop-blur-md z-20 flex flex-col items-center justify-center'>
-          {auction
-            ? (
-              <>
-                <span>La subasta comenzará en:</span>
-                <span className='font-bold text-2xl'>{countdownLabel}</span>
-              </>
-            ) : (
-              <Spinner className='size-8' />
-            )}
+          <span>La subasta ha finalizado</span>
+        </div>
+      )}
+
+      {!auction && (
+        <div className='absolute top-0 w-full h-full bg-white/20 backdrop-blur-md z-20 flex flex-col items-center justify-center'>
+          <Spinner className='size-8' />
         </div>
       )}
     </Card>

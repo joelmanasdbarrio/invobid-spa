@@ -46,10 +46,10 @@ export function AdminSidebarContent () {
     })
   }, [])
 
-  const [pausedAuctionsCount, setPausedAuctionsCount] = useState(0)
+  const [transitioningAuctionsCount, setTransitioningAuctionsCount] = useState(0)
   useEffect(() => {
-    countAuctions({ status: AuctionStatus.PAUSED }).then(res => {
-      setPausedAuctionsCount(res.data)
+    countAuctions({ status: AuctionStatus.TRANSITIONING }).then(res => {
+      setTransitioningAuctionsCount(res.data)
     })
   }, [])
 
@@ -175,7 +175,7 @@ export function AdminSidebarContent () {
               <CollapsibleTrigger asChild className={'group/collapsible'}>
                 <SidebarMenuButton isActive={location.pathname.startsWith('/admin/auctions')}>
                   <GavelIcon /> Subastas
-                  {pausedAuctionsCount > 0 && (
+                  {transitioningAuctionsCount > 0 && (
                     <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
                   )}
                   <ChevronRightIcon className='ms-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
@@ -191,12 +191,12 @@ export function AdminSidebarContent () {
                     </Link>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
-                    <Link to='/admin/auctions?status=paused'>
+                    <Link to='/admin/auctions?status=transitioning'>
                       <SidebarMenuButton>
-                        Subastas pausadas
-                        {pausedAuctionsCount > 0 && (
+                        Subastas en transición
+                        {transitioningAuctionsCount > 0 && (
                           <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
-                            {pausedAuctionsCount > 99 ? '+99' : pausedAuctionsCount}
+                            {transitioningAuctionsCount > 99 ? '+99' : transitioningAuctionsCount}
                           </Badge>
                         )}
                       </SidebarMenuButton>

@@ -8,7 +8,6 @@ import z from 'zod'
 import { getAuctionById } from '@/services/auction.api'
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
@@ -16,7 +15,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { formatCurrency } from '@/lib/format-currency'
 import { AuctionStatus, type Auction } from '@/types/Auction'
-import { BuildingIcon, CirclePauseIcon, FileTextIcon, GavelIcon, IdCardIcon } from 'lucide-react'
+import { BuildingIcon, GavelIcon, IdCardIcon } from 'lucide-react'
 import { ProgressBar } from '../components/progress-bar'
 import { MarketplaceAuctionBids } from './components/auction-bids/auction-bids'
 
@@ -76,7 +75,6 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
           <ProgressBar
             dateStart={auction.auctionDate.auctionDateStart}
             dateEnd={auction.auctionDate.auctionDateEnd}
-            pausedAt={auction.pausedAt}
           />
         </div>
       )}
@@ -217,25 +215,6 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
         )}
       </Card>
 
-      {(auction && auction.status === AuctionStatus.PAUSED) && (
-        <AlertDialog defaultOpen>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className='flex flex-col items-center'>
-                <CirclePauseIcon className='size-12 rounded-full text-slate-600 bg-slate-300/25 p-2'/>
-                La subasta se ha pausado para revisión
-              </AlertDialogTitle>
-
-              <AlertDialogDescription>
-                La subasta <span className='font-bold'><FileTextIcon className='size-4 inline-block mb-1' /> {auction.invoice.invoiceUid}</span> ha sido pausada por el equipo de Invobid para su revisión. Si tienes alguna duda, por favor contacta con soporte.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction>Aceptar</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
     </section>
   )
 }
