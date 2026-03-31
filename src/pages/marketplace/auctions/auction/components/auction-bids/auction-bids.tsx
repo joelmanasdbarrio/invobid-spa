@@ -163,7 +163,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
           </div>
         </CardHeader>
         <div className='flex flex-col gap-4 pb-6 xl:pb-0'>
-          <DataTable columns={columns} data={bids} totalItems={totalItems} onLoadMore={() => handlePageChange(currentPage + 1)} />
+          <DataTable columns={columns} data={bids} totalItems={totalItems} onLoadMore={() => setCurrentPage(currentPage + 1)} />
         </div>
       </div>
 

@@ -14,8 +14,8 @@ export function useBidColumns (): ColumnDef<Bid>[] {
       header: ''
     },
     {
-      accessorKey: 'investor.companyName',
-      header: 'Inversor'
+      id: 'rank',
+      header: '#'
     },
     {
       accessorKey: 'amount',
