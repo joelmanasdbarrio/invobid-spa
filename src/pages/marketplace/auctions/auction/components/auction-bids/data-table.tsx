@@ -74,6 +74,7 @@ export function DataTable<TData, TValue> ({
                   {row.getVisibleCells().map((cell, j) => (
                     <TableCell key={cell.id}>
                       {(i === 0 && j === 0) && <CrownIcon className='size-4 text-yellow-600' />}
+                      {(j === 1) && totalItems - i}
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
