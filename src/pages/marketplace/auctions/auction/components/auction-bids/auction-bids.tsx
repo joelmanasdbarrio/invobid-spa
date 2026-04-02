@@ -72,7 +72,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
     }
   }, [auction?.id])
 
-  const latestBidAmount = bids[0]?.amount ?? auction?.startingPrice ?? 0
+  const latestBidAmount = bids[0]?.amount ?? auction?.price?.start ?? 0
   const faceValue = auction?.invoice.amount ?? 0
   const buyerPercentage = auction?.invoice.transactionFee.buyerPercentage ?? 0
   const currentDiscount = calcDiscount(faceValue, latestBidAmount)
@@ -162,7 +162,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
             </span>
           </div>
         </CardHeader>
-        <div className='flex flex-col gap-4 pb-6 xl:pb-0'>
+        <div className='flex flex-col'>
           <DataTable columns={columns} data={bids} totalItems={totalItems} onLoadMore={() => setCurrentPage(currentPage + 1)} />
         </div>
       </div>
@@ -172,10 +172,10 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
           <div className='flex flex-col md:gap-5'>
             <h4>Precio actual</h4>
             <div className='flex flex-col gap-2'>
-              <span className='text-4xl'>
+              <span className='text-2xl lg:text-4xl'>
                 {formatCurrency(latestBidAmount, locale, auction?.invoice.currency)}
               </span>
-              <span className='line-through text-lg'>
+              <span className='line-through lg:text-lg'>
                 {formatCurrency(auction?.invoice.amount, locale, auction?.invoice.currency)}
               </span>
             </div>
@@ -185,10 +185,10 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
               <TooltipTrigger>
                 <ColorBadge
                   color={auction?.invoice.rating >= 4.9 ? 'green' : auction?.invoice.rating >= 4.5 ? 'yellow' : 'red'}
-                  icon={<ShieldCheckIcon className='size-8' />}
+                  icon={<ShieldCheckIcon className='size-4 lg:size-8' />}
                   className='px-4 rounded-full'
                 >
-                  <span title={`Rating ${auction?.invoice.rating}`} className='text-lg font-bold'>
+                  <span title={`Rating ${auction?.invoice.rating}`} className='lg:text-lg font-bold'>
                     {auction?.invoice.rating}
                   </span>
                 </ColorBadge>
@@ -199,10 +199,10 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
               <TooltipTrigger>
                 <ColorBadge
                   color={auction?.invoice.extRating >= 4.9 ? 'green' : auction?.invoice.extRating >= 4.5 ? 'yellow' : 'red'}
-                  icon={<ShieldCheckIcon className='size-8' />}
+                  icon={<ShieldCheckIcon className='size-4 lg:size-8' />}
                   className='px-4 rounded-full'
                 >
-                  <span title={`Rating ${auction?.invoice.extRating}`} className='text-lg font-bold'>
+                  <span title={`Rating ${auction?.invoice.extRating}`} className='lg:text-lg font-bold'>
                     {auction?.invoice.extRating}
                   </span>
                 </ColorBadge>
@@ -232,7 +232,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
           </div>
         </div>
         <div className='grow flex flex-col gap-2 p-4 pb-0'>
-          <div className='grid grid-cols-2 grid-rows-1 gap-2'>
+          <div className='grid lg:grid-cols-2 lg:grid-rows-1 gap-2'>
             <InputGroup>
               <InputGroupInput placeholder='Valor final' type='number' min={latestBidAmount} step={100} disabled={!isAuctionActive} value={bidInput} aria-invalid={bidInputInvalid} onChange={e => handleBidInputChange(e.target.value)} />
               <InputGroupAddon align='inline-end'>

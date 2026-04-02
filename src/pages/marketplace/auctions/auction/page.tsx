@@ -36,7 +36,7 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
         .then(res => res.data)
         .then(auction => {
           setAuction(auction)
-          setLastBreadcrumb(auction.invoice.invoiceId)
+          setLastBreadcrumb(auction.invoice.invoiceUid)
         })
         .catch(() => {
           navigate('/marketplace/auctions')
@@ -73,8 +73,8 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
       {auction && (
         <div className='px-6'>
           <ProgressBar
-            dateStart={auction.auctionDate.auctionDateStart}
-            dateEnd={auction.auctionDate.auctionDateEnd}
+            dateStart={auction.date.start}
+            dateEnd={auction.date.end}
           />
         </div>
       )}
@@ -165,9 +165,9 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
                       <AccordionContent>
                         <FieldGroup className='flex flex-col gap-4 lg:grid lg:grid-cols-2'>
                           <Field>
-                            <FieldLabel htmlFor='invoiceId'>UID de factura:</FieldLabel>
+                            <FieldLabel htmlFor='invoiceUid'>UID de factura:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='invoiceId' value={auction.invoice.invoiceUid} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
+                              <InputGroupInput id='invoiceUid' value={auction.invoice.invoiceUid} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
                               <InputGroupAddon>
                                 #
                               </InputGroupAddon>

@@ -52,7 +52,7 @@ const formSchema = z.object({
 })
 
 export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {invoiceId} = useParams()
+  const {invoiceUid} = useParams()
   const [invoice, setInvoice] = useState<Invoice | undefined>()
   const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
   const [isFormDisabled, setIsFormDisabled] = useState(true)
@@ -61,19 +61,19 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
 
   const navigate = useNavigate()
   useEffect(() => {
-    if(invoiceId) {
-      getInvoiceById(invoiceId)
+    if(invoiceUid) {
+      getInvoiceById(invoiceUid)
         .then(res => res.data)
         .then(invoice => {
           setInvoice(invoice)
           setOriginalInvoice(invoice)
-          setLastBreadcrumb(`Factura ${invoice.invoiceId}`)
+          setLastBreadcrumb(`Factura ${invoice.invoiceUid}`)
         })
         .catch(() => {
           navigate('/admin/invoices')
         })
     }
-  }, [invoiceId, navigate, setLastBreadcrumb])
+  }, [invoiceUid, navigate, setLastBreadcrumb])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -115,7 +115,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
         setIsFormDisabled(true)
         setIsDialogOpen(false)
       })
-      .then(() => navigate(`/admin/invoices/${invoiceId}`))
+      .then(() => navigate(`/admin/invoices/${invoiceUid}`))
   }
 
   function handleReset () {
@@ -226,9 +226,9 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                       )}
                     />
                     <Field>
-                      <FieldLabel htmlFor='invoiceId'>UID de factura:</FieldLabel>
+                      <FieldLabel htmlFor='invoiceUid'>UID de factura:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput id='invoiceId' value={invoice?.invoiceUid} type='text' placeholder='0' required disabled />
+                        <InputGroupInput id='invoiceUid' value={invoice?.invoiceUid} type='text' placeholder='0' required disabled />
                         <InputGroupAddon>
                           #
                         </InputGroupAddon>
@@ -610,7 +610,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
         <InvoiceChangeHistory invoice={invoice} />
       </div>
 
-      <InvoiceDocuments invoiceId={invoice?.id ?? ''} />
+      <InvoiceDocuments invoiceUid={invoice?.id ?? ''} />
     </section>
   )
 }

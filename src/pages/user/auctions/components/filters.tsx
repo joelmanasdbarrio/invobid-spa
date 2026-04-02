@@ -16,7 +16,7 @@ export default function AuctionFilters (
     sellerCompanyName?: string | undefined;
     buyerCompanyName?: string | undefined;
     debtorCompanyName?: string | undefined;
-    invoiceId?: string | undefined;
+    invoiceUid?: string | undefined;
     maxAmount?: number | undefined;
     minAmount?: number | undefined;
     auctionDateStart?: string | undefined;
@@ -28,7 +28,7 @@ export default function AuctionFilters (
       sellerCompanyName?: string | undefined;
     buyerCompanyName?: string | undefined;
     debtorCompanyName?: string | undefined;
-    invoiceId?: string | undefined;
+    invoiceUid?: string | undefined;
     maxAmount?: number | undefined;
     minAmount?: number | undefined;
     auctionDateStart?: string | undefined;

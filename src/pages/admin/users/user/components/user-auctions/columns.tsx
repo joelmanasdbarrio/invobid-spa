@@ -35,19 +35,19 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
       header: 'Deudor'
     },
     {
-      accessorKey: 'startingPrice',
+      accessorKey: 'price.start',
       header: 'Precio de salida',
-      cell: ({row}) => formatCurrency(row.original.startingPrice, locale, row.original.invoice.currency)
+      cell: ({row}) => formatCurrency(row.original.price.start, locale, row.original.invoice.currency)
     },
     {
-      accessorKey: 'auctionDate.auctionDateStart',
+      accessorKey: 'date.start',
       header: 'Fecha de inicio',
-      cell: ({row}) => formatDateTime(row.original.auctionDate.auctionDateStart, locale)
+      cell: ({row}) => formatDateTime(row.original.date.start, locale)
     },
     {
-      accessorKey: 'auctionDate.auctionDateEnd',
+      accessorKey: 'date.end',
       header: 'Fecha de finalización',
-      cell: ({row}) => formatDateTime(row.original.auctionDate.auctionDateEnd, locale)
+      cell: ({row}) => formatDateTime(row.original.date.end, locale)
     },
     {
       accessorKey: 'status',
