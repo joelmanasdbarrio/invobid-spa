@@ -14,7 +14,7 @@ import AdminUserPage from './pages/admin/users/user/page'
 import DashboardPage from './pages/dashboard/page'
 import Login from './pages/login/page'
 import MarketplaceAuctionPage from './pages/marketplace/auctions/auction/page'
-import MarketplaceAvailableAuctionsPage from './pages/marketplace/auctions/available/page'
+import MarketplaceAvailableAuctionsPage from './pages/marketplace/auctions/page'
 import NotFoundPage from './pages/not-found'
 import ProfilePage from './pages/profile/page'
 import Register from './pages/register/page'
@@ -57,7 +57,7 @@ function App () {
 
           <Route path='/admin/invoices'>
             <Route index element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de facturas', href: '/admin/invoices' }]}><AdminInvoicesPage /></MainLayout></ProtectedRoute>} />
-            <Route path=':invoiceId' element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de facturas', href: '/admin/invoices' }, { label: lastBreadcrumb, href: '/admin/invoices/:invoiceId' }]}><AdminInvoicePage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
+            <Route path=':invoiceUid' element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de facturas', href: '/admin/invoices' }, { label: lastBreadcrumb, href: '/admin/invoices/:invoiceUid' }]}><AdminInvoicePage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
           </Route>
 
           <Route path='/admin/auctions'>
@@ -73,7 +73,7 @@ function App () {
 
           <Route path='/invoices'>
             <Route index element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis facturas', href: '/invoices' }]}><InvoicesPage /></MainLayout></ProtectedRoute>} />
-            <Route path=':invoiceId' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis facturas', href: '/invoices' }, { label: lastBreadcrumb, href: '/invoices/:invoiceId' }]}><InvoicePage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
+            <Route path=':invoiceUid' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis facturas', href: '/invoices' }, { label: lastBreadcrumb, href: '/invoices/:invoiceUid' }]}><InvoicePage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
             <Route path='create' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis facturas', href: '/invoices' }, { label: 'Crear factura', href: '/invoices/create' }]}><CreateInvoicePage /></MainLayout></ProtectedRoute>} />
           </Route>
 

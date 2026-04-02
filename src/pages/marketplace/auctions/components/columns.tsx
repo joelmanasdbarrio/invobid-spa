@@ -7,7 +7,7 @@ import { AuctionStatus, type Auction } from '@/types/Auction'
 import type { ColumnDef } from '@tanstack/react-table'
 import { BadgeEuroIcon, BuildingIcon, CalendarIcon, CalendarXIcon, FileText, HandCoinsIcon, MoveRightIcon, PercentIcon, ShieldCheckIcon, TrendingUpIcon } from 'lucide-react'
 import { useMemo } from 'react'
-import { ProgressBar } from '../../components/progress-bar'
+import { ProgressBar } from './progress-bar'
 
 export function useAuctionColumns (): ColumnDef<Auction>[] {
   const { locale } = useLocale()
@@ -73,15 +73,15 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
               <BadgeEuroIcon className='w-4 h-4 inline-block' />
               Importe
             </span>
-            <span className='ps-6' title={`Importe ${row.original.invoice.amount}`}>{formatCurrency(row.original.startingPrice, locale, row.original.invoice.currency)}</span>
+            <span className='ps-6' title={`Importe ${row.original.invoice.amount}`}>{formatCurrency(row.original.price.start, locale, row.original.invoice.currency)}</span>
           </div>
           <div className='flex flex-col text-sm'>
             <span className='text-muted-foreground flex items-center gap-2'>
               <PercentIcon className='w-4 h-4 inline-block' />
               Descuento
             </span>
-            <span className='ps-6 text-xl font-bold' title={`Descuento ${Number(row.original.discount).toFixed(2)}%`}>
-              {Number(row.original.discount).toFixed(2)}%
+            <span className='ps-6 text-xl font-bold' title={`Descuento ${Number(row.original.discount.start).toFixed(2)}%`}>
+              {Number(row.original.discount.start).toFixed(2)}%
             </span>
           </div>
           <div className='flex flex-col text-sm'>
@@ -89,8 +89,8 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
               <TrendingUpIcon className='w-4 h-4 inline-block' />
               Rentabilidad
             </span>
-            <span className='ps-6 text-xl font-bold text-green-500 text-shadow-md' title={`Rentabilidad ${Number(row.original.profitability).toFixed(2)}%`}>
-              {Number(row.original.profitability).toFixed(2)}%
+            <span className='ps-6 text-xl font-bold text-green-500 text-shadow-md' title={`Rentabilidad ${Number(row.original.profitability.start).toFixed(2)}%`}>
+              {Number(row.original.profitability.start).toFixed(2)}%
             </span>
           </div>
         </div>
@@ -105,8 +105,8 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
               <>
                 <CalendarIcon className='w-4 h-4 inline-block' />
                 <ProgressBar
-                  dateStart={row.original.auctionDate.auctionDateStart}
-                  dateEnd={row.original.auctionDate.auctionDateEnd}
+                  dateStart={row.original.date.start}
+                  dateEnd={row.original.date.end}
                 />
                 <CalendarXIcon className='w-4 h-4 inline-block' />
                 {formatDateTime(row.original.invoice.dueDate, locale)}
@@ -115,7 +115,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
               <>
                 <span className='flex gap-2 items-center'>
                   <CalendarIcon className='w-4 h-4 inline-block' />
-                  {formatDateTime(row.original.auctionDate.auctionDateStart, locale)} <MoveRightIcon className='w-2 h-2' /> {formatDateTime(row.original.auctionDate.auctionDateEnd, locale)}
+                  {formatDateTime(row.original.date.start, locale)} <MoveRightIcon className='w-2 h-2' /> {formatDateTime(row.original.date.end, locale)}
                 </span>
                 <span className='text-xs text-muted-foreground flex items-center gap-2 justify-end'>
                   <CalendarXIcon className='w-4 h-4 inline-block' />

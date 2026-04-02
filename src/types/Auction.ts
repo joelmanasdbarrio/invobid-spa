@@ -1,22 +1,39 @@
+import type { Bid } from './Bid'
 import type { Invoice } from './Invoice'
 
 export type Auction = {
   id: string;
   invoice: Invoice;
-  startingPrice: number;
-  endingPrice: number;
-  discount: number;
-  profitability: number;
-  auctionDate: AuctionDate;
+  bids: Bid[];
+  price: AuctionPrice;
+  discount: AuctionDiscount;
+  profitability: AuctionProfitability;
+  date: AuctionDate;
   status: AuctionStatus;
+  lastCommunication?: string;
   createdAt: string;
   updatedAt: string;
   deletedAt: string;
 }
 
+export type AuctionPrice = {
+  start: number;
+  end?: number;
+}
+
+export type AuctionDiscount = {
+  start: number;
+  end?: number;
+}
+
+export type AuctionProfitability = {
+  start: number;
+  end?: number;
+}
+
 export type AuctionDate = {
-  auctionDateStart: string;
-  auctionDateEnd: string;
+  start?: string;
+  end: string;
 }
 
 export enum AuctionStatus {

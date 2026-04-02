@@ -60,21 +60,21 @@ const baseFormSchema = z.object({
 })
 
 const documentFormSchema = z.object({
-  invoiceId: z.string()
+  invoiceUid: z.string()
     .min(1, 'El identificador de factura es obligatorio')
     .or(z.literal('')),
   file: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
 }).refine((data) => {
-  if (data.file || data.invoiceId) {
-    return data.file && data.invoiceId
+  if (data.file || data.invoiceUid) {
+    return data.file && data.invoiceUid
   }
   return true
 })
 
 export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {invoiceId} = useParams<{ invoiceId: string }>()
+  const {invoiceUid} = useParams<{ invoiceUid: string }>()
   const [invoice, setInvoice] = useState<Invoice | undefined>()
   const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
   const [verifiedDebtors, setVerifiedDebtors] = useState<[Debtor]>()
@@ -105,7 +105,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     resolver: zodResolver(documentFormSchema),
     mode: 'onTouched',
     defaultValues: {
-      invoiceId: '',
+      invoiceUid: '',
       file: undefined
     }
   })
@@ -122,18 +122,18 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!invoiceId || !loggedInUser) return
-    getInvoiceById(invoiceId)
+    if (!invoiceUid || !loggedInUser) return
+    getInvoiceById(invoiceUid)
       .then(res => res.data)
       .then(invoice => {
         setInvoice(invoice)
         setOriginalInvoice(invoice)
-        setLastBreadcrumb(`Factura ${invoice.invoiceId}`)
+        setLastBreadcrumb(`Factura ${invoice.invoiceUid}`)
       })
       .catch(() => {
         navigate('/user/invoices')
       })
-  }, [invoiceId, loggedInUser, navigate, setLastBreadcrumb])
+  }, [invoiceUid, loggedInUser, navigate, setLastBreadcrumb])
 
   useEffect(() => {
     if (!loggedInUser) return
@@ -154,33 +154,33 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
   }, [loggedInUser, debtorSearch])
 
   function onSubmitBase (data: z.infer<typeof baseFormSchema>) {
-    if (!invoiceId) return
-    updateInvoiceById(invoiceId, JSON.stringify({
+    if (!invoiceUid) return
+    updateInvoiceById(invoiceUid, JSON.stringify({
       debtorId: data.debtorId,
       amount: data.amount,
       dueDate: toDateOnlyString(data.dueDate)
     }))
       .then(res => setInvoice(res.data))
-      .then(() => navigate(`/user/invoices/${invoiceId}`))
+      .then(() => navigate(`/user/invoices/${invoiceUid}`))
   }
 
   function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
-    if (!invoiceId) return
+    if (!invoiceUid) return
     const formData = new FormData()
-    formData.append('invoiceId', data.invoiceId)
+    formData.append('invoiceUid', data.invoiceUid)
     formData.append('file', data.file[0])
-    updateInvoiceById(invoiceId, formData)
+    updateInvoiceById(invoiceUid, formData)
       .then(res => setInvoice(res.data))
-      .then(() => navigate(`/user/invoices/${invoiceId}`))
+      .then(() => navigate(`/user/invoices/${invoiceUid}`))
   }
 
   function onSubmitValidate (data: z.infer<typeof validateFormSchema>) {
-    if (!invoiceId) return
-    updateInvoiceById(invoiceId, JSON.stringify({
+    if (!invoiceUid) return
+    updateInvoiceById(invoiceUid, JSON.stringify({
       status: data.status
     }))
       .then(res => setInvoice(res.data))
-      .then(() => navigate(`/user/invoices/${invoiceId}`))
+      .then(() => navigate(`/user/invoices/${invoiceUid}`))
   }
 
   const invoiceStatusTextMap: {
@@ -366,7 +366,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                 <FieldLegend>Actualizar documento</FieldLegend>
                 <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
                   <Controller
-                    name='invoiceId'
+                    name='invoiceUid'
                     control={documentForm.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>

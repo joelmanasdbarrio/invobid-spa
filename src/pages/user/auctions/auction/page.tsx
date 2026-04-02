@@ -28,7 +28,7 @@ const validateFormSchema = z.object({
 })
 
 const baseFormSchema = z.object({
-  invoiceId: z.string(),
+  invoiceUid: z.string(),
   startingPrice: z.number().positive(),
   auctionDateEnd: z.date('La fecha de vencimiento no es válida').refine((date) => {
     const minDate = new Date()
@@ -65,24 +65,24 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     resolver: zodResolver(baseFormSchema),
     mode: 'onTouched',
     defaultValues: {
-      invoiceId: auction?.invoice.id || '',
-      startingPrice: auction?.startingPrice || 0,
-      auctionDateEnd: auction?.auctionDate.auctionDateEnd ? new Date(auction.auctionDate.auctionDateEnd) : undefined
+      invoiceUid: auction?.invoice.id || '',
+      startingPrice: auction?.price?.start || 0,
+      auctionDateEnd: auction?.date.end ? new Date(auction.date.end) : undefined
     }
   })
 
   useEffect(() => {
     baseForm.reset({
-      invoiceId: auction?.invoice.id || '',
-      startingPrice: auction?.startingPrice || 0,
-      auctionDateEnd: auction?.auctionDate.auctionDateEnd ? new Date(auction.auctionDate.auctionDateEnd) : undefined
+      invoiceUid: auction?.invoice.id || '',
+      startingPrice: auction?.price?.start || 0,
+      auctionDateEnd: auction?.date.end ? new Date(auction.date.end) : undefined
     })
   }, [auction, baseForm])
 
-  const watchedInvoiceId = useWatch({ control: baseForm.control, name: 'invoiceId' })
+  const watchedinvoiceUid = useWatch({ control: baseForm.control, name: 'invoiceUid' })
   const watchedDateEnd = useWatch({ control: baseForm.control, name: 'auctionDateEnd' })
 
-  const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedInvoiceId) ?? auction?.invoice
+  const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedinvoiceUid) ?? auction?.invoice
   const invoiceDueDate = selectedInvoice?.dueDate
 
   const auctionEndMaxDate = invoiceDueDate
@@ -101,7 +101,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       .then(auction => {
         setAuction(auction)
         setOriginalAuction(auction)
-        setLastBreadcrumb(`Subasta ${auction.invoice.invoiceId}`)
+        setLastBreadcrumb(`Subasta ${auction.invoice.invoiceUid}`)
       })
       .catch(() => {
         navigate('/user/auctions')
@@ -115,7 +115,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       setIsLoadingInvoices(true)
       getInvoices({
         sellerInvestorId: loggedInUser.id,
-        ...(invoiceSearch ? { invoiceId: invoiceSearch } : {}),
+        ...(invoiceSearch ? { invoiceUid: invoiceSearch } : {}),
         status: InvoiceStatus.VERIFIED
       })
         .then(res => res.data)
@@ -135,7 +135,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
   function onSubmitBase (data: z.infer<typeof baseFormSchema>) {
     if (!auctionId) return
     updateAuctionById(auctionId, JSON.stringify({
-      invoiceId: data.invoiceId,
+      invoiceUid: data.invoiceUid,
       startingPrice: data.startingPrice,
       auctionDateEnd: data.auctionDateEnd.toISOString()
     }))
@@ -194,7 +194,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                 <FieldLegend>Factura relacionada</FieldLegend>
                 <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
                   <Controller
-                    name='invoiceId'
+                    name='invoiceUid'
                     control={baseForm.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>

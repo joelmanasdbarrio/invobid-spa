@@ -51,7 +51,7 @@ export function DataTable<TData, TValue> ({
   })
 
   return (
-    <div ref={containerRef} className='*:data-[slot=table-container]:max-h-72 *:data-[slot=table-container]:w-full *:data-[slot=table-container]:overflow-scroll border-y'>
+    <div ref={containerRef} className='*:data-[slot=table-container]:max-h-80 *:data-[slot=table-container]:w-full *:data-[slot=table-container]:overflow-scroll'>
       <Table className='table-padding'>
         <TableHeader className='bg-accent sticky top-0 z-10'>
           {table.getHeaderGroups().map((headerGroup) => (
