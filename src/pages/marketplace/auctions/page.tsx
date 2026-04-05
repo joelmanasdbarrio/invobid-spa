@@ -1,12 +1,17 @@
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
+import { connectSocketIO } from '@/lib/socket.io'
 import { getAuctions } from '@/services/auction.api'
+import { getBids } from '@/services/bid.api'
+import type { Auction } from '@/types/Auction'
+import type { Bid } from '@/types/Bid'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeftIcon, ChevronRightIcon, GavelIcon } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
+import type { Socket } from 'socket.io-client'
 import z from 'zod'
 import { useAuctionColumns } from './components/columns'
 import { DataTable } from './components/data-table'
@@ -46,8 +51,9 @@ export default function MarketplaceAvailableAuctionsPage () {
     form.reset(defaultForm)
   }, [form, defaultForm])
 
-  const [data, setData] = useState([])
+  const [data, setData] = useState<Auction[]>([])
   const [totalItems, setTotalItems] = useState(0)
+  const socketRef = useRef<Socket | null>(null)
 
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10))
   const [currentLimit, setCurrentLimit] = useState(parseInt(searchParams.get('limit') || '10', 10))
@@ -76,11 +82,32 @@ export default function MarketplaceAvailableAuctionsPage () {
       ...filters,
       page: String(currentPage),
       limit: String(currentLimit)
-    }).then(res => {
-      setData(res.data)
+    }).then(async res => {
+      const auctions: Auction[] = res.data
+      const bidResults = await Promise.all(
+        auctions.map(a => getBids({ auctionId: a.id, page: '1', limit: '1' }))
+      )
+      bidResults.forEach((bidRes, i) => {
+        auctions[i].bids = bidRes.data
+      })
+      setData(auctions)
       setTotalItems(res['_metadata'].total)
     })
   }, [searchParams, currentPage, currentLimit])
+
+  useEffect(() => {
+    const socket = connectSocketIO('/auctions')
+    socketRef.current = socket
+
+    socket.on('auction-bid-update', ({ auctionId, bid }: { auctionId: string; bid: Bid }) => {
+      setData(prev => prev.map(a => a.id === auctionId ? { ...a, bids: [bid] } : a))
+    })
+
+    return () => {
+      socket.disconnect()
+      socketRef.current = null
+    }
+  }, [])
 
   function handleClear () {
     form.reset({
