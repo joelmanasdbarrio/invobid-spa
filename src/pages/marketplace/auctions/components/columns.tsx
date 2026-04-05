@@ -73,15 +73,15 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
               <BadgeEuroIcon className='w-4 h-4 inline-block' />
               Importe
             </span>
-            <span className='ps-6' title={`Importe ${row.original.invoice.amount}`}>{formatCurrency(row.original.price.start, locale, row.original.invoice.currency)}</span>
+            <span className='ps-6' title={`Importe ${row.original.invoice.amount}`}>{formatCurrency(Number(row.original.bids[0]?.amount ?? row.original.price.start), locale, row.original.invoice.currency)}</span>
           </div>
           <div className='flex flex-col text-sm'>
             <span className='text-muted-foreground flex items-center gap-2'>
               <PercentIcon className='w-4 h-4 inline-block' />
               Descuento
             </span>
-            <span className='ps-6 text-xl font-bold' title={`Descuento ${Number(row.original.discount.start).toFixed(2)}%`}>
-              {Number(row.original.discount.start).toFixed(2)}%
+            <span className='ps-6 text-xl font-bold' title={`Descuento ${Number(row.original.bids[0]?.discount ?? row.original.discount.start).toFixed(2)}%`}>
+              {Number(row.original.bids[0]?.discount ?? row.original.discount.start).toFixed(2)}%
             </span>
           </div>
           <div className='flex flex-col text-sm'>
@@ -89,8 +89,8 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
               <TrendingUpIcon className='w-4 h-4 inline-block' />
               Rentabilidad
             </span>
-            <span className='ps-6 text-xl font-bold text-green-500 text-shadow-md' title={`Rentabilidad ${Number(row.original.profitability.start).toFixed(2)}%`}>
-              {Number(row.original.profitability.start).toFixed(2)}%
+            <span className='ps-6 text-xl font-bold text-green-500 text-shadow-md' title={`Rentabilidad ${Number(row.original.bids[0]?.profitability ?? row.original.profitability.start).toFixed(2)}%`}>
+              {Number(row.original.bids[0]?.profitability ?? row.original.profitability.start).toFixed(2)}%
             </span>
           </div>
         </div>
