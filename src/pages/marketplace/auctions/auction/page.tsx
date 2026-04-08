@@ -36,7 +36,7 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
         .then(res => res.data)
         .then(auction => {
           setAuction(auction)
-          setLastBreadcrumb(auction.invoice.invoiceUid)
+          setLastBreadcrumb(`Subasta de factura ${auction.invoice.invoiceUid}`)
         })
         .catch(() => {
           navigate('/marketplace/auctions')

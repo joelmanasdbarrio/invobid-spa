@@ -43,7 +43,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
         .then(auction => {
           setAuction(auction)
           setOriginalAuction(auction)
-          setLastBreadcrumb(auction.invoice.invoiceUid)
+          setLastBreadcrumb(`Subasta de factura ${auction.invoice.invoiceUid}`)
         })
         .catch(() => {
           navigate('/admin/auctions')

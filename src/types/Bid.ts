@@ -3,7 +3,7 @@ import type { Investor } from './User'
 
 export type Bid = {
   id: string;
-  auction: Auction;
+  auction?: Auction;
   investor: Investor;
   amount: number;
   discount: number;
