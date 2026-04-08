@@ -83,9 +83,10 @@ function App () {
             <Route path='create' element={<ProtectedRoute userType={InvestorType.COMPANY}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis subastas', href: '/auctions' }, { label: 'Crear subasta', href: '/auctions/create' }]}><CreateAuctionPage /></MainLayout></ProtectedRoute>} />
           </Route>
 
+          {/* Marketplace */}
           <Route path='/marketplace/auctions'>
-            <Route index element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Subastas', href: '/marketplace/auctions' }]}><MarketplaceAvailableAuctionsPage /></MainLayout></ProtectedRoute>} />
-            <Route path=':auctionId' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Subastas', href: '/marketplace/auctions' }, { label: lastBreadcrumb, href: '/marketplace/auctions/:auctionId' }]}><MarketplaceAuctionPage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
+            <Route index element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Subastas activas', href: '/marketplace/auctions' }]}><MarketplaceAvailableAuctionsPage /></MainLayout></ProtectedRoute>} />
+            <Route path=':auctionId' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Subastas activas', href: '/marketplace/auctions' }, { label: lastBreadcrumb, href: '/marketplace/auctions/:auctionId' }]}><MarketplaceAuctionPage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
           </Route>
 
           <Route path='*' element={<ProtectedRoute><MainLayout><NotFoundPage /></MainLayout></ProtectedRoute>} />

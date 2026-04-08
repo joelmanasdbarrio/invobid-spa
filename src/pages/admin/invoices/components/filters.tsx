@@ -9,7 +9,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { InvoiceStatus } from '@/types/Invoice'
-import { BuildingIcon, CheckCheckIcon, CircleAlertIcon, ClockIcon, OctagonXIcon } from 'lucide-react'
+import { BuildingIcon, CheckCheckIcon, CircleAlertIcon, ClockIcon, KeyRoundIcon, OctagonXIcon } from 'lucide-react'
 import { Controller, type UseFormReturn } from 'react-hook-form'
 
 export default function InvoiceFilters (
@@ -18,6 +18,7 @@ export default function InvoiceFilters (
       sellerCompanyName?: string | undefined;
       buyerCompanyName?: string | undefined;
       debtorCompanyName?: string | undefined;
+      invoiceUid?: string | undefined;
       maxAmount?: number | undefined;
       minAmount?: number | undefined;
       minRating?: number | undefined;
@@ -31,6 +32,7 @@ export default function InvoiceFilters (
       sellerCompanyName?: string | undefined;
       buyerCompanyName?: string | undefined;
       debtorCompanyName?: string | undefined;
+      invoiceUid?: string | undefined;
       maxAmount?: number | undefined;
       minAmount?: number | undefined;
       minRating?: number | undefined;
@@ -94,6 +96,24 @@ export default function InvoiceFilters (
                       <InputGroupInput {...field} id={field.name} type='text' placeholder='Empresa S.L.' autoComplete='off'/>
                       <InputGroupAddon>
                         <BuildingIcon />
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name='invoiceUid'
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>UID de la factura</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput {...field} id={field.name} type='text' placeholder='UID de la factura' autoComplete='off'/>
+                      <InputGroupAddon>
+                        <KeyRoundIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (

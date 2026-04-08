@@ -610,7 +610,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
         <InvoiceChangeHistory invoice={invoice} />
       </div>
 
-      <InvoiceDocuments invoiceUid={invoice?.id ?? ''} />
+      <InvoiceDocuments invoiceUid={invoice?.invoiceUid ?? ''} />
     </section>
   )
 }

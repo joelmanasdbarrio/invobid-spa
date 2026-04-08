@@ -101,7 +101,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       .then(auction => {
         setAuction(auction)
         setOriginalAuction(auction)
-        setLastBreadcrumb(`Subasta ${auction.invoice.invoiceUid}`)
+        setLastBreadcrumb(`Subasta de factura ${auction.invoice.invoiceUid}`)
       })
       .catch(() => {
         navigate('/user/auctions')

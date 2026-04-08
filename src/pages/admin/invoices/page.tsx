@@ -18,6 +18,7 @@ const formSchema = z.object({
   sellerCompanyName: z.string().optional(),
   buyerCompanyName: z.string().optional(),
   debtorCompanyName: z.string().optional(),
+  invoiceUid: z.string().optional(),
   maxAmount: z.number().positive().optional(),
   minAmount: z.number().positive().optional(),
   minRating: z.number().positive().optional(),
@@ -50,6 +51,7 @@ export default function AdminInvoicesPage () {
     sellerCompanyName: searchParams.get('sellerCompanyName') || undefined,
     buyerCompanyName: searchParams.get('buyerCompanyName') || undefined,
     debtorCompanyName: searchParams.get('debtorCompanyName') || undefined,
+    invoiceUid: searchParams.get('invoiceUid') || undefined,
     maxAmount: searchParams.get('maxAmount') ? Number(searchParams.get('maxAmount')) : undefined,
     minAmount: searchParams.get('minAmount') ? Number(searchParams.get('minAmount')) : undefined,
     minRating: searchParams.get('minRating') ? Number(searchParams.get('minRating')) : undefined,
@@ -125,6 +127,7 @@ export default function AdminInvoicesPage () {
       dueDateFrom: undefined,
       dueDateTo: undefined,
       isSold: undefined,
+      invoiceUid: undefined,
       includeDeleted: undefined
     })
     setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
