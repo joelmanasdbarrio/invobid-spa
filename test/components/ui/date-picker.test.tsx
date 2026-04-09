@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 // DatePicker uses useLocale() which reads from LocaleContext.
 // We mock the hook so tests don't need the full provider tree.
 vi.mock('@/hooks/use-locale', () => ({
-  default: () => ({ locale: 'es-ES', setLocale: vi.fn() })
+  useLocale: () => ({ locale: 'es-ES', setLocale: vi.fn() })
 }))
 
 describe('DatePicker', () => {

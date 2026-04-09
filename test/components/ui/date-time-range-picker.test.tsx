@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/hooks/use-locale', () => ({
-  default: () => ({ locale: 'es-ES', setLocale: vi.fn() })
+  useLocale: () => ({ locale: 'es-ES', setLocale: vi.fn() })
 }))
 
 describe('DateTimeRangePicker', () => {

@@ -1,6 +1,4 @@
-import ColorBadge from '@/components/color-badge'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
@@ -11,19 +9,19 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
-import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import useLocale from '@/hooks/use-locale'
+import { useLocale } from '@/hooks/use-locale'
 import { formatCurrency } from '@/lib/format-currency'
 import { getAuctionById, updateAuctionById } from '@/services/auction.api'
 import { AuctionStatus, type Auction } from '@/types/Auction'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { BuildingIcon, CheckIcon, CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CirclePauseIcon, CircleSlashIcon, CopyIcon, ExternalLinkIcon, GavelIcon, IdCardIcon, SaveIcon } from 'lucide-react'
+import { BuildingIcon, CheckIcon, CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CircleSlashIcon, CopyIcon, ExternalLinkIcon, GavelIcon, IdCardIcon, SaveIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
 import z from 'zod'
-import { AuctionChangeHistory } from './auction-change-history'
+import { AuctionBidHistory } from './components/auction-bid-history/auction-bid-history'
+import { AuctionChangeHistory } from './components/auction-change-history'
 
 const formSchema = z.object({
   status: z.enum(AuctionStatus).optional(),
@@ -45,7 +43,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
         .then(auction => {
           setAuction(auction)
           setOriginalAuction(auction)
-          setLastBreadcrumb(auction.invoice.invoiceId)
+          setLastBreadcrumb(`Subasta de factura ${auction.invoice.svc}`)
         })
         .catch(() => {
           navigate('/admin/auctions')
@@ -106,6 +104,66 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
     }, 2000)
   }
 
+  // Helper: Get the latest bid
+  const getLatestBid = () => {
+    if (!auction || !auction.bids || auction.bids.length === 0) return null
+    return auction.bids.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+  }
+
+  // Helper: Get display ending price based on auction status
+  const getDisplayEndingPrice = (): number | undefined => {
+    if (!auction) return undefined
+    if (auction.status === AuctionStatus.FINISHED) {
+      return auction.price.end
+    }
+    // For TRANSITIONING and PUBLISHED, show latest bid amount
+    const latestBid = getLatestBid()
+    return latestBid?.amount
+  }
+
+  // Helper: Get display ending discount based on auction status
+  const getDisplayEndingDiscount = (): number | undefined => {
+    if (!auction) return undefined
+    if (auction.status === AuctionStatus.FINISHED) {
+      return auction.discount.end
+    }
+    // For TRANSITIONING and PUBLISHED, show latest bid discount
+    const latestBid = getLatestBid()
+    return latestBid?.discount
+  }
+
+  // Helper: Get display ending profitability based on auction status
+  const getDisplayEndingProfitability = (): number | undefined => {
+    if (!auction) return undefined
+    if (auction.status === AuctionStatus.FINISHED) {
+      return auction.profitability.end
+    }
+    // For TRANSITIONING and PUBLISHED, show latest bid profitability
+    const latestBid = getLatestBid()
+    return latestBid?.profitability
+  }
+
+  // Helper: Get ending price label based on auction status
+  const getEndingPriceLabel = () => {
+    if (!auction) return 'Precio de cierre'
+    if (auction.status === AuctionStatus.FINISHED) return 'Precio de cierre'
+    return 'Oferta más reciente'
+  }
+
+  // Helper: Get ending discount label based on auction status
+  const getEndingDiscountLabel = () => {
+    if (!auction) return 'Descuento de cierre'
+    if (auction.status === AuctionStatus.FINISHED) return 'Descuento de cierre'
+    return 'Descuento de oferta más reciente'
+  }
+
+  // Helper: Get ending profitability label based on auction status
+  const getEndingProfitabilityLabel = () => {
+    if (!auction) return 'Rentabilidad de cierre'
+    if (auction.status === AuctionStatus.FINISHED) return 'Rentabilidad de cierre'
+    return 'Rentabilidad de oferta más reciente'
+  }
+
   const updateNotesMap: Record<string, string> = { }
 
   return (
@@ -122,30 +180,26 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
             <Form {...form}>
               <form id='auction-form' onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
                 <CardHeader className='flex flex-col xl:flex-row gap-2'>
-                  <h3>Detalle de la subasta <span className='text-primary'>{auction.invoice.invoiceId}</span></h3>
+                  <h3>Detalle de la subasta <span className='text-primary'>{auction.id}</span></h3>
                   <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                     <ButtonGroup>
-                      <Button type='button' title='Borrador' disabled variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', AuctionStatus.DRAFT)}>
+                      <Button type='button' title='Borrador' disabled variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25'>
                         <CircleDashedIcon className='w-5 h-5 rounded-full text-yellow-600'/>
                         {form.watch('status') === AuctionStatus.DRAFT && 'Borrador'}
                       </Button>
-                      <Button type='button' title='Publicada' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', AuctionStatus.PUBLISHED)}>
+                      <Button type='button' title='Publicada' disabled variant='outline' className='bg-green-300/25 dark:bg-green-300/25'>
                         <CircleCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
                         {form.watch('status') === AuctionStatus.PUBLISHED && 'Publicada'}
                       </Button>
-                      <Button type='button' title='En curso' disabled variant='outline' className='bg-blue-300/25 dark:bg-blue-300/25' onClick={() => form.setValue('status', AuctionStatus.LIVE)}>
+                      <Button type='button' title='En transición' disabled variant='outline' className='bg-blue-300/25 dark:bg-blue-300/25'>
                         <CircleGaugeIcon className='w-5 h-5 rounded-full text-blue-600'/>
-                        {form.watch('status') === AuctionStatus.LIVE && 'En curso'}
+                        {form.watch('status') === AuctionStatus.TRANSITIONING && 'En transición'}
                       </Button>
-                      <Button type='button' title='Pausada' variant='outline' className='bg-slate-300/25 dark:bg-slate-300/25' onClick={() => form.setValue('status', AuctionStatus.PAUSED)}>
-                        <CirclePauseIcon className='w-5 h-5 rounded-full text-slate-600'/>
-                        {form.watch('status') === AuctionStatus.PAUSED && 'Pausada'}
-                      </Button>
-                      <Button type='button' title='Cancelada' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', AuctionStatus.CANCELLED)}>
+                      <Button type='button' title='Cancelada' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', AuctionStatus.CANCELLED, { shouldDirty: true })}>
                         <CircleSlashIcon className='w-5 h-5 rounded-full text-red-600'/>
                         {form.watch('status') === AuctionStatus.CANCELLED && 'Cancelada'}
                       </Button>
-                      <Button type='button' title='Finalizada' disabled variant='outline' className='bg-violet-300/25 dark:bg-violet-300/25' onClick={() => form.setValue('status', AuctionStatus.FINISHED)}>
+                      <Button type='button' disabled={auction.status !== AuctionStatus.TRANSITIONING} title='Finalizada' variant='outline' className='bg-violet-300/25 dark:bg-violet-300/25' onClick={() => form.setValue('status', AuctionStatus.FINISHED, { shouldDirty: true })}>
                         <GavelIcon className='w-5 h-5 rounded-full text-violet-600'/>
                         {form.watch('status') === AuctionStatus.FINISHED && 'Finalizada'}
                       </Button>
@@ -159,14 +213,14 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                       <Field>
                         <FieldLabel>Fecha inicio</FieldLabel>
                         <DateTimePicker
-                          value={auction.auctionDate.auctionDateStart}
+                          value={auction.date.start}
                           disabled
                         />
                       </Field>
                       <Field>
                         <FieldLabel>Fecha fin</FieldLabel>
                         <DateTimePicker
-                          value={auction.auctionDate.auctionDateEnd}
+                          value={auction.date.end}
                           disabled
                         />
                       </Field>
@@ -174,7 +228,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         <FieldLabel>Precio de salida</FieldLabel>
                         <InputGroup>
                           <InputGroupInput
-                            value={formatCurrency(auction.startingPrice, locale, auction.invoice.currency) ?? ''}
+                            value={formatCurrency(auction.price.start, locale, auction.invoice.currency) ?? ''}
                             disabled
                           />
                           <InputGroupAddon>
@@ -183,14 +237,62 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         </InputGroup>
                       </Field>
                       <Field>
-                        <FieldLabel>Precio de cierre</FieldLabel>
+                        <FieldLabel>{getEndingPriceLabel()}</FieldLabel>
                         <InputGroup>
                           <InputGroupInput
-                            value={formatCurrency(auction.endingPrice, locale, auction.invoice.currency) ?? ''}
+                            value={formatCurrency(getDisplayEndingPrice() ?? 0, locale, auction.invoice.currency) ?? ''}
                             disabled
                           />
                           <InputGroupAddon>
                             €
+                          </InputGroupAddon>
+                        </InputGroup>
+                      </Field>
+                      <Field>
+                        <FieldLabel>Descuento de salida</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            value={auction.discount.start != null ? new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(Number(auction.discount.start)) : ''}
+                            disabled
+                          />
+                          <InputGroupAddon>
+                            %
+                          </InputGroupAddon>
+                        </InputGroup>
+                      </Field>
+                      <Field>
+                        <FieldLabel>{getEndingDiscountLabel()}</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            value={getDisplayEndingDiscount() != null ? new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(Number(getDisplayEndingDiscount())) : ''}
+                            disabled
+                          />
+                          <InputGroupAddon>
+                            %
+                          </InputGroupAddon>
+                        </InputGroup>
+                      </Field>
+                      <Field>
+                        <FieldLabel>Rentabilidad de salida</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            value={auction.profitability.start != null ? new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(Number(auction.profitability.start)) : ''}
+                            disabled
+                          />
+                          <InputGroupAddon>
+                            %
+                          </InputGroupAddon>
+                        </InputGroup>
+                      </Field>
+                      <Field>
+                        <FieldLabel>{getEndingProfitabilityLabel()}</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            value={getDisplayEndingProfitability() != null ? new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(Number(getDisplayEndingProfitability())) : ''}
+                            disabled
+                          />
+                          <InputGroupAddon>
+                            %
                           </InputGroupAddon>
                         </InputGroup>
                       </Field>
@@ -349,14 +451,14 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         <AccordionContent>
                           <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
                             <Field>
-                              <FieldLabel htmlFor='invoiceId'>UID de factura:</FieldLabel>
+                              <FieldLabel htmlFor='svc'>UID de factura:</FieldLabel>
                               <InputGroup>
-                                <InputGroupInput id='invoiceId' value={auction.invoice.invoiceId} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
+                                <InputGroupInput id='svc' value={auction.invoice.svc} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
                                 <InputGroupAddon>
                                   #
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, auction.invoice.invoiceId ?? '')} className='group'>
+                                  <button onClick={(e) => copyToClipboard(e, auction.invoice.svc ?? '')} className='group'>
                                     <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>
@@ -523,37 +625,45 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                           <DialogHeader>
                             <DialogTitle>¿Estás seguro de que deseas guardar los cambios?</DialogTitle>
                           </DialogHeader>
-                          <DialogDescription>Esta acción actualizará la información del inversor en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
+                          <DialogDescription>Esta acción actualizará la información de la subasta en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
 
-                          <Controller
-                            name='lastCommunication'
-                            control={form.control}
-                            render={({ field }) => (
-                              <Field className='mt-4'>
-                                <FieldLabel htmlFor={field.name}>Notas de la actualización:</FieldLabel>
-                                <InputGroup>
-                                  <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
-                                </InputGroup>
-                                <div className='flex flex-wrap gap-1'>
-                                  {Object.entries(updateNotesMap).map(([key, note]) => (
-                                    <Badge
-                                      key={key}
-                                      variant='outline'
-                                      className='hover:cursor-pointer border-dashed hover:bg-accent'
-                                      onClick={() => {
-                                        form.setValue('lastCommunication', note)
-                                      }}
-                                    >
-                                      {note}
-                                    </Badge>
-                                  ))}
-                                </div>
-                                <FieldDescription>
-                                  Este mensaje le indicará al usuario próximas acciones que debe realizar o el motivo de la actualización.
-                                </FieldDescription>
-                              </Field>
-                            )}
-                          />
+                          {form.getValues('status') === AuctionStatus.CANCELLED && (
+                            <Controller
+                              name='lastCommunication'
+                              control={form.control}
+                              render={({ field }) => (
+                                <Field className='mt-4'>
+                                  <FieldLabel htmlFor={field.name}>Notas de la actualización:</FieldLabel>
+                                  <InputGroup>
+                                    <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
+                                  </InputGroup>
+                                  <div className='flex flex-wrap gap-1'>
+                                    {Object.entries(updateNotesMap).map(([key, note]) => (
+                                      <Badge
+                                        key={key}
+                                        variant='outline'
+                                        className='hover:cursor-pointer border-dashed hover:bg-accent'
+                                        onClick={() => {
+                                          form.setValue('lastCommunication', note)
+                                        }}
+                                      >
+                                        {note}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                  <FieldDescription>
+                                    Este mensaje le indicará al usuario próximas acciones que debe realizar o el motivo de la actualización.
+                                  </FieldDescription>
+                                </Field>
+                              )}
+                            />
+                          )}
+
+                          {form.getValues('status') === AuctionStatus.FINISHED && (
+                            <DialogDescription>
+                              Al finalizar la subasta, se fijarán los valores de cierre (precio, descuento y rentabilidad) basados en la puja ganadora y se transferirá la propiedad de la factura al inversor ganador: <b>{`${auction.bids[0].investor.companyName} (${auction.bids[0].investor.taxId})`}</b>.
+                            </DialogDescription>
+                          )}
 
                           <DialogFooter>
                             <DialogClose asChild>
@@ -578,40 +688,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
         <AuctionChangeHistory auction={auction} />
       </div>
 
-      {(auction && auction.status === AuctionStatus.PAUSED) && (
-        <AlertDialog defaultOpen>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Actualización de la subasta</AlertDialogTitle>
-              <AlertDialogDescription>
-                Compruebe el estado de la subasta y ejecute las acciones necesarias:
-                <ul className='list-disc list-inside wrap-break-word'>
-                  <li>
-                    Seleccione <ColorBadge className='inline' color='green'>publicar</ColorBadge> si está todo correcto para reanudar la subasta (aprox. 1 minuto).
-                  </li>
-                  <li>
-                    Seleccione <ColorBadge className='inline' color='red'>cancelar</ColorBadge> para finalizar la subasta inmediatamente sin adjudicar la factura a ningún inversor (las pujas ejercidas por los inversores serán revertidas).
-                  </li>
-                </ul>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <Item variant='muted' className='gap-2'>
-              <ItemMedia className='self-center! w-10 h-10'>
-                <CirclePauseIcon className='w-full h-full rounded-full text-slate-600 bg-slate-300/25 p-2'/>
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle>Subasta pausada</ItemTitle>
-                <ItemDescription className='line-clamp-none'>
-                  {auction.lastCommunication}
-                </ItemDescription>
-              </ItemContent>
-            </Item>
-            <AlertDialogFooter>
-              <AlertDialogAction>Aceptar</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <AuctionBidHistory auction={auction} />
     </section>
   )
 }

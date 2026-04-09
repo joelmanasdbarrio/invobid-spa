@@ -55,14 +55,18 @@ export function InvestorSidebarContent () {
               <CollapsibleContent>
                 <SidebarMenuSub className={'m-0 pe-0'}>
                   <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Disponibles
-                    </SidebarMenuButton>
+                    <Link to='/marketplace/auctions'>
+                      <SidebarMenuButton isActive={location.pathname.startsWith('/marketplace/auctions')}>
+                        Disponibles
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Pujadas
-                    </SidebarMenuButton>
+                    <Link to='/marketplace/auctions/bids'>
+                      <SidebarMenuButton isActive={location.pathname.startsWith('/marketplace/auctions/bids')}>
+                        Pujadas
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>
               </CollapsibleContent>

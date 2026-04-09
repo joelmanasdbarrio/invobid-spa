@@ -1,0 +1,99 @@
+import { ColorBadge } from '@/components/color-badge'
+import { useLocale } from '@/hooks/use-locale'
+import { formatCurrency } from '@/lib/format-currency'
+import { formatDateTime } from '@/lib/format-date'
+import { AuctionStatus, type Auction } from '@/types/Auction'
+import type { ColumnDef } from '@tanstack/react-table'
+import { CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CircleSlashIcon, ExternalLinkIcon, GavelIcon } from 'lucide-react'
+import { useMemo } from 'react'
+import { Link } from 'react-router'
+
+export function useAuctionColumns (): ColumnDef<Auction>[] {
+  const { locale } = useLocale()
+
+  return useMemo(() => [
+    {
+      accessorKey: 'id',
+      header: '',
+      enableHiding: false,
+      cell: ({row}) => (
+        <Link to={`/auctions/${row.original.id}`}>
+          <ExternalLinkIcon className='w-4 h-4' />
+        </Link>
+      )
+    },
+    {
+      accessorKey: 'invoice.sellerInvestor.companyName',
+      header: 'Cedente'
+    },
+    {
+      accessorKey: 'invoice.buyerInvestor.companyName',
+      header: 'Inversor'
+    },
+    {
+      accessorKey: 'invoice.debtor.companyName',
+      header: 'Deudor'
+    },
+    {
+      accessorKey: 'price.start',
+      header: 'Precio de salida',
+      cell: ({row}) => formatCurrency(row.original.price.start, locale, row.original.invoice.currency)
+    },
+    {
+      accessorKey: 'price.end',
+      header: 'Precio de cierre',
+      cell: ({row}) => row.original.price.end ? formatCurrency(row.original.price.end, locale, row.original.invoice.currency) : null
+    },
+    {
+      accessorKey: 'date.start',
+      header: 'Fecha de inicio',
+      cell: ({row}) => formatDateTime(row.original.date.start, locale)
+    },
+    {
+      accessorKey: 'date.end',
+      header: 'Fecha de finalización',
+      cell: ({row}) => formatDateTime(row.original.date.end, locale)
+    },
+    {
+      accessorKey: 'status',
+      header: 'Estado',
+      cell: ({row}) => {
+        const status = row.original.status
+        switch (status) {
+          case AuctionStatus.DRAFT:
+            return (
+              <ColorBadge color='yellow' icon={<CircleDashedIcon />}>
+                Borrador
+              </ColorBadge>
+            )
+          case AuctionStatus.PUBLISHED:
+            return (
+              <ColorBadge color='green' icon={<CircleCheckIcon />}>
+                Publicado
+              </ColorBadge>
+            )
+          case AuctionStatus.CANCELLED:
+            return (
+              <ColorBadge color='red' icon={<CircleSlashIcon />}>
+                Cancelado
+              </ColorBadge>
+            )
+          case AuctionStatus.TRANSITIONING:
+            return (
+              <ColorBadge color='blue' icon={<CircleGaugeIcon />}>
+                En transición
+              </ColorBadge>
+            )
+          case AuctionStatus.FINISHED:
+            return (
+              <ColorBadge color='purple' icon={<GavelIcon />}>
+                Finalizado
+              </ColorBadge>
+            )
+          default:
+            return status
+        }
+      }
+    }
+  ], [locale])
+}

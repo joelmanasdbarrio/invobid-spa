@@ -22,15 +22,15 @@ export const getInvoices = async (queryParams?: Record<string, string>) => {
   })
 }
 
-export const getInvoiceById = async (invoiceId: string) => {
-  return fetchApi(`${base_url}/invoices/${invoiceId}`, {
+export const getInvoiceById = async (svc: string) => {
+  return fetchApi(`${base_url}/invoices/${svc}`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar la factura'
   })
 }
 
-export const updateInvoiceById = async (invoiceId: string, body: FormData | string) => {
+export const updateInvoiceById = async (svc: string, body: FormData | string) => {
   const fetchOptions: RequestInit = {
     method: 'PATCH'
   }
@@ -42,7 +42,7 @@ export const updateInvoiceById = async (invoiceId: string, body: FormData | stri
     fetchOptions.headers = { 'Content-Type': 'application/json' }
   }
 
-  return fetchApi(`${base_url}/invoices/${invoiceId}`, fetchOptions, {
+  return fetchApi(`${base_url}/invoices/${svc}`, fetchOptions, {
     promise: 'Actualizando factura...',
     resolve: 'Factura actualizada con éxito',
     reject: 'Error al actualizar la factura'

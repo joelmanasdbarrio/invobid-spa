@@ -10,14 +10,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'react-router'
 import z from 'zod'
-import { useInvoiceColumns } from './columns'
-import { DataTable } from './data-table'
-import InvoiceFilters from './filters'
+import { useInvoiceColumns } from './components/columns'
+import { DataTable } from './components/data-table'
+import InvoiceFilters from './components/filters'
 
 const formSchema = z.object({
   sellerCompanyName: z.string().optional(),
   buyerCompanyName: z.string().optional(),
   debtorCompanyName: z.string().optional(),
+  invoiceSvc: z.string().optional(),
   maxAmount: z.number().positive().optional(),
   minAmount: z.number().positive().optional(),
   minRating: z.number().positive().optional(),
@@ -47,6 +48,7 @@ export default function AdminInvoicesPage () {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const defaultForm = useMemo(() => ({
+    invoiceSvc: searchParams.get('invoiceSvc') || undefined,
     sellerCompanyName: searchParams.get('sellerCompanyName') || undefined,
     buyerCompanyName: searchParams.get('buyerCompanyName') || undefined,
     debtorCompanyName: searchParams.get('debtorCompanyName') || undefined,
@@ -114,19 +116,7 @@ export default function AdminInvoicesPage () {
   }, [loggedInUser, searchParams, currentPage, currentLimit])
 
   function handleClear () {
-    form.reset({
-      sellerCompanyName: undefined,
-      buyerCompanyName: undefined,
-      debtorCompanyName: undefined,
-      maxAmount: undefined,
-      minAmount: undefined,
-      minRating: undefined,
-      status: undefined,
-      dueDateFrom: undefined,
-      dueDateTo: undefined,
-      isSold: undefined,
-      includeDeleted: undefined
-    })
+    form.reset(defaultForm)
     setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
   }
 

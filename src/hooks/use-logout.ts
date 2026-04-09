@@ -1,7 +1,8 @@
-import {AuthContext} from '@/contexts/auth.context'
 import Cookies from 'js-cookie'
-import {useContext} from 'react'
-import {useNavigate} from 'react-router'
+import { useContext } from 'react'
+import { useNavigate } from 'react-router'
+
+import { AuthContext } from '@/contexts/auth.context'
 
 export function useLogout () {
   const navigate = useNavigate()

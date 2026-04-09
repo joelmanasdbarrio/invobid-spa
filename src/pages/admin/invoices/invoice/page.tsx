@@ -18,7 +18,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegen
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import useLocale from '@/hooks/use-locale'
+import { useLocale } from '@/hooks/use-locale'
 import { formatCurrency } from '@/lib/format-currency'
 import { getInvoiceById, updateInvoiceById } from '@/services/invoice.api'
 import { type Invoice, InvoiceStatus } from '@/types/Invoice'
@@ -42,8 +42,8 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
 import z from 'zod'
-import { InvoiceChangeHistory } from './invoice-change-history'
-import InvoiceDocuments from './invoice-documents/invoice-documents'
+import { InvoiceChangeHistory } from './components/invoice-change-history'
+import InvoiceDocuments from './components/invoice-documents/invoice-documents'
 
 const formSchema = z.object({
   status: z.enum(InvoiceStatus).optional(),
@@ -52,7 +52,7 @@ const formSchema = z.object({
 })
 
 export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {invoiceId} = useParams()
+  const {svc} = useParams()
   const [invoice, setInvoice] = useState<Invoice | undefined>()
   const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
   const [isFormDisabled, setIsFormDisabled] = useState(true)
@@ -61,19 +61,19 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
 
   const navigate = useNavigate()
   useEffect(() => {
-    if(invoiceId) {
-      getInvoiceById(invoiceId)
+    if(svc) {
+      getInvoiceById(svc)
         .then(res => res.data)
         .then(invoice => {
           setInvoice(invoice)
           setOriginalInvoice(invoice)
-          setLastBreadcrumb(`Factura ${invoice.invoiceId}`)
+          setLastBreadcrumb(`Factura ${invoice.svc}`)
         })
         .catch(() => {
           navigate('/admin/invoices')
         })
     }
-  }, [invoiceId, navigate, setLastBreadcrumb])
+  }, [svc, navigate, setLastBreadcrumb])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -115,7 +115,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
         setIsFormDisabled(true)
         setIsDialogOpen(false)
       })
-      .then(() => navigate(`/admin/invoices/${invoiceId}`))
+      .then(() => navigate(`/admin/invoices/${svc}`))
   }
 
   function handleReset () {
@@ -152,7 +152,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
           <Form {...form}>
             <form id='debtor-form' onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
               <CardHeader className='flex flex-col xl:flex-row gap-2'>
-                <h3>Detalle de la factura <span className='text-primary'>{invoice?.invoiceId}</span></h3>
+                <h3>Detalle de la factura <span className='text-primary'>{invoice?.id}</span></h3>
                 <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                   <ButtonGroup>
                     {isFormDisabled
@@ -226,14 +226,14 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                       )}
                     />
                     <Field>
-                      <FieldLabel htmlFor='invoiceId'>UID de factura:</FieldLabel>
+                      <FieldLabel htmlFor='svc'>UID de factura:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput id='invoiceId' value={invoice?.invoiceId} type='text' placeholder='0' required disabled />
+                        <InputGroupInput id='svc' value={invoice?.svc} type='text' placeholder='0' required disabled />
                         <InputGroupAddon>
                           #
                         </InputGroupAddon>
                         <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, invoice?.invoiceId ?? '')} className='group'>
+                          <button onClick={(e) => copyToClipboard(e, invoice?.svc ?? '')} className='group'>
                             <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                             <Tooltip>
@@ -610,7 +610,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
         <InvoiceChangeHistory invoice={invoice} />
       </div>
 
-      <InvoiceDocuments invoiceId={invoice?.id ?? ''} />
+      <InvoiceDocuments invoiceSvc={invoice?.svc ?? ''} />
     </section>
   )
 }

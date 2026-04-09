@@ -1,13 +1,16 @@
+import { ColorBadge } from '@/components/color-badge'
 import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
-import { DateTimeRangePicker } from '@/components/ui/date-time-range-picker'
+import { DateTimePicker } from '@/components/ui/date-time-picker'
 import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
-import useLocale from '@/hooks/use-locale'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useLocale } from '@/hooks/use-locale'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { formatCurrency } from '@/lib/format-currency'
 import { parseLocalDate } from '@/lib/format-date'
@@ -16,47 +19,31 @@ import { getInvoices } from '@/services/invoice.api'
 import { AuctionStatus, type Auction } from '@/types/Auction'
 import { InvoiceStatus, type Invoice } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { EyeOffIcon, GavelIcon, GlobeIcon, SaveIcon, SearchIcon } from 'lucide-react'
+import { CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CircleSlashIcon, GavelIcon, SaveIcon, SearchIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import z from 'zod'
+import { AuctionBids } from './components/auction-bids/auction-bids'
+import { AuctionInvoices } from './components/auction-invoices/auction-invoices'
 
 const validateFormSchema = z.object({
   status: z.enum(AuctionStatus)
 })
 
 const baseFormSchema = z.object({
-  invoiceId: z.string(),
+  svc: z.string(),
   startingPrice: z.number().positive(),
-  auctionDateStart: z.date('La fecha de vencimiento no es válida').refine((date) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const selectedDate = new Date(date)
-    selectedDate.setHours(0, 0, 0, 0)
-    return selectedDate > today
-  }, {
-    message: 'La fecha de vencimiento debe ser posterior a la fecha actual'
-  }),
   auctionDateEnd: z.date('La fecha de vencimiento no es válida').refine((date) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const minDate = new Date()
+    minDate.setDate(minDate.getDate() + 2)
+    minDate.setHours(0, 0, 0, 0)
     const selectedDate = new Date(date)
     selectedDate.setHours(0, 0, 0, 0)
-    return selectedDate > today
+    return selectedDate >= minDate
   }, {
-    message: 'La fecha de vencimiento debe ser posterior a la fecha actual'
+    message: 'La fecha de fin debe ser al menos 2 días desde hoy'
   })
-}).refine((data) => {
-  const startDate = new Date(data.auctionDateStart)
-  const endDate = new Date(data.auctionDateEnd)
-
-  const nextDay = new Date(startDate)
-  nextDay.setDate(nextDay.getDate() + 1)
-
-  return endDate >= nextDay
-}, {
-  message: 'La fecha de fin de la subasta debe ser al menos un día después de la fecha de inicio'
 })
 
 export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
@@ -82,34 +69,31 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     resolver: zodResolver(baseFormSchema),
     mode: 'onTouched',
     defaultValues: {
-      invoiceId: auction?.invoice.id || '',
-      startingPrice: auction?.startingPrice || 0,
-      auctionDateStart: auction?.auctionDate.auctionDateStart ? new Date(auction.auctionDate.auctionDateStart) : undefined,
-      auctionDateEnd: auction?.auctionDate.auctionDateEnd ? new Date(auction.auctionDate.auctionDateEnd) : undefined
+      svc: auction?.invoice.id || '',
+      startingPrice: auction?.price?.start || 0,
+      auctionDateEnd: auction?.date.end ? new Date(auction.date.end) : undefined
     }
   })
 
   useEffect(() => {
     baseForm.reset({
-      invoiceId: auction?.invoice.id || '',
-      startingPrice: auction?.startingPrice || 0,
-      auctionDateStart: auction?.auctionDate.auctionDateStart ? new Date(auction.auctionDate.auctionDateStart) : undefined,
-      auctionDateEnd: auction?.auctionDate.auctionDateEnd ? new Date(auction.auctionDate.auctionDateEnd) : undefined
+      svc: auction?.invoice.id || '',
+      startingPrice: auction?.price?.start || 0,
+      auctionDateEnd: auction?.date.end ? new Date(auction.date.end) : undefined
     })
   }, [auction, baseForm])
 
-  const watchedInvoiceId = useWatch({ control: baseForm.control, name: 'invoiceId' })
-  const watchedDateStart = useWatch({ control: baseForm.control, name: 'auctionDateStart' })
+  const watchedsvc = useWatch({ control: baseForm.control, name: 'svc' })
   const watchedDateEnd = useWatch({ control: baseForm.control, name: 'auctionDateEnd' })
 
-  const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedInvoiceId) ?? auction?.invoice
+  const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedsvc) ?? auction?.invoice
   const invoiceDueDate = selectedInvoice?.dueDate
 
   const auctionEndMaxDate = invoiceDueDate
     ? (() => { const d = parseLocalDate(invoiceDueDate); d.setMonth(d.getMonth() - 1); return d.toISOString() })()
     : undefined
 
-  const auctionStartMinDate = (() => { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(0, 0, 0, 0); return d.toISOString() })()
+  const auctionEndMinDate = (() => { const d = new Date(); d.setDate(d.getDate() + 2); d.setHours(0, 0, 0, 0); return d.toISOString() })()
 
   const loggedInUser = useLoggedInUser()
   const navigate = useNavigate()
@@ -121,7 +105,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       .then(auction => {
         setAuction(auction)
         setOriginalAuction(auction)
-        setLastBreadcrumb(`Subasta ${auction.invoice.invoiceId}`)
+        setLastBreadcrumb(`Subasta de factura ${auction.invoice.svc}`)
       })
       .catch(() => {
         navigate('/user/auctions')
@@ -135,7 +119,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       setIsLoadingInvoices(true)
       getInvoices({
         sellerInvestorId: loggedInUser.id,
-        ...(invoiceSearch ? { invoiceId: invoiceSearch } : {}),
+        ...(invoiceSearch ? { svc: invoiceSearch } : {}),
         status: InvoiceStatus.VERIFIED
       })
         .then(res => res.data)
@@ -146,12 +130,17 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     return () => clearTimeout(timer)
   }, [loggedInUser, invoiceSearch])
 
+  function applyDiscount (discountPercent: number) {
+    if (!selectedInvoice?.amount) return
+    const discountedPrice = Math.round(selectedInvoice.amount * (1 - discountPercent / 100) * 100) / 100
+    baseForm.setValue('startingPrice', discountedPrice, { shouldDirty: true, shouldTouch: true })
+  }
+
   function onSubmitBase (data: z.infer<typeof baseFormSchema>) {
     if (!auctionId) return
     updateAuctionById(auctionId, JSON.stringify({
-      invoiceId: data.invoiceId,
+      svc: data.svc,
       startingPrice: data.startingPrice,
-      auctionDateStart: data.auctionDateStart.toISOString(),
       auctionDateEnd: data.auctionDateEnd.toISOString()
     }))
       .then(res => {
@@ -179,54 +168,64 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
         <h2>Gestionar subasta</h2>
       </div>
       <Card>
-        <CardHeader className='md:grid-cols-[auto_1fr]'>
-          <h3>Detalles de la subasta <span className='text-primary'>{auction?.invoice?.invoiceId}</span></h3>
-          {(auction?.status === AuctionStatus.DRAFT || auction?.status === AuctionStatus.PUBLISHED) && (
+        <CardHeader className='md:grid-cols-[auto_1fr] grid-rows-1'>
+          <div className='flex flex-wrap gap-2 items-center'>
+            <h3>Detalles de la subasta <span className='text-primary'>{auction?.invoice?.svc}</span></h3>
+            {auction?.status === AuctionStatus.DRAFT && (
+              <ColorBadge color='yellow' icon={<CircleDashedIcon />}>
+                Borrador
+              </ColorBadge>
+            )}
+            {auction?.status === AuctionStatus.PUBLISHED && (
+              <ColorBadge color='green' icon={<CircleCheckIcon />}>
+                Publicada
+              </ColorBadge>
+            )}
+            {auction?.status === AuctionStatus.TRANSITIONING && (
+              <ColorBadge color='blue' icon={<CircleGaugeIcon />}>
+                En transición
+              </ColorBadge>
+            )}
+            {auction?.status === AuctionStatus.CANCELLED && (
+              <ColorBadge color='red' icon={<CircleSlashIcon />}>
+                Cancelada
+              </ColorBadge>
+            )}
+            {auction?.status === AuctionStatus.FINISHED && (
+              <ColorBadge color='purple' icon={<GavelIcon />}>
+                Finalizada
+              </ColorBadge>
+            )}
+          </div>
+          {auction?.status === AuctionStatus.DRAFT && (
             <Form {...validateForm}>
               <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
-                {auction.status === AuctionStatus.DRAFT ? (
-                  <Button
-                    variant='outline'
-                    className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
-                    disabled={!auction}
-                    onClick={() => {
-                      validateForm.setValue('status', AuctionStatus.PUBLISHED)
-                      validateForm.handleSubmit(onSubmitValidate)()
-                    }}
-                  >
-                    <GlobeIcon className='shrink-0' />
-                    <span className='overflow-hidden'>
-                      Publicar
-                    </span>
-                  </Button>
-                ) : (
-                  <Button
-                    variant='outline'
-                    className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
-                    disabled={!auction}
-                    onClick={() => {
-                      validateForm.setValue('status', AuctionStatus.DRAFT)
-                      validateForm.handleSubmit(onSubmitValidate)()
-                    }}
-                  >
-                    <EyeOffIcon className='shrink-0' />
-                    <span className='overflow-hidden'>
-                      Despublicar
-                    </span>
-                  </Button>
-                )}
+                <Button
+                  variant='outline'
+                  className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
+                  disabled={!auction}
+                  onClick={() => {
+                    validateForm.setValue('status', AuctionStatus.PUBLISHED)
+                    validateForm.handleSubmit(onSubmitValidate)()
+                  }}
+                >
+                  <CircleCheckIcon className='shrink-0' />
+                  <span className='overflow-hidden'>
+                    Publicar
+                  </span>
+                </Button>
               </form>
             </Form>
           )}
         </CardHeader>
-        <CardContent className='grid md:grid-cols-[1fr_200px] gap-4'>
+        <CardContent>
           <Form {...baseForm}>
-            <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='col-span-full flex flex-col gap-4'>
+            <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4'>
               <FieldSet>
                 <FieldLegend>Factura relacionada</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
                   <Controller
-                    name='invoiceId'
+                    name='svc'
                     control={baseForm.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
@@ -238,7 +237,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                           disabled={isFormDisabled}
                         >
                           <SelectTrigger>
-                            {verifiedInvoices?.find(inv => inv.id === field.value)?.invoiceId || auction?.invoice?.invoiceId || 'Selecciona una factura'}
+                            {verifiedInvoices?.find(inv => inv.id === field.value)?.svc || auction?.invoice?.svc || 'Selecciona una factura'}
                           </SelectTrigger>
                           <SelectContent>
                             <InputGroup className='border-0 border-b w-full'>
@@ -262,7 +261,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                             </SelectItem>
                             {verifiedInvoices?.map(inv => (
                               <SelectItem key={inv.id} value={inv.id}>
-                                {inv.invoiceId}
+                                {inv.svc}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -296,7 +295,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
 
               <FieldSet>
                 <FieldLegend>Datos de la subasta</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
                   <Controller
                     name='startingPrice'
                     control={baseForm.control}
@@ -336,36 +335,77 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                     )}
                   />
                   <Field
-                    data-invalid={!!(baseForm.formState.errors.auctionDateStart || baseForm.formState.errors.auctionDateEnd)}
+                    data-invalid={!!baseForm.formState.errors.auctionDateEnd}
                   >
-                    <FieldLabel>Periodo de subasta:</FieldLabel>
-                    <DateTimeRangePicker
-                      fromValue={watchedDateStart instanceof Date ? watchedDateStart.toISOString() : undefined}
-                      toValue={watchedDateEnd instanceof Date ? watchedDateEnd.toISOString() : undefined}
-                      minDate={auctionStartMinDate}
+                    <FieldLabel>Fecha de fin de subasta:</FieldLabel>
+                    <DateTimePicker
+                      value={watchedDateEnd instanceof Date ? watchedDateEnd.toISOString() : undefined}
+                      minDate={auctionEndMinDate}
                       maxDate={auctionEndMaxDate}
-                      onFromChange={(isoStr) => {
-                        baseForm.setValue('auctionDateStart', (isoStr ? new Date(isoStr) : undefined) as Date, { shouldDirty: true, shouldTouch: true })
-                        baseForm.trigger('auctionDateStart')
-                        baseForm.trigger('auctionDateEnd')
-                      }}
-                      onToChange={(isoStr) => {
+                      onChange={(isoStr) => {
                         baseForm.setValue('auctionDateEnd', (isoStr ? new Date(isoStr) : undefined) as Date, { shouldDirty: true, shouldTouch: true })
-                        baseForm.trigger('auctionDateStart')
                         baseForm.trigger('auctionDateEnd')
                       }}
                       disabled={isFormDisabled}
                     />
-                    {baseForm.formState.errors.auctionDateStart && <FieldError errors={[baseForm.formState.errors.auctionDateStart]} />}
                     {baseForm.formState.errors.auctionDateEnd && <FieldError errors={[baseForm.formState.errors.auctionDateEnd]} />}
                   </Field>
+                  <div className='flex gap-2'>
+                    <ButtonGroup>
+                      <Button
+                        variant='outline'
+                        type='button'
+                        onClick={() => applyDiscount(3)}
+                        disabled={isFormDisabled}
+                      >
+                        -3%
+                      </Button>
+                      <Button
+                        variant='outline'
+                        type='button'
+                        onClick={() => applyDiscount(5)}
+                        disabled={isFormDisabled}
+                      >
+                        -5%
+                      </Button>
+                      <Button
+                        variant='outline'
+                        type='button'
+                        onClick={() => applyDiscount(10)}
+                        disabled={isFormDisabled}
+                      >
+                        -10%
+                      </Button>
+                      <Button
+                        variant='outline'
+                        type='button'
+                        onClick={() => applyDiscount(20)}
+                        disabled={isFormDisabled}
+                      >
+                        -20%
+                      </Button>
+                    </ButtonGroup>
+                    <InputGroup className='w-40'>
+                      <InputGroupInput
+                        type='number'
+                        placeholder='Descuento...'
+                        disabled={isFormDisabled}
+                        onChange={(e) => {
+                          const discountPercent = parseFloat(e.target.value) || 0
+                          applyDiscount(discountPercent)
+                        }}
+                      />
+                      <InputGroupAddon>-</InputGroupAddon>
+                      <InputGroupAddon align='inline-end'>%</InputGroupAddon>
+                    </InputGroup>
+                  </div>
                   <Button
                     className='w-min self-end justify-self-end'
                     disabled={JSON.stringify(originalAuction) === JSON.stringify(auction) && !baseForm.formState.isDirty}
                     title='Guardar cambios'
                   >
                     <SaveIcon />
-                    <span className='lg:hidden'>
+                    <span>
                       Guardar cambios
                     </span>
                   </Button>
@@ -375,6 +415,18 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
           </Form>
         </CardContent>
       </Card>
+      <Tabs defaultValue='bids' className='gap-4'>
+        <TabsList>
+          <TabsTrigger value='bids'>Pujas</TabsTrigger>
+          <TabsTrigger value='invoices'>Facturas</TabsTrigger>
+        </TabsList>
+        <TabsContent value='bids'>
+          <AuctionBids auctionId={auctionId} />
+        </TabsContent>
+        <TabsContent value='invoices'>
+          <AuctionInvoices invoiceSvc={auction?.invoice?.svc} />
+        </TabsContent>
+      </Tabs>
     </section>
   )
 }

@@ -41,8 +41,8 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
 import z from 'zod'
-import { DebtorChangeHistory } from './debtor-change-history'
-import DebtorDocuments from './debtor-documents/debtor-documents'
+import { DebtorChangeHistory } from './components/debtor-change-history'
+import DebtorDocuments from './components/debtor-documents/debtor-documents'
 
 const formSchema = z.object({
   status: z.enum(DebtorStatus).optional(),
