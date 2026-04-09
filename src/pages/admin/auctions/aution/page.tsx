@@ -43,7 +43,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
         .then(auction => {
           setAuction(auction)
           setOriginalAuction(auction)
-          setLastBreadcrumb(`Subasta de factura ${auction.invoice.invoiceUid}`)
+          setLastBreadcrumb(`Subasta de factura ${auction.invoice.svc}`)
         })
         .catch(() => {
           navigate('/admin/auctions')
@@ -180,18 +180,18 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
             <Form {...form}>
               <form id='auction-form' onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
                 <CardHeader className='flex flex-col xl:flex-row gap-2'>
-                  <h3>Detalle de la subasta <span className='text-primary'>{auction.invoice.invoiceUid}</span></h3>
+                  <h3>Detalle de la subasta <span className='text-primary'>{auction.id}</span></h3>
                   <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                     <ButtonGroup>
-                      <Button type='button' title='Borrador' disabled variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', AuctionStatus.DRAFT, { shouldDirty: true })}>
+                      <Button type='button' title='Borrador' disabled variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25'>
                         <CircleDashedIcon className='w-5 h-5 rounded-full text-yellow-600'/>
                         {form.watch('status') === AuctionStatus.DRAFT && 'Borrador'}
                       </Button>
-                      <Button type='button' title='Publicada' disabled variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', AuctionStatus.PUBLISHED, { shouldDirty: true })}>
+                      <Button type='button' title='Publicada' disabled variant='outline' className='bg-green-300/25 dark:bg-green-300/25'>
                         <CircleCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
                         {form.watch('status') === AuctionStatus.PUBLISHED && 'Publicada'}
                       </Button>
-                      <Button type='button' title='En transición' disabled variant='outline' className='bg-blue-300/25 dark:bg-blue-300/25' onClick={() => form.setValue('status', AuctionStatus.TRANSITIONING, { shouldDirty: true })}>
+                      <Button type='button' title='En transición' disabled variant='outline' className='bg-blue-300/25 dark:bg-blue-300/25'>
                         <CircleGaugeIcon className='w-5 h-5 rounded-full text-blue-600'/>
                         {form.watch('status') === AuctionStatus.TRANSITIONING && 'En transición'}
                       </Button>
@@ -199,7 +199,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         <CircleSlashIcon className='w-5 h-5 rounded-full text-red-600'/>
                         {form.watch('status') === AuctionStatus.CANCELLED && 'Cancelada'}
                       </Button>
-                      <Button type='button' title='Finalizada' variant='outline' className='bg-violet-300/25 dark:bg-violet-300/25' onClick={() => form.setValue('status', AuctionStatus.FINISHED, { shouldDirty: true })}>
+                      <Button type='button' disabled={auction.status !== AuctionStatus.TRANSITIONING} title='Finalizada' variant='outline' className='bg-violet-300/25 dark:bg-violet-300/25' onClick={() => form.setValue('status', AuctionStatus.FINISHED, { shouldDirty: true })}>
                         <GavelIcon className='w-5 h-5 rounded-full text-violet-600'/>
                         {form.watch('status') === AuctionStatus.FINISHED && 'Finalizada'}
                       </Button>
@@ -451,14 +451,14 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         <AccordionContent>
                           <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
                             <Field>
-                              <FieldLabel htmlFor='invoiceUid'>UID de factura:</FieldLabel>
+                              <FieldLabel htmlFor='svc'>UID de factura:</FieldLabel>
                               <InputGroup>
-                                <InputGroupInput id='invoiceUid' value={auction.invoice.invoiceUid} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
+                                <InputGroupInput id='svc' value={auction.invoice.svc} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
                                 <InputGroupAddon>
                                   #
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, auction.invoice.invoiceUid ?? '')} className='group'>
+                                  <button onClick={(e) => copyToClipboard(e, auction.invoice.svc ?? '')} className='group'>
                                     <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>

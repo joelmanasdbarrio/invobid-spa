@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { useDocumentColumns } from './columns'
 import { DataTable } from './data-table'
 
-export default function InvoiceDocuments ({ invoiceUid } : { invoiceUid: string | undefined }) {
+export default function InvoiceDocuments ({ invoiceSvc } : { invoiceSvc: string | undefined }) {
   const documentColumns = useDocumentColumns()
   const [data, setData] = useState([])
   const [totalItems, setTotalItems] = useState(0)
@@ -15,9 +15,9 @@ export default function InvoiceDocuments ({ invoiceUid } : { invoiceUid: string 
   const [currentLimit, setCurrentLimit] = useState(10)
 
   useEffect(() => {
-    if (invoiceUid) {
+    if (invoiceSvc) {
       getDocuments({
-        invoiceUid,
+        invoiceSvc,
         page: String(currentPage),
         limit: String(currentLimit)
       }).then(res => {
@@ -25,7 +25,7 @@ export default function InvoiceDocuments ({ invoiceUid } : { invoiceUid: string 
         setTotalItems(res['_metadata'].total)
       })
     }
-  }, [invoiceUid, currentLimit, currentPage])
+  }, [invoiceSvc, currentLimit, currentPage])
 
   return (
     <div className='flex flex-col gap-4'>

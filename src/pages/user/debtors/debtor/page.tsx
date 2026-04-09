@@ -1,3 +1,4 @@
+import { ColorBadge } from '@/components/color-badge'
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -8,7 +9,7 @@ import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/comp
 import { getDebtorById, updateDebtorById } from '@/services/debtor.api'
 import { DebtorStatus, type Debtor } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CircleAlertIcon, ClockIcon, FileIcon, HandCoinsIcon, IdCardIcon, KeyRoundIcon, MailIcon, OctagonXIcon, PhoneIcon, RefreshCcwIcon, SaveIcon, UsersIcon } from 'lucide-react'
+import { CheckCheckIcon, CircleAlertIcon, ClockIcon, FileIcon, HandCoinsIcon, IdCardIcon, KeyRoundIcon, MailIcon, OctagonXIcon, PhoneIcon, RefreshCcwIcon, SaveIcon, UsersIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
@@ -173,7 +174,29 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
       </div>
       <Card>
         <CardHeader className='md:grid-cols-[auto_1fr]'>
-          <h3>Detalle del deudor <span className='text-primary'>{debtor?.companyName}</span></h3>
+          <div className='flex flex-wrap gap-2 items-center'>
+            <h3>Detalle del deudor <span className='text-primary'>{debtor?.companyName}</span></h3>
+            {debtor?.status ===DebtorStatus.PENDING && (
+              <ColorBadge color='yellow' icon={<ClockIcon />}>
+                Pendiente
+              </ColorBadge>
+            )}
+            {debtor?.status ===DebtorStatus.VERIFIED && (
+              <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                Verificado
+              </ColorBadge>
+            )}
+            {debtor?.status ===DebtorStatus.CORRECTION && (
+              <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                Corrección
+              </ColorBadge>
+            )}
+            {debtor?.status ===DebtorStatus.DENIED && (
+              <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                Denegado
+              </ColorBadge>
+            )}
+          </div>
           {(debtor?.status === DebtorStatus.CORRECTION || debtor?.status === DebtorStatus.PENDING) && (
             <Form {...validateForm}>
               <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>

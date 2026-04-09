@@ -37,7 +37,6 @@ export default function DebtorFilters (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
             <FieldGroup className='grid md:grid-cols-2 xl:grid-cols-4 gap-4'>
-              {/* Form fields go here */}
               <Controller
                 name='companyName'
                 control={form.control}

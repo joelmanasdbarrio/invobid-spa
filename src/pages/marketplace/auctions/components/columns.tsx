@@ -18,7 +18,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
       cell: ({row}) => (
         <div className='flex gap-2 items-center'>
           <FileText className='w-4 h-4 text-accent-foreground' />
-          <h4 title={`Factura ${row.original.invoice.invoiceUid}`}>{row.original.invoice.invoiceUid}</h4>
+          <h4 title={`Factura ${row.original.invoice.svc}`}>{row.original.invoice.svc}</h4>
           <Tooltip>
             <TooltipTrigger>
               <ColorBadge

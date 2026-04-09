@@ -15,6 +15,7 @@ import { DataTable } from './components/data-table'
 import InvoiceFilters from './components/filters'
 
 const formSchema = z.object({
+  invoiceSvc: z.string().optional(),
   buyerCompanyName: z.string().optional(),
   debtorCompanyName: z.string().optional(),
   maxAmount: z.number().positive().optional(),
@@ -47,6 +48,7 @@ export default function InvoicesPage () {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const defaultForm = useMemo(() => ({
+    invoiceSvc: searchParams.get('invoiceSvc') || undefined,
     buyerCompanyName: searchParams.get('buyerCompanyName') || undefined,
     debtorCompanyName: searchParams.get('debtorCompanyName') || undefined,
     maxAmount: searchParams.get('maxAmount') ? Number(searchParams.get('maxAmount')) : undefined,
@@ -115,18 +117,7 @@ export default function InvoicesPage () {
   }, [loggedInUser, searchParams, currentPage, currentLimit])
 
   function handleClear () {
-    form.reset({
-      buyerCompanyName: undefined,
-      debtorCompanyName: undefined,
-      maxAmount: undefined,
-      minAmount: undefined,
-      minRating: undefined,
-      status: undefined,
-      dueDateFrom: undefined,
-      dueDateTo: undefined,
-      isSold: undefined,
-      includeDeleted: undefined
-    })
+    form.reset(defaultForm)
     setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
   }
 

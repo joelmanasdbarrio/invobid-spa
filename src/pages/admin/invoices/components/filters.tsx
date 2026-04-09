@@ -15,10 +15,10 @@ import { Controller, type UseFormReturn } from 'react-hook-form'
 export default function InvoiceFilters (
   { form, onSubmit, handleClear }: {
     form: UseFormReturn<{
+      invoiceSvc?: string | undefined;
       sellerCompanyName?: string | undefined;
       buyerCompanyName?: string | undefined;
       debtorCompanyName?: string | undefined;
-      invoiceUid?: string | undefined;
       maxAmount?: number | undefined;
       minAmount?: number | undefined;
       minRating?: number | undefined;
@@ -29,10 +29,10 @@ export default function InvoiceFilters (
       includeDeleted?: boolean | undefined;
     }>;
     onSubmit: (data: {
+      invoiceSvc?: string | undefined;
       sellerCompanyName?: string | undefined;
       buyerCompanyName?: string | undefined;
       debtorCompanyName?: string | undefined;
-      invoiceUid?: string | undefined;
       maxAmount?: number | undefined;
       minAmount?: number | undefined;
       minRating?: number | undefined;
@@ -51,15 +51,15 @@ export default function InvoiceFilters (
           <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
             <FieldGroup className='grid md:grid-cols-2 xl:grid-cols-4 gap-4'>
               <Controller
-                name='sellerCompanyName'
+                name='invoiceSvc'
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>Razón social del cedente</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>CSV de la factura</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput {...field} id={field.name} type='text' placeholder='Empresa S.L.' autoComplete='off'/>
+                      <InputGroupInput {...field} id={field.name} type='text' placeholder='B12345678-F001-00001234-20260216-A9K3' autoComplete='off'/>
                       <InputGroupAddon>
-                        <BuildingIcon />
+                        <KeyRoundIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (
@@ -69,11 +69,11 @@ export default function InvoiceFilters (
                 )}
               />
               <Controller
-                name='buyerCompanyName'
+                name='sellerCompanyName'
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>Razón social del inversor</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>Razón social del cedente</FieldLabel>
                     <InputGroup>
                       <InputGroupInput {...field} id={field.name} type='text' placeholder='Empresa S.L.' autoComplete='off'/>
                       <InputGroupAddon>
@@ -105,15 +105,15 @@ export default function InvoiceFilters (
                 )}
               />
               <Controller
-                name='invoiceUid'
+                name='buyerCompanyName'
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>UID de la factura</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>Razón social del inversor</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput {...field} id={field.name} type='text' placeholder='UID de la factura' autoComplete='off'/>
+                      <InputGroupInput {...field} id={field.name} type='text' placeholder='Empresa S.L.' autoComplete='off'/>
                       <InputGroupAddon>
-                        <KeyRoundIcon />
+                        <BuildingIcon />
                       </InputGroupAddon>
                     </InputGroup>
                     {fieldState.invalid && (

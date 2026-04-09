@@ -24,7 +24,7 @@ import { useNavigate } from 'react-router'
 import z from 'zod'
 
 const formSchema = z.object({
-  invoiceUid: z.string().min(1, 'La factura es obligatoria'),
+  svc: z.string().min(1, 'La factura es obligatoria'),
   startingPrice: z.number().positive('El precio inicial debe ser mayor que 0'),
   auctionDateEnd: z.date('La fecha de fin no es válida').refine((date) => {
     const minDate = new Date()
@@ -48,16 +48,16 @@ export default function CreateAuctionPage () {
     resolver: zodResolver(formSchema),
     mode: 'onTouched',
     defaultValues: {
-      invoiceUid: '',
+      svc: '',
       startingPrice: undefined,
       auctionDateEnd: undefined
     }
   })
 
-  const watchedinvoiceUid = useWatch({ control: form.control, name: 'invoiceUid' })
+  const watchedsvc = useWatch({ control: form.control, name: 'svc' })
   const watchedDateEnd = useWatch({ control: form.control, name: 'auctionDateEnd' })
 
-  const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedinvoiceUid)
+  const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedsvc)
   const invoiceDueDate = selectedInvoice?.dueDate
 
   const auctionEndMaxDate = invoiceDueDate
@@ -76,7 +76,7 @@ export default function CreateAuctionPage () {
       setIsLoadingInvoices(true)
       getInvoices({
         sellerInvestorId: loggedInUser.id,
-        ...(invoiceSearch ? { invoiceUid: invoiceSearch } : {}),
+        ...(invoiceSearch ? { svc: invoiceSearch } : {}),
         status: InvoiceStatus.VERIFIED
       })
         .then(res => res.data)
@@ -89,7 +89,7 @@ export default function CreateAuctionPage () {
 
   function onSubmit (data: z.infer<typeof formSchema>) {
     createAuction(JSON.stringify({
-      invoiceUid: data.invoiceUid,
+      svc: data.svc,
       startingPrice: data.startingPrice,
       auctionDateEnd: data.auctionDateEnd.toISOString()
     }))
@@ -131,7 +131,7 @@ export default function CreateAuctionPage () {
                 <FieldLegend>Factura relacionada</FieldLegend>
                 <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
                   <Controller
-                    name='invoiceUid'
+                    name='svc'
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
@@ -142,7 +142,7 @@ export default function CreateAuctionPage () {
                           defaultValue='__NONE__'
                         >
                           <SelectTrigger>
-                            {verifiedInvoices?.find(inv => inv.id === field.value)?.invoiceUid || 'Selecciona una factura'}
+                            {verifiedInvoices?.find(inv => inv.id === field.value)?.svc || 'Selecciona una factura'}
                           </SelectTrigger>
                           <SelectContent>
                             <InputGroup className='border-0 border-b w-full'>
@@ -166,7 +166,7 @@ export default function CreateAuctionPage () {
                             </SelectItem>
                             {verifiedInvoices?.map(inv => (
                               <SelectItem key={inv.id} value={inv.id}>
-                                {inv.invoiceUid}
+                                {inv.svc}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -245,7 +245,7 @@ export default function CreateAuctionPage () {
                               field.onBlur()
                             }}
                             ref={field.ref}
-                            disabled={!watchedinvoiceUid}
+                            disabled={!watchedsvc}
                           />
                           <InputGroupAddon>€</InputGroupAddon>
                           <InputGroupAddon align='inline-end'>
@@ -274,7 +274,7 @@ export default function CreateAuctionPage () {
                         form.setValue('auctionDateEnd', (isoStr ? new Date(isoStr) : undefined) as Date, { shouldDirty: true, shouldTouch: true })
                         form.trigger('auctionDateEnd')
                       }}
-                      disabled={!watchedinvoiceUid}
+                      disabled={!watchedsvc}
                     />
                     {form.formState.errors.auctionDateEnd && <FieldError errors={[form.formState.errors.auctionDateEnd]} />}
                   </Field>
@@ -284,7 +284,7 @@ export default function CreateAuctionPage () {
                         variant='outline'
                         type='button'
                         onClick={() => applyDiscount(3)}
-                        disabled={!watchedinvoiceUid}
+                        disabled={!watchedsvc}
                       >
                         -3%
                       </Button>
@@ -292,7 +292,7 @@ export default function CreateAuctionPage () {
                         variant='outline'
                         type='button'
                         onClick={() => applyDiscount(5)}
-                        disabled={!watchedinvoiceUid}
+                        disabled={!watchedsvc}
                       >
                         -5%
                       </Button>
@@ -300,7 +300,7 @@ export default function CreateAuctionPage () {
                         variant='outline'
                         type='button'
                         onClick={() => applyDiscount(10)}
-                        disabled={!watchedinvoiceUid}
+                        disabled={!watchedsvc}
                       >
                         -10%
                       </Button>
@@ -308,7 +308,7 @@ export default function CreateAuctionPage () {
                         variant='outline'
                         type='button'
                         onClick={() => applyDiscount(20)}
-                        disabled={!watchedinvoiceUid}
+                        disabled={!watchedsvc}
                       >
                         -20%
                       </Button>
@@ -317,7 +317,7 @@ export default function CreateAuctionPage () {
                       <InputGroupInput
                         type='number'
                         placeholder='Descuento...'
-                        disabled={!watchedinvoiceUid}
+                        disabled={!watchedsvc}
                         onChange={(e) => {
                           const discountPercent = parseFloat(e.target.value) || 0
                           applyDiscount(discountPercent)

@@ -5,6 +5,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLocale } from '@/hooks/use-locale'
+import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { calcDiscount, calcProfitability, invertProfitability } from '@/lib/auction-metrics'
 import { formatCurrency } from '@/lib/format-currency'
 import { connectSocketIO, socketEmit } from '@/lib/socket.io'
@@ -19,8 +20,10 @@ import { DataTable } from './data-table'
 
 export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined}) {
   const { locale } = useLocale()
+  const loggedInUser = useLoggedInUser()
 
   const isAuctionActive = auction?.status === AuctionStatus.PUBLISHED
+  const isDisabled = !isAuctionActive || !auction || auction.invoice.sellerInvestor.id === loggedInUser?.id
 
   const [bidInput, setBidInput] = useState('')
   const [bidInputInvalid, setBidInputInvalid] = useState(false)
@@ -234,7 +237,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
         <div className='grow flex flex-col gap-2 p-4 pb-0'>
           <div className='grid lg:grid-cols-2 lg:grid-rows-1 gap-2'>
             <InputGroup>
-              <InputGroupInput placeholder='Valor final' type='number' min={latestBidAmount} step={100} disabled={!isAuctionActive} value={bidInput} aria-invalid={bidInputInvalid} onChange={e => handleBidInputChange(e.target.value)} />
+              <InputGroupInput placeholder='Valor final' type='number' min={latestBidAmount} step={100} disabled={isDisabled} value={bidInput} aria-invalid={bidInputInvalid} onChange={e => handleBidInputChange(e.target.value)} />
               <InputGroupAddon align='inline-end'>
                 €
               </InputGroupAddon>
@@ -245,7 +248,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
               </InputGroupAddon>
             </InputGroup>
             <InputGroup>
-              <InputGroupInput placeholder='Rentabilidad' type='number' min={profitabilityReductions[0]} step={0.01} disabled={!isAuctionActive} value={profitabilityInput} aria-invalid={profitabilityInputInvalid} onChange={e => handleProfitabilityInputChange(e.target.value)} />
+              <InputGroupInput placeholder='Rentabilidad' type='number' min={profitabilityReductions[0]} step={0.01} disabled={isDisabled} value={profitabilityInput} aria-invalid={profitabilityInputInvalid} onChange={e => handleProfitabilityInputChange(e.target.value)} />
               <InputGroupAddon>
                 -
               </InputGroupAddon>
@@ -266,7 +269,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
                 <Button
                   key={delta}
                   variant='outline'
-                  disabled={!isAuctionActive}
+                  disabled={isDisabled}
                   onClick={() => handleBidInputChange(String(profitabilityReductionAmounts[i]))}
                   onMouseEnter={() => calcPreview(profitabilityReductionAmounts[i])}
                   onMouseLeave={clearPreview}
@@ -278,7 +281,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
           </div>
           <Button
             className='w-full mt-auto'
-            disabled={!isAuctionActive || !bidInput}
+            disabled={isDisabled || !bidInput}
             onClick={handlePlaceBid}
           >
             Realizar oferta

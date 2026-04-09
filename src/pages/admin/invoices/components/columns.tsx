@@ -23,21 +23,25 @@ export function useInvoiceColumns (): ColumnDef<Invoice>[] {
       )
     },
     {
+      header: 'Cedente',
+      cell: ({row}) => row.original.sellerInvestor.companyName
+    },
+    {
       header: 'Deudor',
       cell: ({row}) => row.original.debtor.companyName
+    },
+    {
+      header: 'Inversor',
+      cell: ({row}) => row.original.buyerInvestor ? (
+        row.original.buyerInvestor.companyName
+      ) : (
+        <span className='text-sm text-gray-500'>Pendiente</span>
+      )
     },
     {
       accessorKey: 'amount',
       header: 'Importe',
       cell: ({row}) => formatCurrency(row.original.amount, locale, row.original.currency)
-    },
-    {
-      header: 'Vendido',
-      cell: ({row}) => row.original.buyerInvestor ? (
-        row.original.buyerInvestor.companyName
-      ) : (
-        <span className='text-sm text-gray-500'>No vendido</span>
-      )
     },
     {
       accessorKey: 'dueDate',

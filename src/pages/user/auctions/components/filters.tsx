@@ -13,28 +13,28 @@ import { Controller, type UseFormReturn } from 'react-hook-form'
 export default function AuctionFilters (
   { form, onSubmit, handleClear }: {
     form: UseFormReturn<{
-    sellerCompanyName?: string | undefined;
-    buyerCompanyName?: string | undefined;
-    debtorCompanyName?: string | undefined;
-    invoiceUid?: string | undefined;
-    maxAmount?: number | undefined;
-    minAmount?: number | undefined;
-    auctionDateStart?: string | undefined;
-    auctionDateEnd?: string | undefined;
-    status?: AuctionStatus | undefined;
-    includeDeleted?: boolean | undefined;
-}>,
-    onSubmit: (data: {
+      invoiceSvc?: string | undefined;
       sellerCompanyName?: string | undefined;
-    buyerCompanyName?: string | undefined;
-    debtorCompanyName?: string | undefined;
-    invoiceUid?: string | undefined;
-    maxAmount?: number | undefined;
-    minAmount?: number | undefined;
-    auctionDateStart?: string | undefined;
-    auctionDateEnd?: string | undefined;
-    status?: AuctionStatus | undefined;
-    includeDeleted?: boolean | undefined;
+      buyerCompanyName?: string | undefined;
+      debtorCompanyName?: string | undefined;
+      maxAmount?: number | undefined;
+      minAmount?: number | undefined;
+      auctionDateStart?: string | undefined;
+      auctionDateEnd?: string | undefined;
+      status?: AuctionStatus | undefined;
+      includeDeleted?: boolean | undefined;
+  }>,
+    onSubmit: (data: {
+      invoiceSvc?: string | undefined;
+      sellerCompanyName?: string | undefined;
+      buyerCompanyName?: string | undefined;
+      debtorCompanyName?: string | undefined;
+      maxAmount?: number | undefined;
+      minAmount?: number | undefined;
+      auctionDateStart?: string | undefined;
+      auctionDateEnd?: string | undefined;
+      status?: AuctionStatus | undefined;
+      includeDeleted?: boolean | undefined;
     }) => void;
     handleClear: () => void;
   }
@@ -45,6 +45,24 @@ export default function AuctionFilters (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
             <FieldGroup className='grid md:grid-cols-2 xl:grid-cols-4 gap-4'>
+              <Controller
+                name='invoiceSvc'
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>CSV de la factura</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput {...field} id={field.name} type='text' placeholder='B12345678-F001-00001234-20260216-A9K3' autoComplete='off'/>
+                      <InputGroupAddon>
+                        <BuildingIcon />
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
               <Controller
                 name='buyerCompanyName'
                 control={form.control}

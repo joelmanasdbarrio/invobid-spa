@@ -15,6 +15,7 @@ import { Controller, type UseFormReturn } from 'react-hook-form'
 export default function InvoiceFilters (
   { form, onSubmit, handleClear }: {
     form: UseFormReturn<{
+      invoiceSvc?: string | undefined;
       buyerCompanyName?: string | undefined;
       debtorCompanyName?: string | undefined;
       maxAmount?: number | undefined;
@@ -27,6 +28,7 @@ export default function InvoiceFilters (
       includeDeleted?: boolean | undefined;
     }>;
     onSubmit: (data: {
+      invoiceSvc?: string | undefined;
       buyerCompanyName?: string | undefined;
       debtorCompanyName?: string | undefined;
       maxAmount?: number | undefined;
@@ -46,6 +48,24 @@ export default function InvoiceFilters (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
             <FieldGroup className='grid md:grid-cols-2 xl:grid-cols-4 gap-4'>
+              <Controller
+                name='invoiceSvc'
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>CSV de la factura</FieldLabel>
+                    <InputGroup>
+                      <InputGroupInput {...field} id={field.name} type='text' placeholder='B12345678-F001-00001234-20260216-A9K3' autoComplete='off'/>
+                      <InputGroupAddon>
+                        <BuildingIcon />
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
               <Controller
                 name='buyerCompanyName'
                 control={form.control}
