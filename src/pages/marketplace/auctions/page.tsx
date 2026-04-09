@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
 import { connectSocketIO } from '@/lib/socket.io'
 import { getAuctions } from '@/services/auction.api'
 import { getBids } from '@/services/bid.api'
-import type { Auction } from '@/types/Auction'
+import { AuctionStatus, type Auction } from '@/types/Auction'
 import type { Bid } from '@/types/Bid'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeftIcon, ChevronRightIcon, GavelIcon } from 'lucide-react'
@@ -80,6 +80,7 @@ export default function MarketplaceAvailableAuctionsPage () {
 
     getAuctions({
       ...filters,
+      status: AuctionStatus.PUBLISHED,
       page: String(currentPage),
       limit: String(currentLimit)
     }).then(async res => {

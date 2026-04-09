@@ -36,7 +36,7 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
         .then(res => res.data)
         .then(auction => {
           setAuction(auction)
-          setLastBreadcrumb(`Subasta de factura ${auction.invoice.invoiceUid}`)
+          setLastBreadcrumb(`Subasta de factura ${auction.invoice.svc}`)
         })
         .catch(() => {
           navigate('/marketplace/auctions')
@@ -84,7 +84,7 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
           <Form {...form}>
             <form id='auction-form' className='flex flex-col gap-4'>
               <CardHeader className='flex flex-row items-center gap-2'>
-                <h3>Detalles de la subasta <span className='text-primary'>{auction.invoice.invoiceUid}</span></h3>
+                <h3>Detalles de la subasta <span className='text-primary'>{auction.invoice.svc}</span></h3>
               </CardHeader>
 
               <CardContent className='flex flex-col gap-4'>
@@ -165,9 +165,9 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
                       <AccordionContent>
                         <FieldGroup className='flex flex-col gap-4 lg:grid lg:grid-cols-2'>
                           <Field>
-                            <FieldLabel htmlFor='invoiceUid'>UID de factura:</FieldLabel>
+                            <FieldLabel htmlFor='svc'>UID de factura:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='invoiceUid' value={auction.invoice.invoiceUid} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
+                              <InputGroupInput id='svc' value={auction.invoice.svc} type='text' placeholder='A1B2C3D4E5F6G7H8' required disabled />
                               <InputGroupAddon>
                                 #
                               </InputGroupAddon>

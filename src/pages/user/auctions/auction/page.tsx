@@ -1,3 +1,4 @@
+import { ColorBadge } from '@/components/color-badge'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -8,6 +9,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useLocale } from '@/hooks/use-locale'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { formatCurrency } from '@/lib/format-currency'
@@ -17,18 +19,20 @@ import { getInvoices } from '@/services/invoice.api'
 import { AuctionStatus, type Auction } from '@/types/Auction'
 import { InvoiceStatus, type Invoice } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CircleCheckIcon, GavelIcon, SaveIcon, SearchIcon } from 'lucide-react'
+import { CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CircleSlashIcon, GavelIcon, SaveIcon, SearchIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import z from 'zod'
+import { AuctionBids } from './components/auction-bids/auction-bids'
+import { AuctionInvoices } from './components/auction-invoices/auction-invoices'
 
 const validateFormSchema = z.object({
   status: z.enum(AuctionStatus)
 })
 
 const baseFormSchema = z.object({
-  invoiceUid: z.string(),
+  svc: z.string(),
   startingPrice: z.number().positive(),
   auctionDateEnd: z.date('La fecha de vencimiento no es válida').refine((date) => {
     const minDate = new Date()
@@ -65,7 +69,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     resolver: zodResolver(baseFormSchema),
     mode: 'onTouched',
     defaultValues: {
-      invoiceUid: auction?.invoice.id || '',
+      svc: auction?.invoice.id || '',
       startingPrice: auction?.price?.start || 0,
       auctionDateEnd: auction?.date.end ? new Date(auction.date.end) : undefined
     }
@@ -73,16 +77,16 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
 
   useEffect(() => {
     baseForm.reset({
-      invoiceUid: auction?.invoice.id || '',
+      svc: auction?.invoice.id || '',
       startingPrice: auction?.price?.start || 0,
       auctionDateEnd: auction?.date.end ? new Date(auction.date.end) : undefined
     })
   }, [auction, baseForm])
 
-  const watchedinvoiceUid = useWatch({ control: baseForm.control, name: 'invoiceUid' })
+  const watchedsvc = useWatch({ control: baseForm.control, name: 'svc' })
   const watchedDateEnd = useWatch({ control: baseForm.control, name: 'auctionDateEnd' })
 
-  const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedinvoiceUid) ?? auction?.invoice
+  const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedsvc) ?? auction?.invoice
   const invoiceDueDate = selectedInvoice?.dueDate
 
   const auctionEndMaxDate = invoiceDueDate
@@ -101,7 +105,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       .then(auction => {
         setAuction(auction)
         setOriginalAuction(auction)
-        setLastBreadcrumb(`Subasta de factura ${auction.invoice.invoiceUid}`)
+        setLastBreadcrumb(`Subasta de factura ${auction.invoice.svc}`)
       })
       .catch(() => {
         navigate('/user/auctions')
@@ -115,7 +119,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       setIsLoadingInvoices(true)
       getInvoices({
         sellerInvestorId: loggedInUser.id,
-        ...(invoiceSearch ? { invoiceUid: invoiceSearch } : {}),
+        ...(invoiceSearch ? { svc: invoiceSearch } : {}),
         status: InvoiceStatus.VERIFIED
       })
         .then(res => res.data)
@@ -135,7 +139,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
   function onSubmitBase (data: z.infer<typeof baseFormSchema>) {
     if (!auctionId) return
     updateAuctionById(auctionId, JSON.stringify({
-      invoiceUid: data.invoiceUid,
+      svc: data.svc,
       startingPrice: data.startingPrice,
       auctionDateEnd: data.auctionDateEnd.toISOString()
     }))
@@ -165,7 +169,34 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       </div>
       <Card>
         <CardHeader className='md:grid-cols-[auto_1fr] grid-rows-1'>
-          <h3>Detalles de la subasta <span className='text-primary'>{auction?.invoice?.invoiceUid}</span></h3>
+          <div className='flex flex-wrap gap-2 items-center'>
+            <h3>Detalles de la subasta <span className='text-primary'>{auction?.invoice?.svc}</span></h3>
+            {auction?.status === AuctionStatus.DRAFT && (
+              <ColorBadge color='yellow' icon={<CircleDashedIcon />}>
+                Borrador
+              </ColorBadge>
+            )}
+            {auction?.status === AuctionStatus.PUBLISHED && (
+              <ColorBadge color='green' icon={<CircleCheckIcon />}>
+                Publicada
+              </ColorBadge>
+            )}
+            {auction?.status === AuctionStatus.TRANSITIONING && (
+              <ColorBadge color='blue' icon={<CircleGaugeIcon />}>
+                En transición
+              </ColorBadge>
+            )}
+            {auction?.status === AuctionStatus.CANCELLED && (
+              <ColorBadge color='red' icon={<CircleSlashIcon />}>
+                Cancelada
+              </ColorBadge>
+            )}
+            {auction?.status === AuctionStatus.FINISHED && (
+              <ColorBadge color='purple' icon={<GavelIcon />}>
+                Finalizada
+              </ColorBadge>
+            )}
+          </div>
           {auction?.status === AuctionStatus.DRAFT && (
             <Form {...validateForm}>
               <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
@@ -194,7 +225,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                 <FieldLegend>Factura relacionada</FieldLegend>
                 <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
                   <Controller
-                    name='invoiceUid'
+                    name='svc'
                     control={baseForm.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
@@ -206,7 +237,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                           disabled={isFormDisabled}
                         >
                           <SelectTrigger>
-                            {verifiedInvoices?.find(inv => inv.id === field.value)?.invoiceUid || auction?.invoice?.invoiceUid || 'Selecciona una factura'}
+                            {verifiedInvoices?.find(inv => inv.id === field.value)?.svc || auction?.invoice?.svc || 'Selecciona una factura'}
                           </SelectTrigger>
                           <SelectContent>
                             <InputGroup className='border-0 border-b w-full'>
@@ -230,7 +261,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                             </SelectItem>
                             {verifiedInvoices?.map(inv => (
                               <SelectItem key={inv.id} value={inv.id}>
-                                {inv.invoiceUid}
+                                {inv.svc}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -384,6 +415,18 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
           </Form>
         </CardContent>
       </Card>
+      <Tabs defaultValue='bids' className='gap-4'>
+        <TabsList>
+          <TabsTrigger value='bids'>Pujas</TabsTrigger>
+          <TabsTrigger value='invoices'>Facturas</TabsTrigger>
+        </TabsList>
+        <TabsContent value='bids'>
+          <AuctionBids auctionId={auctionId} />
+        </TabsContent>
+        <TabsContent value='invoices'>
+          <AuctionInvoices invoiceSvc={auction?.invoice?.svc} />
+        </TabsContent>
+      </Tabs>
     </section>
   )
 }

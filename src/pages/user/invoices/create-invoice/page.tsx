@@ -49,15 +49,15 @@ const formSchema = z.object({
   }, {
     message: 'La fecha de vencimiento debe ser al menos 5 semanas en el futuro'
   }),
-  invoiceUid: z.string()
+  svc: z.string()
     .min(1, 'El identificador de factura es obligatorio')
     .or(z.literal('')),
   file: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
 }).refine((data) => {
-  if (data.file || data.invoiceUid) {
-    return data.file && data.invoiceUid
+  if (data.file || data.svc) {
+    return data.file && data.svc
   }
   return true
 })
@@ -82,7 +82,7 @@ export default function CreateInvoicePage () {
       debtorId: '',
       amount: undefined,
       dueDate: undefined,
-      invoiceUid: '',
+      svc: '',
       file: undefined
     }
   })
@@ -113,7 +113,7 @@ export default function CreateInvoicePage () {
     formData.append('debtorId', data.debtorId)
     formData.append('amount', data.amount.toString())
     formData.append('dueDate', toDateOnlyString(data.dueDate))
-    formData.append('invoiceUid', data.invoiceUid)
+    formData.append('svc', data.svc)
     formData.append('file', data.file?.[0])
     createInvoice(formData).then(res => navigate(`/invoices/${res.data.id}`))
   }
@@ -246,7 +246,7 @@ export default function CreateInvoicePage () {
                 <FieldLegend>Documentación</FieldLegend>
                 <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
                   <Controller
-                    name='invoiceUid'
+                    name='svc'
                     control={baseForm.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>

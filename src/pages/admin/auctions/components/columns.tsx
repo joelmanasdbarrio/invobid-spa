@@ -32,7 +32,12 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
     },
     {
       accessorKey: 'invoice.buyerInvestor.companyName',
-      header: 'Inversor'
+      header: 'Inversor',
+      cell: ({row}) => row.original.invoice.buyerInvestor ? (
+        row.original.invoice.buyerInvestor.companyName
+      ) : (
+        <span className='text-sm text-gray-500'>Pendiente</span>
+      )
     },
     {
       accessorKey: 'price.start',
@@ -41,7 +46,10 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
     },
     {
       header: 'Fecha de inicio',
-      cell: ({row}) => formatDateTime(row.original.date.start, locale)
+      cell: ({row}) => row.original.date.start ?
+        formatDateTime(row.original.date.start, locale) : (
+          <span className='text-sm text-gray-500'>Pendiente</span>
+        )
     },
     {
       header: 'Fecha de finalización',

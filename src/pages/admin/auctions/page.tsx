@@ -15,10 +15,10 @@ import { DataTable } from './components/data-table'
 import AuctionFilters from './components/filters'
 
 const formSchema = z.object({
+  invoiceSvc: z.string().optional(),
   sellerCompanyName: z.string().optional(),
   buyerCompanyName: z.string().optional(),
   debtorCompanyName: z.string().optional(),
-  invoiceUid: z.string().optional(),
   maxAmount: z.number().positive().optional(),
   minAmount: z.number().positive().optional(),
   auctionDateStart: z.string().optional(),
@@ -32,10 +32,10 @@ export default function AdminAuctionsPage () {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const defaultForm = useMemo(() => ({
+    invoiceSvc: searchParams.get('invoiceSvc') || undefined,
     sellerCompanyName: searchParams.get('sellerCompanyName') || undefined,
     buyerCompanyName: searchParams.get('buyerCompanyName') || undefined,
     debtorCompanyName: searchParams.get('debtorCompanyName') || undefined,
-    invoiceUid: searchParams.get('invoiceUid') || undefined,
     maxAmount: searchParams.get('maxAmount') ? Number(searchParams.get('maxAmount')) : undefined,
     minAmount: searchParams.get('minAmount') ? Number(searchParams.get('minAmount')) : undefined,
     auctionDateStart: searchParams.get('auctionDateStart') || undefined,
@@ -95,18 +95,7 @@ export default function AdminAuctionsPage () {
   }, [searchParams, currentPage, currentLimit])
 
   function handleClear () {
-    form.reset({
-      sellerCompanyName: undefined,
-      buyerCompanyName: undefined,
-      debtorCompanyName: undefined,
-      invoiceUid: undefined,
-      maxAmount: undefined,
-      minAmount: undefined,
-      auctionDateStart: undefined,
-      auctionDateEnd: undefined,
-      status: undefined,
-      includeDeleted: false
-    })
+    form.reset(defaultForm)
     setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
   }
 

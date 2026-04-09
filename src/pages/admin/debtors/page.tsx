@@ -87,15 +87,7 @@ export default function AdminDebtorsPage () {
   }, [searchParams, currentPage, currentLimit])
 
   function handleClear () {
-    form.reset({
-      email: '',
-      phoneNumber: undefined,
-      companyName: '',
-      taxId: '',
-      investorId: '',
-      status: undefined,
-      includeDeleted: undefined
-    })
+    form.reset(defaultForm)
     setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
   }
 

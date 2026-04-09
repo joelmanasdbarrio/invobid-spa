@@ -4,7 +4,7 @@ import type { Investor } from './User'
 
 export type Invoice = {
   id: string;
-  invoiceUid: string;
+  svc: string;
   sellerInvestor: Investor;
   buyerInvestor?: Investor;
   status: InvoiceStatus;

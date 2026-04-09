@@ -1,3 +1,4 @@
+import { ColorBadge } from '@/components/color-badge'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +17,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
 import { Spinner } from '@/components/ui/spinner'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 import { parseLocalDate, toDateOnlyString } from '@/lib/format-date'
@@ -25,6 +27,7 @@ import { type Debtor, DebtorStatus } from '@/types/Debtor.ts'
 import { type Invoice, InvoiceStatus } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  CheckCheckIcon,
   CircleAlertIcon,
   CircleQuestionMarkIcon,
   ClockIcon,
@@ -40,6 +43,8 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import z from 'zod'
+import InvoiceAuctions from './components/invoice-auctions/invoice-auctions'
+import InvoiceDocuments from './components/invoice-documents/invoice-documents'
 
 const validateFormSchema = z.object({
   status: z.enum(InvoiceStatus)
@@ -60,21 +65,21 @@ const baseFormSchema = z.object({
 })
 
 const documentFormSchema = z.object({
-  invoiceUid: z.string()
+  svc: z.string()
     .min(1, 'El identificador de factura es obligatorio')
     .or(z.literal('')),
   file: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
 }).refine((data) => {
-  if (data.file || data.invoiceUid) {
-    return data.file && data.invoiceUid
+  if (data.file || data.svc) {
+    return data.file && data.svc
   }
   return true
 })
 
 export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {invoiceUid} = useParams<{ invoiceUid: string }>()
+  const {invoiceId} = useParams<{ invoiceId: string }>()
   const [invoice, setInvoice] = useState<Invoice | undefined>()
   const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
   const [verifiedDebtors, setVerifiedDebtors] = useState<[Debtor]>()
@@ -105,7 +110,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     resolver: zodResolver(documentFormSchema),
     mode: 'onTouched',
     defaultValues: {
-      invoiceUid: '',
+      svc: '',
       file: undefined
     }
   })
@@ -122,18 +127,18 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!invoiceUid || !loggedInUser) return
-    getInvoiceById(invoiceUid)
+    if (!invoiceId || !loggedInUser) return
+    getInvoiceById(invoiceId)
       .then(res => res.data)
       .then(invoice => {
         setInvoice(invoice)
         setOriginalInvoice(invoice)
-        setLastBreadcrumb(`Factura ${invoice.invoiceUid}`)
+        setLastBreadcrumb(`Factura ${invoice.svc}`)
       })
       .catch(() => {
         navigate('/user/invoices')
       })
-  }, [invoiceUid, loggedInUser, navigate, setLastBreadcrumb])
+  }, [invoiceId, loggedInUser, navigate, setLastBreadcrumb])
 
   useEffect(() => {
     if (!loggedInUser) return
@@ -154,33 +159,33 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
   }, [loggedInUser, debtorSearch])
 
   function onSubmitBase (data: z.infer<typeof baseFormSchema>) {
-    if (!invoiceUid) return
-    updateInvoiceById(invoiceUid, JSON.stringify({
+    if (!invoiceId) return
+    updateInvoiceById(invoiceId, JSON.stringify({
       debtorId: data.debtorId,
       amount: data.amount,
       dueDate: toDateOnlyString(data.dueDate)
     }))
       .then(res => setInvoice(res.data))
-      .then(() => navigate(`/user/invoices/${invoiceUid}`))
+      .then(() => navigate(`/user/invoices/${invoiceId}`))
   }
 
   function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
-    if (!invoiceUid) return
+    if (!invoiceId) return
     const formData = new FormData()
-    formData.append('invoiceUid', data.invoiceUid)
+    formData.append('svc', data.svc)
     formData.append('file', data.file[0])
-    updateInvoiceById(invoiceUid, formData)
+    updateInvoiceById(invoiceId, formData)
       .then(res => setInvoice(res.data))
-      .then(() => navigate(`/user/invoices/${invoiceUid}`))
+      .then(() => navigate(`/user/invoices/${invoiceId}`))
   }
 
   function onSubmitValidate (data: z.infer<typeof validateFormSchema>) {
-    if (!invoiceUid) return
-    updateInvoiceById(invoiceUid, JSON.stringify({
+    if (!invoiceId) return
+    updateInvoiceById(invoiceId, JSON.stringify({
       status: data.status
     }))
       .then(res => setInvoice(res.data))
-      .then(() => navigate(`/user/invoices/${invoiceUid}`))
+      .then(() => navigate(`/user/invoices/${invoiceId}`))
   }
 
   const invoiceStatusTextMap: {
@@ -212,7 +217,29 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       </div>
       <Card>
         <CardHeader className='md:grid-cols-[auto_1fr]'>
-          <h3>Detalles de la factura <span className='text-primary'>{invoice?.invoiceUid}</span></h3>
+          <div className='flex flex-wrap gap-2 items-center'>
+            <h3>Detalles de la factura <span className='text-primary'>{invoice?.svc}</span></h3>
+            {invoice?.status === InvoiceStatus.PENDING && (
+              <ColorBadge color='yellow' icon={<ClockIcon />}>
+                Pendiente
+              </ColorBadge>
+            )}
+            {invoice?.status === InvoiceStatus.VERIFIED && (
+              <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                Verificada
+              </ColorBadge>
+            )}
+            {invoice?.status === InvoiceStatus.CORRECTION && (
+              <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                Corrección
+              </ColorBadge>
+            )}
+            {invoice?.status === InvoiceStatus.DENIED && (
+              <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                Denegada
+              </ColorBadge>
+            )}
+          </div>
           {(invoice?.status === InvoiceStatus.CORRECTION || invoice?.status === InvoiceStatus.PENDING) && (
             <Form {...validateForm}>
               <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
@@ -366,7 +393,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                 <FieldLegend>Actualizar documento</FieldLegend>
                 <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
                   <Controller
-                    name='invoiceUid'
+                    name='svc'
                     control={documentForm.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
@@ -437,6 +464,19 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
           </Form>
         </CardContent>
       </Card>
+
+      <Tabs defaultValue='auctions' className='gap-4'>
+        <TabsList>
+          <TabsTrigger value='auctions'>Subastas</TabsTrigger>
+          <TabsTrigger value='documents'>Documentos</TabsTrigger>
+        </TabsList>
+        <TabsContent value='auctions'>
+          <InvoiceAuctions invoiceSvc={invoice?.svc} />
+        </TabsContent>
+        <TabsContent value='documents'>
+          <InvoiceDocuments invoiceSvc={invoice?.svc} />
+        </TabsContent>
+      </Tabs>
 
       {(invoice?.status && invoice.status !== InvoiceStatus.VERIFIED) && (
         <AlertDialog defaultOpen>

@@ -52,7 +52,7 @@ const formSchema = z.object({
 })
 
 export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {invoiceUid} = useParams()
+  const {svc} = useParams()
   const [invoice, setInvoice] = useState<Invoice | undefined>()
   const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
   const [isFormDisabled, setIsFormDisabled] = useState(true)
@@ -61,19 +61,19 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
 
   const navigate = useNavigate()
   useEffect(() => {
-    if(invoiceUid) {
-      getInvoiceById(invoiceUid)
+    if(svc) {
+      getInvoiceById(svc)
         .then(res => res.data)
         .then(invoice => {
           setInvoice(invoice)
           setOriginalInvoice(invoice)
-          setLastBreadcrumb(`Factura ${invoice.invoiceUid}`)
+          setLastBreadcrumb(`Factura ${invoice.svc}`)
         })
         .catch(() => {
           navigate('/admin/invoices')
         })
     }
-  }, [invoiceUid, navigate, setLastBreadcrumb])
+  }, [svc, navigate, setLastBreadcrumb])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -115,7 +115,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
         setIsFormDisabled(true)
         setIsDialogOpen(false)
       })
-      .then(() => navigate(`/admin/invoices/${invoiceUid}`))
+      .then(() => navigate(`/admin/invoices/${svc}`))
   }
 
   function handleReset () {
@@ -152,7 +152,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
           <Form {...form}>
             <form id='debtor-form' onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
               <CardHeader className='flex flex-col xl:flex-row gap-2'>
-                <h3>Detalle de la factura <span className='text-primary'>{invoice?.invoiceUid}</span></h3>
+                <h3>Detalle de la factura <span className='text-primary'>{invoice?.id}</span></h3>
                 <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                   <ButtonGroup>
                     {isFormDisabled
@@ -226,14 +226,14 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                       )}
                     />
                     <Field>
-                      <FieldLabel htmlFor='invoiceUid'>UID de factura:</FieldLabel>
+                      <FieldLabel htmlFor='svc'>UID de factura:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput id='invoiceUid' value={invoice?.invoiceUid} type='text' placeholder='0' required disabled />
+                        <InputGroupInput id='svc' value={invoice?.svc} type='text' placeholder='0' required disabled />
                         <InputGroupAddon>
                           #
                         </InputGroupAddon>
                         <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, invoice?.invoiceUid ?? '')} className='group'>
+                          <button onClick={(e) => copyToClipboard(e, invoice?.svc ?? '')} className='group'>
                             <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                             <Tooltip>
@@ -610,7 +610,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
         <InvoiceChangeHistory invoice={invoice} />
       </div>
 
-      <InvoiceDocuments invoiceUid={invoice?.invoiceUid ?? ''} />
+      <InvoiceDocuments invoiceSvc={invoice?.svc ?? ''} />
     </section>
   )
 }

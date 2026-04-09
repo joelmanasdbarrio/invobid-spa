@@ -57,7 +57,7 @@ function App () {
 
           <Route path='/admin/invoices'>
             <Route index element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de facturas', href: '/admin/invoices' }]}><AdminInvoicesPage /></MainLayout></ProtectedRoute>} />
-            <Route path=':invoiceUid' element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de facturas', href: '/admin/invoices' }, { label: lastBreadcrumb, href: '/admin/invoices/:invoiceUid' }]}><AdminInvoicePage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
+            <Route path=':svc' element={<ProtectedRoute userType={UserType.ADMIN}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Gestión de facturas', href: '/admin/invoices' }, { label: lastBreadcrumb, href: '/admin/invoices/:svc' }]}><AdminInvoicePage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
           </Route>
 
           <Route path='/admin/auctions'>
@@ -73,7 +73,7 @@ function App () {
 
           <Route path='/invoices'>
             <Route index element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis facturas', href: '/invoices' }]}><InvoicesPage /></MainLayout></ProtectedRoute>} />
-            <Route path=':invoiceUid' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis facturas', href: '/invoices' }, { label: lastBreadcrumb, href: '/invoices/:invoiceUid' }]}><InvoicePage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
+            <Route path=':invoiceId' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis facturas', href: '/invoices' }, { label: lastBreadcrumb, href: '/invoices/:svc' }]}><InvoicePage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
             <Route path='create' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Mis facturas', href: '/invoices' }, { label: 'Crear factura', href: '/invoices/create' }]}><CreateInvoicePage /></MainLayout></ProtectedRoute>} />
           </Route>
 
