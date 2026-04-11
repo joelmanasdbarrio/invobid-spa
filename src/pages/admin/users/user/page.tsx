@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog.tsx'
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field.tsx'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field.tsx'
 import { Form } from '@/components/ui/form.tsx'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
@@ -37,6 +37,7 @@ import {
   MailIcon,
   OctagonXIcon,
   PhoneIcon,
+  RotateCcwIcon,
   SaveIcon,
   UserIcon,
   UsersIcon
@@ -114,6 +115,7 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
   }, [investor, form])
 
   const investorType = useWatch({ control: form.control, name: 'investorType' })
+  const watchedStatus = useWatch({ control: form.control, name: 'status' })
 
   function onSubmit (data: z.infer<typeof formSchema>) {
     if (!investor) return
@@ -200,21 +202,21 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                   </ButtonGroup>
 
                   <ButtonGroup>
-                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/10' onClick={() => form.setValue('status', InvestorStatus.DENIED)}>
+                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/10' onClick={() => form.setValue('status', InvestorStatus.DENIED, { shouldDirty: true })}>
                       <OctagonXIcon className='rounded-full text-zinc-600'/>
-                      {form.watch('status') === InvestorStatus.DENIED && 'Denegado'}
+                      {watchedStatus === InvestorStatus.DENIED && 'Denegado'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/15' onClick={() => form.setValue('status', InvestorStatus.CORRECTION)}>
+                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/15' onClick={() => form.setValue('status', InvestorStatus.CORRECTION, { shouldDirty: true })}>
                       <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                      {form.watch('status') === InvestorStatus.CORRECTION && 'Corrección'}
+                      {watchedStatus === InvestorStatus.CORRECTION && 'Corrección'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/15' onClick={() => form.setValue('status', InvestorStatus.PENDING)}>
+                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/15' onClick={() => form.setValue('status', InvestorStatus.PENDING, { shouldDirty: true })}>
                       <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
-                      {form.watch('status') === InvestorStatus.PENDING && 'Por verificar'}
+                      {watchedStatus === InvestorStatus.PENDING && 'Por verificar'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/15' onClick={() => form.setValue('status', InvestorStatus.VERIFIED)}>
+                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/15' onClick={() => form.setValue('status', InvestorStatus.VERIFIED, { shouldDirty: true })}>
                       <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
-                      {form.watch('status') === InvestorStatus.VERIFIED && 'Verificado'}
+                      {watchedStatus === InvestorStatus.VERIFIED && 'Verificado'}
                     </Button>
                   </ButtonGroup>
                 </ButtonGroup>
@@ -450,63 +452,69 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                     )}
                   />
                 </FieldGroup>
-                <FieldGroup>
-                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button className='ms-auto w-min' disabled={JSON.stringify(originalInvestor) === JSON.stringify(investor) && !form.formState.isDirty}>
-                        <SaveIcon />
-                        Guardar cambios
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>¿Estás seguro de que deseas guardar los cambios?</DialogTitle>
-                      </DialogHeader>
-                      <DialogDescription>Esta acción actualizará la información del usuario en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
-
-                      <Controller
-                        name='lastCommunication'
-                        control={form.control}
-                        render={({ field }) => (
-                          <Field className='mt-4'>
-                            <FieldLabel htmlFor={field.name}>Notas de la actualización:</FieldLabel>
-                            <InputGroup>
-                              <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
-                            </InputGroup>
-                            <div className='flex flex-wrap gap-1'>
-                              {Object.entries(updateNotesMap).map(([key, note]) => (
-                                <Badge
-                                  key={key}
-                                  variant='outline'
-                                  className='hover:cursor-pointer border-dashed hover:bg-accent'
-                                  onClick={() => {
-                                    form.setValue('lastCommunication', note)
-                                  }}
-                                >
-                                  {note}
-                                </Badge>
-                              ))}
-                            </div>
-                            <FieldDescription>
-                              Este mensaje le indicará al usuario próximas acciones que debe realizar o el motivo de la actualización.
-                            </FieldDescription>
-                          </Field>
-                        )}
-                      />
-
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button variant='outline' onClick={handleReset}>
-                            Cancelar
-                          </Button>
-                        </DialogClose>
-                        <Button type='submit' form='investor-form' onClick={form.handleSubmit(onSubmit)}>
-                          Confirmar
+                <FieldSet>
+                  <FieldGroup className='flex flex-row gap-2 items-center justify-end'>
+                    <Button type='button' variant='secondary' onClick={handleReset} disabled={JSON.stringify(originalInvestor) === JSON.stringify(investor) && !form.formState.isDirty}>
+                      <RotateCcwIcon />
+                      Deshacer
+                    </Button>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button disabled={JSON.stringify(originalInvestor) === JSON.stringify(investor) && !form.formState.isDirty}>
+                          <SaveIcon />
+                          Guardar cambios
                         </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </FieldGroup>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>¿Estás seguro de que deseas guardar los cambios?</DialogTitle>
+                        </DialogHeader>
+                        <DialogDescription>Esta acción actualizará la información del usuario en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
+
+                        <Controller
+                          name='lastCommunication'
+                          control={form.control}
+                          render={({ field }) => (
+                            <Field className='mt-4'>
+                              <FieldLabel htmlFor={field.name}>Notas de la actualización:</FieldLabel>
+                              <InputGroup>
+                                <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
+                              </InputGroup>
+                              <div className='flex flex-wrap gap-1'>
+                                {Object.entries(updateNotesMap).map(([key, note]) => (
+                                  <Badge
+                                    key={key}
+                                    variant='outline'
+                                    className='hover:cursor-pointer border-dashed hover:bg-accent'
+                                    onClick={() => {
+                                      form.setValue('lastCommunication', note)
+                                    }}
+                                  >
+                                    {note}
+                                  </Badge>
+                                ))}
+                              </div>
+                              <FieldDescription>
+                                Este mensaje le indicará al usuario próximas acciones que debe realizar o el motivo de la actualización.
+                              </FieldDescription>
+                            </Field>
+                          )}
+                        />
+
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button variant='outline' onClick={handleReset}>
+                              Cancelar
+                            </Button>
+                          </DialogClose>
+                          <Button type='submit' form='investor-form' onClick={form.handleSubmit(onSubmit)}>
+                            Confirmar
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </FieldGroup>
+                </FieldSet>
               </CardContent>
             </form>
           </Form>
@@ -514,23 +522,24 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
 
         <UserChangeHistory investor={investor} />
       </div>
-      <Tabs defaultValue={DocumentType.IDENTIFICATION} className='gap-4'>
+
+      <Tabs defaultValue={DocumentType.ID} className='gap-4'>
         <TabsList>
-          <TabsTrigger value={DocumentType.IDENTIFICATION}>Documentos</TabsTrigger>
-          <TabsTrigger value={DocumentType.MODELO_111}>Deudores</TabsTrigger>
+          <TabsTrigger value={DocumentType.ID}>Documentos</TabsTrigger>
+          <TabsTrigger value={'debtors'}>Deudores</TabsTrigger>
           <TabsTrigger value={DocumentType.INVOICE}>Facturas</TabsTrigger>
-          <TabsTrigger value={'Auctions'}>Subastas</TabsTrigger>
+          <TabsTrigger value={'auctions'}>Subastas</TabsTrigger>
         </TabsList>
-        <TabsContent value={DocumentType.IDENTIFICATION}>
+        <TabsContent value={DocumentType.ID}>
           <UserDocuments investorId={investorId} />
         </TabsContent>
-        <TabsContent value={DocumentType.MODELO_111}>
+        <TabsContent value={'debtors'}>
           <UserDebtors investorId={investorId} />
         </TabsContent>
         <TabsContent value={DocumentType.INVOICE}>
           <UserInvoices investorId={investorId} />
         </TabsContent>
-        <TabsContent value={'Auctions'}>
+        <TabsContent value={'auctions'}>
           <UserAuctions investorId={investorId} />
         </TabsContent>
       </Tabs>

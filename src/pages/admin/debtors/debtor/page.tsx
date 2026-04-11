@@ -35,10 +35,11 @@ import {
   MailIcon,
   OctagonXIcon,
   PhoneIcon,
+  RotateCcwIcon,
   SaveIcon
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
 import z from 'zod'
 import { DebtorChangeHistory } from './components/debtor-change-history'
@@ -88,6 +89,8 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
       lastCommunication: ''
     }
   })
+
+  const watchedStatus = useWatch({ control: form.control, name: 'status' })
 
   useEffect(() => {
     form.reset({
@@ -183,21 +186,21 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                   </ButtonGroup>
 
                   <ButtonGroup>
-                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => form.setValue('status', DebtorStatus.DENIED)}>
+                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => form.setValue('status', DebtorStatus.DENIED, { shouldDirty: true })}>
                       <OctagonXIcon className='rounded-full text-zinc-600'/>
-                      {form.watch('status') === DebtorStatus.DENIED && 'Denegado'}
+                      {watchedStatus === DebtorStatus.DENIED && 'Denegado'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', DebtorStatus.CORRECTION)}>
+                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', DebtorStatus.CORRECTION, { shouldDirty: true })}>
                       <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                      {form.watch('status') === DebtorStatus.CORRECTION && 'Corrección'}
+                      {watchedStatus === DebtorStatus.CORRECTION && 'Corrección'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', DebtorStatus.PENDING)}>
+                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', DebtorStatus.PENDING, { shouldDirty: true })}>
                       <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
-                      {form.watch('status') === DebtorStatus.PENDING && 'Por verificar'}
+                      {watchedStatus === DebtorStatus.PENDING && 'Por verificar'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', DebtorStatus.VERIFIED)}>
+                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', DebtorStatus.VERIFIED, { shouldDirty: true })}>
                       <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
-                      {form.watch('status') === DebtorStatus.VERIFIED && 'Verificado'}
+                      {watchedStatus === DebtorStatus.VERIFIED && 'Verificado'}
                     </Button>
                   </ButtonGroup>
                 </ButtonGroup>
@@ -417,10 +420,14 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                   </FieldSet>
                 </Accordion>
                 <FieldSet>
-                  <FieldGroup>
+                  <FieldGroup className='flex flex-row gap-2 items-center justify-end'>
+                    <Button type='button' variant='secondary' onClick={handleReset} disabled={JSON.stringify(originalDebtor) === JSON.stringify(debtor) && !form.formState.isDirty}>
+                      <RotateCcwIcon />
+                      Deshacer
+                    </Button>
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                       <DialogTrigger asChild>
-                        <Button className='ms-auto w-min' disabled={JSON.stringify(originalDebtor) === JSON.stringify(debtor) && !form.formState.isDirty}>
+                        <Button disabled={JSON.stringify(originalDebtor) === JSON.stringify(debtor) && !form.formState.isDirty}>
                           <SaveIcon />
                           Guardar cambios
                         </Button>

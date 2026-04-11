@@ -126,16 +126,16 @@ export default function CreateInvoicePage () {
         </span>
         <h2>Publicar factura</h2>
       </div>
-      <Card>
-        <CardHeader>
-          <h3>Detalles de la factura</h3>
-        </CardHeader>
-        <CardContent className='grid md:grid-cols-[1fr_200px] gap-4'>
-          <Form {...baseForm}>
-            <form onSubmit={baseForm.handleSubmit(onSubmit)} className='col-span-full flex flex-col gap-4'>
+      <Form {...baseForm}>
+        <form onSubmit={baseForm.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+          <Card>
+            <CardHeader>
+              <h3>Detalles de la factura</h3>
+            </CardHeader>
+            <CardContent>
               <FieldSet>
                 <FieldLegend>Información de la factura</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
                   <Controller
                     name='debtorId'
                     control={baseForm.control}
@@ -184,7 +184,7 @@ export default function CreateInvoicePage () {
                     )}
                   />
                 </FieldGroup>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
                   <Controller
                     name='amount'
                     control={baseForm.control}
@@ -242,9 +242,14 @@ export default function CreateInvoicePage () {
                   />
                 </FieldGroup>
               </FieldSet>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent>
               <FieldSet>
                 <FieldLegend>Documentación</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
                   <Controller
                     name='svc'
                     control={baseForm.control}
@@ -293,6 +298,16 @@ export default function CreateInvoicePage () {
                           <InputGroupAddon>
                             <FileIcon />
                           </InputGroupAddon>
+                          <InputGroupAddon align={'inline-end'}>
+                            <Tooltip>
+                              <TooltipTrigger className='leading-1'>
+                                <CircleQuestionMarkIcon className='w-4 h-4'/>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className='text-center'>Fotocopia que permita visualizar el documento completo</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </InputGroupAddon>
                         </InputGroup>
                         {fieldState.invalid && (
                           <FieldError errors={[fieldState.error]} />
@@ -302,18 +317,19 @@ export default function CreateInvoicePage () {
                   />
                 </FieldGroup>
               </FieldSet>
-              <Button
-                className='w-min self-end justify-self-end'
-                disabled={!baseForm.formState.isDirty}
-                title='Crear deudor'
-              >
-                <SaveIcon />
-                Subir factura
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+
+          <Button
+            className='w-min self-end justify-self-end'
+            disabled={!baseForm.formState.isDirty}
+            title='Crear deudor'
+          >
+            <SaveIcon />
+            Subir factura
+          </Button>
+        </form>
+      </Form>
     </section>
   )
 }

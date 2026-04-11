@@ -36,10 +36,11 @@ import {
   LockIcon,
   LockOpenIcon,
   OctagonXIcon,
+  RotateCcwIcon,
   SaveIcon
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
 import z from 'zod'
 import { InvoiceChangeHistory } from './components/invoice-change-history'
@@ -84,6 +85,8 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
       lastCommunication: invoice?.lastCommunication ?? ''
     }
   })
+
+  const watchedStatus = useWatch({ control: form.control, name: 'status' })
 
   useEffect(() => {
     form.reset({
@@ -150,7 +153,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
       <div className='grid xl:grid-cols-3 gap-4'>
         <Card className='xl:col-span-2'>
           <Form {...form}>
-            <form id='debtor-form' onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+            <form id='invoice-form' onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
               <CardHeader className='flex flex-col xl:flex-row gap-2'>
                 <h3>Detalle de la factura <span className='text-primary'>{invoice?.id}</span></h3>
                 <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
@@ -168,21 +171,21 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                   </ButtonGroup>
 
                   <ButtonGroup>
-                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => form.setValue('status', InvoiceStatus.DENIED)}>
+                    <Button type='button' variant='outline' className='bg-zinc-300/25 dark:bg-zinc-300/25' onClick={() => form.setValue('status', InvoiceStatus.DENIED, { shouldDirty: true })}>
                       <OctagonXIcon className='rounded-full text-zinc-600'/>
-                      {form.watch('status') === InvoiceStatus.DENIED && 'Denegado'}
+                      {watchedStatus === InvoiceStatus.DENIED && 'Denegado'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', InvoiceStatus.CORRECTION)}>
+                    <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', InvoiceStatus.CORRECTION, { shouldDirty: true })}>
                       <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
-                      {form.watch('status') === InvoiceStatus.CORRECTION && 'Corrección'}
+                      {watchedStatus === InvoiceStatus.CORRECTION && 'Corrección'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', InvoiceStatus.PENDING)}>
+                    <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', InvoiceStatus.PENDING, { shouldDirty: true })}>
                       <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
-                      {form.watch('status') === InvoiceStatus.PENDING && 'Por verificar'}
+                      {watchedStatus === InvoiceStatus.PENDING && 'Por verificar'}
                     </Button>
-                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', InvoiceStatus.VERIFIED)}>
+                    <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', InvoiceStatus.VERIFIED, { shouldDirty: true })}>
                       <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
-                      {form.watch('status') === InvoiceStatus.VERIFIED && 'Verificado'}
+                      {watchedStatus === InvoiceStatus.VERIFIED && 'Verificado'}
                     </Button>
                   </ButtonGroup>
                 </ButtonGroup>
@@ -545,63 +548,69 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                     </FieldSet>
                   )}
                 </Accordion>
-                <FieldGroup>
-                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button className='ms-auto w-min' disabled={JSON.stringify(originalInvoice) === JSON.stringify(invoice) && !form.formState.isDirty}>
-                        <SaveIcon />
-                        Guardar cambios
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>¿Estás seguro de que deseas guardar los cambios?</DialogTitle>
-                      </DialogHeader>
-                      <DialogDescription>Esta acción actualizará la información de la factura en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
-
-                      <Controller
-                        name='lastCommunication'
-                        control={form.control}
-                        render={({ field }) => (
-                          <Field className='mt-4'>
-                            <FieldLabel htmlFor={field.name}>Notas de la actualización:</FieldLabel>
-                            <InputGroup>
-                              <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
-                            </InputGroup>
-                            <div className='flex flex-wrap gap-1'>
-                              {Object.entries(updateNotesMap).map(([key, note]) => (
-                                <Badge
-                                  key={key}
-                                  variant='outline'
-                                  className='hover:cursor-pointer border-dashed hover:bg-accent'
-                                  onClick={() => {
-                                    form.setValue('lastCommunication', note)
-                                  }}
-                                >
-                                  {note}
-                                </Badge>
-                              ))}
-                            </div>
-                            <FieldDescription>
-                              Este mensaje le indicará al usuario próximas acciones que debe realizar o el motivo de la actualización.
-                            </FieldDescription>
-                          </Field>
-                        )}
-                      />
-
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button variant='outline' onClick={handleReset}>
-                            Cancelar
-                          </Button>
-                        </DialogClose>
-                        <Button type='submit' form='debtor-form' onClick={form.handleSubmit(onSubmit)}>
-                          Confirmar
+                <FieldSet>
+                  <FieldGroup className='flex flex-row gap-2 items-center justify-end'>
+                    <Button type='button' variant='secondary' onClick={handleReset} disabled={JSON.stringify(originalInvoice) === JSON.stringify(invoice) && !form.formState.isDirty}>
+                      <RotateCcwIcon />
+                      Deshacer
+                    </Button>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button disabled={JSON.stringify(originalInvoice) === JSON.stringify(invoice) && !form.formState.isDirty}>
+                          <SaveIcon />
+                          Guardar cambios
                         </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </FieldGroup>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>¿Estás seguro de que deseas guardar los cambios?</DialogTitle>
+                        </DialogHeader>
+                        <DialogDescription>Esta acción actualizará la información de la factura en el sistema, comprueba siempre que los datos son correctos.</DialogDescription>
+
+                        <Controller
+                          name='lastCommunication'
+                          control={form.control}
+                          render={({ field }) => (
+                            <Field className='mt-4'>
+                              <FieldLabel htmlFor={field.name}>Notas de la actualización:</FieldLabel>
+                              <InputGroup>
+                                <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
+                              </InputGroup>
+                              <div className='flex flex-wrap gap-1'>
+                                {Object.entries(updateNotesMap).map(([key, note]) => (
+                                  <Badge
+                                    key={key}
+                                    variant='outline'
+                                    className='hover:cursor-pointer border-dashed hover:bg-accent'
+                                    onClick={() => {
+                                      form.setValue('lastCommunication', note)
+                                    }}
+                                  >
+                                    {note}
+                                  </Badge>
+                                ))}
+                              </div>
+                              <FieldDescription>
+                                Este mensaje le indicará al usuario próximas acciones que debe realizar o el motivo de la actualización.
+                              </FieldDescription>
+                            </Field>
+                          )}
+                        />
+
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button variant='outline' onClick={handleReset}>
+                              Cancelar
+                            </Button>
+                          </DialogClose>
+                          <Button type='submit' form='invoice-form' onClick={form.handleSubmit(onSubmit)}>
+                            Confirmar
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </FieldGroup>
+                </FieldSet>
               </CardContent>
             </form>
           </Form>

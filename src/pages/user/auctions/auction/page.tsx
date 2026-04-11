@@ -223,7 +223,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
             <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4'>
               <FieldSet>
                 <FieldLegend>Factura relacionada</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
                   <Controller
                     name='svc'
                     control={baseForm.control}
@@ -295,7 +295,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
 
               <FieldSet>
                 <FieldLegend>Datos de la subasta</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
                   <Controller
                     name='startingPrice'
                     control={baseForm.control}
