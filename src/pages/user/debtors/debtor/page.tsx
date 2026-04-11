@@ -6,6 +6,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegen
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getDebtorById, updateDebtorById } from '@/services/debtor.api'
 import { DebtorStatus, type Debtor } from '@/types/Debtor'
 import { DocumentType } from '@/types/Document'
@@ -15,6 +16,8 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import z from 'zod'
+import DebtorDocuments from './components/debtor-documents/debtor-documents'
+import DebtorInvoices from './components/debtor-invoices/debtor-invoices'
 
 const validateFormSchema = z.object({
   status: z.enum(DebtorStatus)
@@ -563,6 +566,19 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
           </Button>
         </form>
       </Form>
+
+      <Tabs defaultValue='invoices' className='gap-4'>
+        <TabsList>
+          <TabsTrigger value='invoices'>Facturas</TabsTrigger>
+          <TabsTrigger value='documents'>Documentos</TabsTrigger>
+        </TabsList>
+        <TabsContent value='invoices'>
+          <DebtorInvoices debtorId={debtorId} />
+        </TabsContent>
+        <TabsContent value='documents'>
+          <DebtorDocuments debtorId={debtorId} />
+        </TabsContent>
+      </Tabs>
 
       {(debtor?.status && debtor.status !== DebtorStatus.VERIFIED) && (
         <AlertDialog defaultOpen>

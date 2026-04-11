@@ -50,16 +50,10 @@ const formSchema = z.object({
     message: 'La fecha de vencimiento debe ser al menos 5 semanas en el futuro'
   }),
   svc: z.string()
-    .min(1, 'El identificador de factura es obligatorio')
-    .or(z.literal('')),
+    .min(1, 'El CSV es obligatorio'),
   file: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
     .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
-}).refine((data) => {
-  if (data.file || data.svc) {
-    return data.file && data.svc
-  }
-  return true
 })
 
 export default function CreateInvoicePage () {
@@ -86,7 +80,6 @@ export default function CreateInvoicePage () {
       file: undefined
     }
   })
-
 
   const loggedInUser = useLoggedInUser()
   useEffect(() => {
@@ -163,6 +156,16 @@ export default function CreateInvoicePage () {
                               />
                               <InputGroupAddon>
                                 {isLoadingDebtors ? <Spinner /> : <SearchIcon />}
+                              </InputGroupAddon>
+                              <InputGroupAddon align={'inline-end'}>
+                                <Tooltip>
+                                  <TooltipTrigger className='leading-1'>
+                                    <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className='text-center'>Solo deudores verificados</p>
+                                  </TooltipContent>
+                                </Tooltip>
                               </InputGroupAddon>
                             </InputGroup>
                             <SelectItem value='__NONE__'>

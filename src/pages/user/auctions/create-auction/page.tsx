@@ -17,7 +17,7 @@ import { createAuction } from '@/services/auction.api'
 import { getInvoices } from '@/services/invoice.api'
 import { type Invoice, InvoiceStatus } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CheckIcon, CopyIcon, GavelIcon, SaveIcon, SearchIcon } from 'lucide-react'
+import { CheckIcon, CircleQuestionMarkIcon, CopyIcon, GavelIcon, SaveIcon, SearchIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
@@ -157,6 +157,16 @@ export default function CreateAuctionPage () {
                               />
                               <InputGroupAddon>
                                 {isLoadingInvoices ? <Spinner /> : <SearchIcon />}
+                              </InputGroupAddon>
+                              <InputGroupAddon align={'inline-end'}>
+                                <Tooltip>
+                                  <TooltipTrigger className='leading-1'>
+                                    <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className='text-center'>Solo facturas verificadas</p>
+                                  </TooltipContent>
+                                </Tooltip>
                               </InputGroupAddon>
                             </InputGroup>
                             <SelectItem value='__NONE__'>
