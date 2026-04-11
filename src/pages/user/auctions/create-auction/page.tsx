@@ -120,16 +120,16 @@ export default function CreateAuctionPage () {
         </span>
         <h2>Crear subasta</h2>
       </div>
-      <Card>
-        <CardHeader>
-          <h3>Detalles de la subasta</h3>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+          <Card>
+            <CardHeader>
+              <h3>Detalles de la subasta</h3>
+            </CardHeader>
+            <CardContent className='flex flex-col gap-4'>
               <FieldSet>
                 <FieldLegend>Factura relacionada</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
                   <Controller
                     name='svc'
                     control={form.control}
@@ -177,7 +177,6 @@ export default function CreateAuctionPage () {
                       </Field>
                     )}
                   />
-
                   <Field>
                     <FieldLabel htmlFor='invoiceRating'>Rating:</FieldLabel>
                     <InputGroup>
@@ -187,6 +186,8 @@ export default function CreateAuctionPage () {
                       </InputGroupAddon>
                     </InputGroup>
                   </Field>
+                </FieldGroup>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
                   <Field>
                     <FieldLabel htmlFor='invoiceAmount'>Importe:</FieldLabel>
                     <InputGroup>
@@ -223,45 +224,96 @@ export default function CreateAuctionPage () {
 
               <FieldSet>
                 <FieldLegend>Datos de la subasta</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
-                  <Controller
-                    name='startingPrice'
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>Precio inicial:</FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput
-                            id={field.name}
-                            type='number'
-                            step='0.01'
-                            placeholder='1000'
-                            value={field.value ?? ''}
-                            onChange={e => field.onChange(e.target.valueAsNumber)}
-                            onBlur={() => {
-                              if (field.value !== undefined && !isNaN(field.value)) {
-                                field.onChange(Math.round(field.value * 100) / 100)
-                              }
-                              field.onBlur()
-                            }}
-                            ref={field.ref}
-                            disabled={!watchedsvc}
-                          />
-                          <InputGroupAddon>€</InputGroupAddon>
-                          <InputGroupAddon align='inline-end'>
-                            {selectedInvoice?.amount && field.value !== undefined && !isNaN(field.value) && field.value > 0 &&(
-                              <span className='text-sm text-muted-foreground'>
-                                {`${new Intl.NumberFormat(locale, { maximumFractionDigits: 2, signDisplay: 'always' }).format((field.value / selectedInvoice.amount - 1) * 100)}%`}
-                              </span>
-                            )}
-                          </InputGroupAddon>
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                  <div className='flex flex-col gap-1'>
+                    <Controller
+                      name='startingPrice'
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Precio inicial:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput
+                              id={field.name}
+                              type='number'
+                              step='0.01'
+                              placeholder='1000'
+                              value={field.value ?? ''}
+                              onChange={e => field.onChange(e.target.valueAsNumber)}
+                              onBlur={() => {
+                                if (field.value !== undefined && !isNaN(field.value)) {
+                                  field.onChange(Math.round(field.value * 100) / 100)
+                                }
+                                field.onBlur()
+                              }}
+                              ref={field.ref}
+                              disabled={!watchedsvc}
+                            />
+                            <InputGroupAddon>€</InputGroupAddon>
+                            <InputGroupAddon align='inline-end'>
+                              {selectedInvoice?.amount && field.value !== undefined && !isNaN(field.value) && field.value > 0 &&(
+                                <span className='text-sm text-muted-foreground'>
+                                  {`${new Intl.NumberFormat(locale, { maximumFractionDigits: 2, signDisplay: 'always' }).format((field.value / selectedInvoice.amount - 1) * 100)}%`}
+                                </span>
+                              )}
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <div className='flex gap-2'>
+                      <ButtonGroup>
+                        <Button
+                          variant='outline'
+                          type='button'
+                          onClick={() => applyDiscount(3)}
+                          disabled={!watchedsvc}
+                        >
+                          -3%
+                        </Button>
+                        <Button
+                          variant='outline'
+                          type='button'
+                          onClick={() => applyDiscount(5)}
+                          disabled={!watchedsvc}
+                        >
+                          -5%
+                        </Button>
+                        <Button
+                          variant='outline'
+                          type='button'
+                          onClick={() => applyDiscount(10)}
+                          disabled={!watchedsvc}
+                        >
+                          -10%
+                        </Button>
+                        <Button
+                          variant='outline'
+                          type='button'
+                          onClick={() => applyDiscount(20)}
+                          disabled={!watchedsvc}
+                        >
+                          -20%
+                        </Button>
+                      </ButtonGroup>
+                      <InputGroup className='w-40'>
+                        <InputGroupInput
+                          type='number'
+                          placeholder='Descuento...'
+                          disabled={!watchedsvc}
+                          onChange={(e) => {
+                            const discountPercent = parseFloat(e.target.value) || 0
+                            applyDiscount(discountPercent)
+                          }}
+                        />
+                        <InputGroupAddon>-</InputGroupAddon>
+                        <InputGroupAddon align='inline-end'>%</InputGroupAddon>
+                      </InputGroup>
+                    </div>
+                  </div>
                   <Field
                     data-invalid={!!form.formState.errors.auctionDateEnd}
                   >
@@ -278,69 +330,21 @@ export default function CreateAuctionPage () {
                     />
                     {form.formState.errors.auctionDateEnd && <FieldError errors={[form.formState.errors.auctionDateEnd]} />}
                   </Field>
-                  <div className='flex gap-2'>
-                    <ButtonGroup>
-                      <Button
-                        variant='outline'
-                        type='button'
-                        onClick={() => applyDiscount(3)}
-                        disabled={!watchedsvc}
-                      >
-                        -3%
-                      </Button>
-                      <Button
-                        variant='outline'
-                        type='button'
-                        onClick={() => applyDiscount(5)}
-                        disabled={!watchedsvc}
-                      >
-                        -5%
-                      </Button>
-                      <Button
-                        variant='outline'
-                        type='button'
-                        onClick={() => applyDiscount(10)}
-                        disabled={!watchedsvc}
-                      >
-                        -10%
-                      </Button>
-                      <Button
-                        variant='outline'
-                        type='button'
-                        onClick={() => applyDiscount(20)}
-                        disabled={!watchedsvc}
-                      >
-                        -20%
-                      </Button>
-                    </ButtonGroup>
-                    <InputGroup className='w-40'>
-                      <InputGroupInput
-                        type='number'
-                        placeholder='Descuento...'
-                        disabled={!watchedsvc}
-                        onChange={(e) => {
-                          const discountPercent = parseFloat(e.target.value) || 0
-                          applyDiscount(discountPercent)
-                        }}
-                      />
-                      <InputGroupAddon>-</InputGroupAddon>
-                      <InputGroupAddon align='inline-end'>%</InputGroupAddon>
-                    </InputGroup>
-                  </div>
-                  <Button
-                    className='w-min ms-auto'
-                    disabled={!form.formState.isDirty}
-                    title='Crear subasta'
-                  >
-                    <SaveIcon />
-                    Crear subasta
-                  </Button>
                 </FieldGroup>
               </FieldSet>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+
+          <Button
+            className='w-min ms-auto'
+            disabled={!form.formState.isDirty}
+            title='Crear subasta'
+          >
+            <SaveIcon />
+            Crear subasta
+          </Button>
+        </form>
+      </Form>
     </section>
   )
 }

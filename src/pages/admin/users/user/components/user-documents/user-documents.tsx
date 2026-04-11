@@ -19,7 +19,7 @@ export default function UserDocuments ({ investorId } : { investorId: string | u
     if (investorId) {
       getDocuments({
         investorId,
-        type: DocumentType.IDENTIFICATION,
+        type: DocumentType.ID,
         page: String(currentPage),
         limit: String(currentLimit)
       }).then(res => {

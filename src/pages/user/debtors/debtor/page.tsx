@@ -8,6 +8,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { getDebtorById, updateDebtorById } from '@/services/debtor.api'
 import { DebtorStatus, type Debtor } from '@/types/Debtor'
+import { DocumentType } from '@/types/Document'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckCheckIcon, CircleAlertIcon, ClockIcon, FileIcon, HandCoinsIcon, IdCardIcon, KeyRoundIcon, MailIcon, OctagonXIcon, PhoneIcon, RefreshCcwIcon, SaveIcon, UsersIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -27,29 +28,45 @@ const baseFormSchema = z.object({
 })
 
 const documentFormSchema = z.object({
-  modelo111Csv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 111')
+  modelo111QuarterlyCsv: z.string()
+    .min(1, 'El CSV es obligatorio para el modelo 111 trimestral')
     .or(z.literal('')),
-  modelo111: z.custom<FileList>()
-    .refine((files) => files && files.length > 0, 'El documento 111 es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío'),
-  modelo303Csv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 303')
+  modelo111Quarterly: z.custom<FileList | undefined>()
+    .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío'),
+  modelo303QuarterlyCsv: z.string()
+    .min(1, 'El CSV es obligatorio para el modelo 303 trimestral')
     .or(z.literal('')),
-  modelo303: z.custom<FileList>()
-    .refine((files) => files && files.length > 0, 'El documento 303 es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
-}).refine((data) => {
-  if (data.modelo111 || data.modelo111Csv) {
-    return data.modelo111 && data.modelo111Csv
+  modelo303Quarterly: z.custom<FileList | undefined>()
+    .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío'),
+
+  modelo111AnnualCsv: z.string()
+    .min(1, 'El CSV es obligatorio para el modelo 111 anual')
+    .or(z.literal('')),
+  modelo111Annual: z.custom<FileList | undefined>()
+    .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío'),
+  modelo303AnnualCsv: z.string()
+    .min(1, 'El CSV es obligatorio para el modelo 303 anual')
+    .or(z.literal('')),
+  modelo303Annual: z.custom<FileList | undefined>()
+    .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío')
+}).superRefine((data, ctx) => {
+  const pairs = [
+    { file: 'modelo111Quarterly', svc: 'modelo111QuarterlyCsv' },
+    { file: 'modelo303Quarterly', svc: 'modelo303QuarterlyCsv' },
+    { file: 'modelo111Annual', svc: 'modelo111AnnualCsv' },
+    { file: 'modelo303Annual', svc: 'modelo303AnnualCsv' }
+  ] as const
+  for (const { file, svc } of pairs) {
+    const hasFile = ((data[file] as FileList | undefined)?.length ?? 0) > 0
+    const hasSvc = !!data[svc]
+    if (hasFile && !hasSvc) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'El CSV es obligatorio', path: [svc] })
+    }
+    if (!hasFile && hasSvc) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'El documento es obligatorio', path: [file] })
+    }
   }
-  return true
-}, 'Para actualizar el modelo 111 ambos campos son obligatorios').refine((data) => {
-  if (data.modelo303 || data.modelo303Csv) {
-    return data.modelo303 && data.modelo303Csv
-  }
-  return true
-}, 'Para actualizar el modelo 303 ambos campos son obligatorios')
+})
 
 export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {debtorId} = useParams<{ debtorId: string }>()
@@ -81,10 +98,14 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
     resolver: zodResolver(documentFormSchema),
     mode: 'onTouched',
     defaultValues: {
-      modelo111Csv: '',
-      modelo111: undefined,
-      modelo303Csv: '',
-      modelo303: undefined
+      modelo111QuarterlyCsv: '',
+      modelo111Quarterly: undefined,
+      modelo303QuarterlyCsv: '',
+      modelo303Quarterly: undefined,
+      modelo111AnnualCsv: '',
+      modelo111Annual: undefined,
+      modelo303AnnualCsv: '',
+      modelo303Annual: undefined
     }
   })
 
@@ -127,13 +148,24 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
   function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
     if (!debtorId) return
     const formData = new FormData()
-    formData.append('modelo111Csv', data.modelo111Csv)
-    formData.append('modelo111', data.modelo111[0])
-    formData.append('modelo303Csv', data.modelo303Csv)
-    formData.append('modelo303', data.modelo303[0])
+    if (data.modelo111Quarterly?.[0] && data.modelo111QuarterlyCsv) {
+      formData.append(DocumentType.TAX_111_QUARTERLY, data.modelo111Quarterly[0])
+      formData.append('modelo111QuarterlyCsv', data.modelo111QuarterlyCsv)
+    }
+    if (data.modelo303Quarterly?.[0] && data.modelo303QuarterlyCsv) {
+      formData.append(DocumentType.TAX_303_QUARTERLY, data.modelo303Quarterly[0])
+      formData.append('modelo303QuarterlyCsv', data.modelo303QuarterlyCsv)
+    }
+    if (data.modelo111Annual?.[0] && data.modelo111AnnualCsv) {
+      formData.append(DocumentType.TAX_111_ANNUAL, data.modelo111Annual[0])
+      formData.append('modelo111AnnualCsv', data.modelo111AnnualCsv)
+    }
+    if (data.modelo303Annual?.[0] && data.modelo303AnnualCsv) {
+      formData.append(DocumentType.TAX_303_ANNUAL, data.modelo303Annual[0])
+      formData.append('modelo303AnnualCsv', data.modelo303AnnualCsv)
+    }
     updateDebtorById(debtorId, formData)
       .then(res => setDebtor(res.data))
-      .then(() => navigate(`/user/debtors/${debtorId}`))
   }
 
   function onSubmitValidate (data: z.infer<typeof validateFormSchema>) {
@@ -171,59 +203,61 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
           <HandCoinsIcon className='w-6 h-6' />
         </span>
         <h2>Gestionar deudor</h2>
+        {(debtor?.status === DebtorStatus.CORRECTION || debtor?.status === DebtorStatus.PENDING) && (
+          <Form {...validateForm}>
+            <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
+              <Button
+                variant='outline'
+                className='group'
+                disabled={isFormDisabled}
+                onClick={() => {
+                  validateForm.setValue('status', DebtorStatus.PENDING)
+                  validateForm.handleSubmit(onSubmitValidate)()
+                }}
+              >
+                <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-200' />
+                <span className='overflow-hidden'>
+                  Solicitar verificación
+                </span>
+              </Button>
+            </form>
+          </Form>
+        )}
       </div>
-      <Card>
-        <CardHeader className='md:grid-cols-[auto_1fr]'>
-          <div className='flex flex-wrap gap-2 items-center'>
-            <h3>Detalle del deudor <span className='text-primary'>{debtor?.companyName}</span></h3>
-            {debtor?.status ===DebtorStatus.PENDING && (
-              <ColorBadge color='yellow' icon={<ClockIcon />}>
-                Pendiente
-              </ColorBadge>
-            )}
-            {debtor?.status ===DebtorStatus.VERIFIED && (
-              <ColorBadge color='green' icon={<CheckCheckIcon />}>
-                Verificado
-              </ColorBadge>
-            )}
-            {debtor?.status ===DebtorStatus.CORRECTION && (
-              <ColorBadge color='red' icon={<CircleAlertIcon />}>
-                Corrección
-              </ColorBadge>
-            )}
-            {debtor?.status ===DebtorStatus.DENIED && (
-              <ColorBadge color='gray' icon={<OctagonXIcon />}>
-                Denegado
-              </ColorBadge>
-            )}
-          </div>
-          {(debtor?.status === DebtorStatus.CORRECTION || debtor?.status === DebtorStatus.PENDING) && (
-            <Form {...validateForm}>
-              <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
-                <Button
-                  variant='outline'
-                  className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
-                  disabled={isFormDisabled}
-                  onClick={() => {
-                    validateForm.setValue('status', DebtorStatus.PENDING)
-                    validateForm.handleSubmit(onSubmitValidate)()
-                  }}
-                >
-                  <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-200' />
-                  <span className='overflow-hidden'>
-                    Solicitar verificación
-                  </span>
-                </Button>
-              </form>
-            </Form>
-          )}
-        </CardHeader>
-        <CardContent className='grid md:grid-cols-[1fr_200px] gap-4'>
-          <Form {...baseForm}>
-            <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='col-span-full flex flex-col gap-4'>
+      <Form {...baseForm}>
+        <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4'>
+          <Card>
+            <CardHeader>
+              <div className='flex flex-wrap gap-2 items-center'>
+                <h3>Detalle del deudor <span className='text-primary'>{debtor?.companyName}</span></h3>
+                <div className='ms-auto'>
+                  {debtor?.status ===DebtorStatus.PENDING && (
+                    <ColorBadge color='yellow' icon={<ClockIcon />}>
+                      Pendiente
+                    </ColorBadge>
+                  )}
+                  {debtor?.status ===DebtorStatus.VERIFIED && (
+                    <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                      Verificado
+                    </ColorBadge>
+                  )}
+                  {debtor?.status ===DebtorStatus.CORRECTION && (
+                    <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                      Corrección
+                    </ColorBadge>
+                  )}
+                  {debtor?.status ===DebtorStatus.DENIED && (
+                    <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                      Denegado
+                    </ColorBadge>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
               <FieldSet>
                 <FieldLegend>Información de contacto</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
                   <Controller
                     name='taxId'
                     control={baseForm.control}
@@ -261,7 +295,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
                     )}
                   />
                 </FieldGroup>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
                   <Controller
                     name='email'
                     control={baseForm.control}
@@ -298,34 +332,37 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
                       </Field>
                     )}
                   />
-                  <Button
-                    className='w-min self-end justify-self-end'
-                    disabled={JSON.stringify(originalDebtor) === JSON.stringify(debtor) && !baseForm.formState.isDirty}
-                    title='Guardar cambios'
-                  >
-                    <SaveIcon />
-                    <span className='lg:hidden'>
-                      Guardar cambios
-                    </span>
-                  </Button>
                 </FieldGroup>
               </FieldSet>
-            </form>
-          </Form>
-          <Form {...documentForm}>
-            <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='col-span-full flex flex-col gap-4'>
+            </CardContent>
+          </Card>
+          <Button
+            className='w-min self-end justify-self-end'
+            disabled={JSON.stringify(originalDebtor) === JSON.stringify(debtor) && !baseForm.formState.isDirty}
+            title='Guardar cambios'
+          >
+            <SaveIcon />
+            Guardar cambios
+          </Button>
+        </form>
+      </Form>
+
+      <Form {...documentForm}>
+        <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='flex flex-col gap-4'>
+          <Card>
+            <CardContent className='flex flex-col gap-4'>
               <FieldSet>
-                <FieldLegend>Actualizar documentos</FieldLegend>
+                <FieldLegend>Documentación trimestral</FieldLegend>
                 <FieldDescription>Modelo 111</FieldDescription>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
                   <Controller
-                    name='modelo111Csv'
+                    name='modelo111QuarterlyCsv'
                     control={documentForm.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
                         <InputGroup>
-                          <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' disabled={isFormDisabled} />
+                          <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' />
                           <InputGroupAddon>
                             <KeyRoundIcon />
                           </InputGroupAddon>
@@ -337,7 +374,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
                     )}
                   />
                   <Controller
-                    name='modelo111'
+                    name='modelo111Quarterly'
                     control={documentForm.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
@@ -352,7 +389,6 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
                             type='file'
                             accept='image/jpg,image/jpeg,image/png,.pdf'
                             aria-description='Fotocopia que permita visualizar el documento completo'
-                            disabled={isFormDisabled}
                           />
                           <InputGroupAddon>
                             <FileIcon />
@@ -366,15 +402,15 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
                   />
                 </FieldGroup>
                 <FieldDescription>Modelo 303</FieldDescription>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
                   <Controller
-                    name='modelo303Csv'
+                    name='modelo303QuarterlyCsv'
                     control={documentForm.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
                         <InputGroup>
-                          <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' disabled={isFormDisabled} />
+                          <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' />
                           <InputGroupAddon>
                             <KeyRoundIcon />
                           </InputGroupAddon>
@@ -386,7 +422,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
                     )}
                   />
                   <Controller
-                    name='modelo303'
+                    name='modelo303Quarterly'
                     control={documentForm.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
@@ -401,7 +437,6 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
                             type='file'
                             accept='image/jpg,image/jpeg,image/png,.pdf'
                             aria-description='Fotocopia que permita visualizar el documento completo'
-                            disabled={isFormDisabled}
                           />
                           <InputGroupAddon>
                             <FileIcon />
@@ -413,22 +448,121 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
                       </Field>
                     )}
                   />
-                  <Button
-                    className='w-min self-end justify-self-end'
-                    disabled={!documentForm.formState.isDirty}
-                    title='Actualizar documentos'
-                  >
-                    <SaveIcon />
-                    <span className='lg:hidden'>
-                      Actualizar documentos
-                    </span>
-                  </Button>
                 </FieldGroup>
               </FieldSet>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+
+              <FieldSet>
+                <FieldLegend>Documentación Annual</FieldLegend>
+                <FieldDescription>Modelo 111</FieldDescription>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                  <Controller
+                    name='modelo111AnnualCsv'
+                    control={documentForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' />
+                          <InputGroupAddon>
+                            <KeyRoundIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name='modelo111Annual'
+                    control={documentForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            aria-invalid={fieldState.invalid}
+                            id={field.name}
+                            onChange={(e) => field.onChange(e.target.files)}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                            type='file'
+                            accept='image/jpg,image/jpeg,image/png,.pdf'
+                            aria-description='Fotocopia que permita visualizar el documento completo'
+                          />
+                          <InputGroupAddon>
+                            <FileIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </FieldGroup>
+                <FieldDescription>Modelo 303</FieldDescription>
+                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                  <Controller
+                    name='modelo303AnnualCsv'
+                    control={documentForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>CSV:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput {...field} id={field.name} type='text' placeholder='A1B2C3D4E5F6G7H8' />
+                          <InputGroupAddon>
+                            <KeyRoundIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name='modelo303Annual'
+                    control={documentForm.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Documento:</FieldLabel>
+                        <InputGroup>
+                          <InputGroupInput
+                            aria-invalid={fieldState.invalid}
+                            id={field.name}
+                            onChange={(e) => field.onChange(e.target.files)}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                            type='file'
+                            accept='image/jpg,image/jpeg,image/png,.pdf'
+                            aria-description='Fotocopia que permita visualizar el documento completo'
+                          />
+                          <InputGroupAddon>
+                            <FileIcon />
+                          </InputGroupAddon>
+                        </InputGroup>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </FieldGroup>
+              </FieldSet>
+            </CardContent>
+          </Card>
+
+          <Button
+            className='w-min self-end justify-self-end'
+            disabled={!documentForm.formState.isDirty}
+            title='Actualizar documentos'
+          >
+            <SaveIcon />
+            Actualizar documentos
+          </Button>
+        </form>
+      </Form>
 
       {(debtor?.status && debtor.status !== DebtorStatus.VERIFIED) && (
         <AlertDialog defaultOpen>
