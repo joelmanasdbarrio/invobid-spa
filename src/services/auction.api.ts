@@ -1,8 +1,8 @@
 import fetchApi from '@/lib/fetchApi'
+import { type Auction } from '@/types/Auction'
+import { type PaginatedResponse, type ResponseOK } from '@/types/Response'
 
 const base_url = import.meta.env.VITE_BASE_URL
-
-// TODO: response types
 
 export const createAuction = async (body: FormData | string) => {
   const fetchOptions: RequestInit = {
@@ -16,7 +16,7 @@ export const createAuction = async (body: FormData | string) => {
     fetchOptions.headers = { 'Content-Type': 'application/json' }
   }
 
-  return fetchApi(`${base_url}/auctions`, fetchOptions, {
+  return fetchApi<ResponseOK<Auction>>(`${base_url}/auctions`, fetchOptions, {
     promise: 'Creando subasta...',
     resolve: 'Subasta creada con éxito',
     reject: 'Error al crear la subasta'
@@ -25,7 +25,7 @@ export const createAuction = async (body: FormData | string) => {
 
 export const getAuctions = async (queryParams?: Record<string, string>) => {
   const queryString = new URLSearchParams(queryParams).toString()
-  return fetchApi(`${base_url}/auctions?${queryString}`, {
+  return fetchApi<PaginatedResponse<Auction[]>>(`${base_url}/auctions?${queryString}`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar las subastas'
@@ -33,7 +33,7 @@ export const getAuctions = async (queryParams?: Record<string, string>) => {
 }
 
 export const getAuctionById = async (auctionId: string) => {
-  return fetchApi(`${base_url}/auctions/${auctionId}`, {
+  return fetchApi<ResponseOK<Auction>>(`${base_url}/auctions/${auctionId}`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar la subasta'
@@ -52,7 +52,7 @@ export const updateAuctionById = async (auctionId: string, body: FormData | stri
     fetchOptions.headers = { 'Content-Type': 'application/json' }
   }
 
-  return fetchApi(`${base_url}/auctions/${auctionId}`, fetchOptions, {
+  return fetchApi<ResponseOK<Auction>>(`${base_url}/auctions/${auctionId}`, fetchOptions, {
     promise: 'Actualizando subasta...',
     resolve: 'Subasta actualizada con éxito',
     reject: 'Error al actualizar la subasta'
@@ -63,7 +63,7 @@ export const updateAuctionById = async (auctionId: string, body: FormData | stri
 
 export const countAuctions = async (queryParams?: Record<string, string>) => {
   const queryString = new URLSearchParams(queryParams).toString()
-  return fetchApi(`${base_url}/auctions/lookup/count?${queryString}`, {
+  return fetchApi<ResponseOK<number>>(`${base_url}/auctions/lookup/count?${queryString}`, {
     method: 'GET'
   })
 }

@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { getDebtors } from '@/services/debtor.api'
-import { DebtorStatus } from '@/types/Debtor'
+import { type Debtor, DebtorStatus } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeftIcon, ChevronRightIcon, HandCoinsIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -46,11 +46,11 @@ export default function AdminDebtorsPage () {
     form.reset(defaultForm)
   }, [form, defaultForm])
 
-  const [data, setData] = useState([])
-  const [totalItems, setTotalItems] = useState(0)
+  const [data, setData] = useState<Debtor[]>([])
+  const [totalItems, setTotalItems] = useState<number>(0)
 
-  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10))
-  const [currentLimit, setCurrentLimit] = useState(parseInt(searchParams.get('limit') || '10', 10))
+  const [currentPage, setCurrentPage] = useState<number>(parseInt(searchParams.get('page') || '1', 10))
+  const [currentLimit, setCurrentLimit] = useState<number>(parseInt(searchParams.get('limit') || '10', 10))
 
   function onSubmit (data: z.infer<typeof formSchema>) {
     const formData = Object.fromEntries(
@@ -82,7 +82,7 @@ export default function AdminDebtorsPage () {
       limit: String(currentLimit)
     }).then(res => {
       setData(res.data)
-      setTotalItems(res['_metadata'].total)
+      setTotalItems(res._metadata.total)
     })
   }, [searchParams, currentPage, currentLimit])
 

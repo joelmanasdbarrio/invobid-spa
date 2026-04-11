@@ -1,10 +1,12 @@
-import fetchApi, {downloadFile} from '@/lib/fetchApi.ts'
+import fetchApi, { downloadFile } from '@/lib/fetchApi.ts'
+import { type Document } from '@/types/Document'
+import { type PaginatedResponse } from '@/types/Response'
 
 const base_url = import.meta.env.VITE_BASE_URL
 
 export const getDocuments = async (queryParams?: Record<string, string>) => {
   const queryString = new URLSearchParams(queryParams).toString()
-  return fetchApi(`${base_url}/documents?${queryString}`, {
+  return fetchApi<PaginatedResponse<Document[]>>(`${base_url}/documents?${queryString}`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar los documentos'

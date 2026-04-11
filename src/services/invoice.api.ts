@@ -1,9 +1,11 @@
 import fetchApi from '@/lib/fetchApi'
+import type { Invoice } from '@/types/Invoice'
+import type { PaginatedResponse, ResponseOK } from '@/types/Response'
 
 const base_url = import.meta.env.VITE_BASE_URL
 
 export const createInvoice = async (body: FormData) => {
-  return fetchApi(`${base_url}/invoices`, {
+  return fetchApi<ResponseOK<Invoice>>(`${base_url}/invoices`, {
     method: 'POST',
     body
   }, {
@@ -15,7 +17,7 @@ export const createInvoice = async (body: FormData) => {
 
 export const getInvoices = async (queryParams?: Record<string, string>) => {
   const queryString = new URLSearchParams(queryParams).toString()
-  return fetchApi(`${base_url}/invoices?${queryString}`, {
+  return fetchApi<PaginatedResponse<Invoice[]>>(`${base_url}/invoices?${queryString}`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar las facturas'
@@ -23,7 +25,7 @@ export const getInvoices = async (queryParams?: Record<string, string>) => {
 }
 
 export const getInvoiceById = async (svc: string) => {
-  return fetchApi(`${base_url}/invoices/${svc}`, {
+  return fetchApi<ResponseOK<Invoice>>(`${base_url}/invoices/${svc}`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar la factura'
@@ -42,7 +44,7 @@ export const updateInvoiceById = async (svc: string, body: FormData | string) =>
     fetchOptions.headers = { 'Content-Type': 'application/json' }
   }
 
-  return fetchApi(`${base_url}/invoices/${svc}`, fetchOptions, {
+  return fetchApi<ResponseOK<Invoice>>(`${base_url}/invoices/${svc}`, fetchOptions, {
     promise: 'Actualizando factura...',
     resolve: 'Factura actualizada con éxito',
     reject: 'Error al actualizar la factura'
@@ -53,7 +55,7 @@ export const updateInvoiceById = async (svc: string, body: FormData | string) =>
 
 export const countInvoices = async (queryParams?: Record<string, string>) => {
   const queryString = new URLSearchParams(queryParams).toString()
-  return fetchApi(`${base_url}/invoices/lookup/count?${queryString}`, {
+  return fetchApi<ResponseOK<number>>(`${base_url}/invoices/lookup/count?${queryString}`, {
     method: 'GET'
   })
 }

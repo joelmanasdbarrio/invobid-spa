@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
 import { getDocuments } from '@/services/document.api.ts'
+import { type Document } from '@/types/Document'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useDocumentColumns } from './columns'
@@ -8,11 +9,11 @@ import { DataTable } from './data-table'
 
 export default function DebtorDocuments ({ debtorId } : { debtorId: string | undefined }) {
   const documentColumns = useDocumentColumns()
-  const [data, setData] = useState([])
-  const [totalItems, setTotalItems] = useState(0)
+  const [data, setData] = useState<Document[]>([])
+  const [totalItems, setTotalItems] = useState<number>(0)
 
-  const [currentPage, setCurrentPage] = useState(1)
-  const [currentLimit, setCurrentLimit] = useState(10)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [currentLimit, setCurrentLimit] = useState<number>(10)
 
   useEffect(() => {
     if (debtorId) {
@@ -22,7 +23,7 @@ export default function DebtorDocuments ({ debtorId } : { debtorId: string | und
         limit: String(currentLimit)
       }).then(res => {
         setData(res.data)
-        setTotalItems(res['_metadata'].total)
+        setTotalItems(res._metadata.total)
       })
     }
   }, [debtorId, currentLimit, currentPage])
