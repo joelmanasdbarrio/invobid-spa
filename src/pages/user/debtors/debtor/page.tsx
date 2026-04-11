@@ -208,7 +208,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
         <h2>Gestionar deudor</h2>
         {(debtor?.status === DebtorStatus.CORRECTION || debtor?.status === DebtorStatus.PENDING) && (
           <Form {...validateForm}>
-            <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
+            <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
               <Button
                 variant='outline'
                 className='group'
@@ -228,7 +228,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
         )}
       </div>
       <Form {...baseForm}>
-        <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4'>
+        <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
           <Card>
             <CardHeader>
               <div className='flex flex-wrap gap-2 items-center'>
@@ -260,7 +260,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
             <CardContent>
               <FieldSet>
                 <FieldLegend>Información de contacto</FieldLegend>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='taxId'
                     control={baseForm.control}
@@ -298,7 +298,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
                     )}
                   />
                 </FieldGroup>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='email'
                     control={baseForm.control}
@@ -351,13 +351,13 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
       </Form>
 
       <Form {...documentForm}>
-        <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='flex flex-col gap-4'>
+        <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
           <Card>
             <CardContent className='flex flex-col gap-4'>
               <FieldSet>
                 <FieldLegend>Documentación trimestral</FieldLegend>
                 <FieldDescription>Modelo 111</FieldDescription>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='modelo111QuarterlyCsv'
                     control={documentForm.control}
@@ -405,7 +405,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
                   />
                 </FieldGroup>
                 <FieldDescription>Modelo 303</FieldDescription>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='modelo303QuarterlyCsv'
                     control={documentForm.control}
@@ -457,7 +457,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
               <FieldSet>
                 <FieldLegend>Documentación Annual</FieldLegend>
                 <FieldDescription>Modelo 111</FieldDescription>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='modelo111AnnualCsv'
                     control={documentForm.control}
@@ -505,7 +505,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
                   />
                 </FieldGroup>
                 <FieldDescription>Modelo 303</FieldDescription>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='modelo303AnnualCsv'
                     control={documentForm.control}

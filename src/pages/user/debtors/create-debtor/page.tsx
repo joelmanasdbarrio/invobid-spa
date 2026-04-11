@@ -93,7 +93,7 @@ export default function CreateDebtorPage () {
         <h2>Publicar deudor</h2>
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
           <Card>
             <CardHeader>
               <h3>Detalles del deudor</h3>
@@ -101,7 +101,7 @@ export default function CreateDebtorPage () {
             <CardContent>
               <FieldSet>
                 <FieldLegend>Información de contacto</FieldLegend>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='taxId'
                     control={form.control}
@@ -139,7 +139,7 @@ export default function CreateDebtorPage () {
                     )}
                   />
                 </FieldGroup>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='email'
                     control={form.control}
@@ -186,7 +186,7 @@ export default function CreateDebtorPage () {
               <FieldSet>
                 <FieldLegend>Documentación trimestral</FieldLegend>
                 <FieldDescription>Modelo 111</FieldDescription>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='modelo111QuarterlyCsv'
                     control={form.control}
@@ -235,7 +235,7 @@ export default function CreateDebtorPage () {
                   />
                 </FieldGroup>
                 <FieldDescription>Modelo 303</FieldDescription>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='modelo303QuarterlyCsv'
                     control={form.control}
@@ -288,7 +288,7 @@ export default function CreateDebtorPage () {
               <FieldSet>
                 <FieldLegend>Documentación Annual</FieldLegend>
                 <FieldDescription>Modelo 111</FieldDescription>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='modelo111AnnualCsv'
                     control={form.control}
@@ -337,7 +337,7 @@ export default function CreateDebtorPage () {
                   />
                 </FieldGroup>
                 <FieldDescription>Modelo 303</FieldDescription>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='modelo303AnnualCsv'
                     control={form.control}

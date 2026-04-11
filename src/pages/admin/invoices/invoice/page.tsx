@@ -192,8 +192,8 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
               </CardHeader>
 
               <CardContent className='flex flex-col gap-4'>
-                <FieldSet>
-                  <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
+                  <FieldGroup>
                     <Controller
                       name='rating'
                       control={form.control}
@@ -335,7 +335,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                   </FieldGroup>
                 </FieldSet>
                 <Accordion type='multiple'>
-                  <FieldSet>
+                  <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
                     <AccordionItem value='seller'>
                       <AccordionTrigger>
                         <div>
@@ -344,7 +344,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                         </div>
                       </AccordionTrigger>
                       <AccordionContent>
-                        <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                        <FieldGroup>
                           <Field>
                             <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
@@ -405,7 +405,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                       </AccordionContent>
                     </AccordionItem>
                   </FieldSet>
-                  <FieldSet>
+                  <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
                     <AccordionItem value='debtor'>
                       <AccordionTrigger>
                         <div>
@@ -414,7 +414,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                         </div>
                       </AccordionTrigger>
                       <AccordionContent>
-                        <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                        <FieldGroup>
                           <Field>
                             <FieldLabel htmlFor='debtorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
@@ -476,7 +476,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                     </AccordionItem>
                   </FieldSet>
                   {invoice?.buyerInvestor && (
-                    <FieldSet>
+                    <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
                       <AccordionItem value='investor'>
                         <AccordionTrigger>
                           <div>
@@ -485,7 +485,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                          <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                          <FieldGroup>
                             <Field>
                               <FieldLabel htmlFor='investorTaxId'>CIF/NIF del inversor:</FieldLabel>
                               <InputGroup>
