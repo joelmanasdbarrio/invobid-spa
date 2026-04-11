@@ -23,14 +23,15 @@ export function useInvoiceColumns (): ColumnDef<Invoice>[] {
       )
     },
     {
-      header: 'CSV',
-      cell: ({row}) => row.original.svc
+      accessorKey: 'svc',
+      header: 'CSV'
     },
     {
-      header: 'Deudor',
-      cell: ({row}) => row.original.debtor.companyName
+      accessorKey: 'debtor.companyName',
+      header: 'Deudor'
     },
     {
+      accessorKey: 'buyerInvestor.companyName',
       header: 'Inversor',
       cell: ({row}) => row.original.buyerInvestor ? (
         row.original.buyerInvestor.companyName

@@ -14,6 +14,7 @@ import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { type Investor, InvestorStatus, UserType } from '@/types/User'
 import { AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import { CircleAlertIcon, ClockIcon, OctagonXIcon } from 'lucide-react'
+import { Fragment } from 'react'
 import { Link } from 'react-router'
 
 export default function MainLayout ({
@@ -55,14 +56,14 @@ export default function MainLayout ({
             <Breadcrumb>
               <BreadcrumbList>
                 {breadcrumbs.slice(0, -1).map((breadcrumb, index) => (
-                  <>
-                    <BreadcrumbItem key={index}>
+                  <Fragment key={index}>
+                    <BreadcrumbItem>
                       <BreadcrumbLink asChild>
                         <Link to={breadcrumb.href}>{breadcrumb.label}</Link>
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
-                  </>
+                  </Fragment>
                 ))}
                 <BreadcrumbItem className='text-foreground'>
                   {breadcrumbs[breadcrumbs.length - 1].label}
