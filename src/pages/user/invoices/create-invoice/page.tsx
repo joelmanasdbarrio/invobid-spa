@@ -120,7 +120,7 @@ export default function CreateInvoicePage () {
         <h2>Publicar factura</h2>
       </div>
       <Form {...baseForm}>
-        <form onSubmit={baseForm.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+        <form onSubmit={baseForm.handleSubmit(onSubmit)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
           <Card>
             <CardHeader>
               <h3>Detalles de la factura</h3>
@@ -128,7 +128,7 @@ export default function CreateInvoicePage () {
             <CardContent>
               <FieldSet>
                 <FieldLegend>Información de la factura</FieldLegend>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='debtorId'
                     control={baseForm.control}
@@ -187,7 +187,7 @@ export default function CreateInvoicePage () {
                     )}
                   />
                 </FieldGroup>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='amount'
                     control={baseForm.control}
@@ -252,7 +252,7 @@ export default function CreateInvoicePage () {
             <CardContent>
               <FieldSet>
                 <FieldLegend>Documentación</FieldLegend>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='svc'
                     control={baseForm.control}

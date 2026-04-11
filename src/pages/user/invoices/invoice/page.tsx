@@ -239,7 +239,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
         )}
       </div>
       <Form {...baseForm}>
-        <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4'>
+        <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
           <Card>
             <CardHeader>
               <div className='flex flex-wrap gap-2 items-center'>
@@ -271,7 +271,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
             <CardContent>
               <FieldSet>
                 <FieldLegend>Información básica</FieldLegend>
-                <FieldGroup className='grid md:grid-cols-2'>
+                <FieldGroup>
                   <Controller
                     name='debtorId'
                     control={baseForm.control}
@@ -321,7 +321,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                     )}
                   />
                 </FieldGroup>
-                <FieldGroup className='grid md:grid-cols-2'>
+                <FieldGroup>
                   <Controller
                     name='amount'
                     control={baseForm.control}
@@ -394,12 +394,12 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       </Form>
 
       <Form {...documentForm}>
-        <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='flex flex-col gap-4'>
+        <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
           <Card>
             <CardContent>
               <FieldSet>
                 <FieldLegend>Actualizar documento</FieldLegend>
-                <FieldGroup className='grid md:grid-cols-2'>
+                <FieldGroup>
                   <Controller
                     name='svc'
                     control={documentForm.control}

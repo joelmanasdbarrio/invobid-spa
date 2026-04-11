@@ -210,8 +210,8 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                 </CardHeader>
 
                 <CardContent className='flex flex-col gap-4'>
-                  <FieldSet>
-                    <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                  <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
+                    <FieldGroup>
                       <Field>
                         <FieldLabel>Fecha inicio</FieldLabel>
                         <DateTimePicker
@@ -301,7 +301,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                     </FieldGroup>
                   </FieldSet>
                   <Accordion type='multiple'>
-                    <FieldSet>
+                    <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
                       <AccordionItem value='seller'>
                         <AccordionTrigger>
                           <div>
@@ -311,7 +311,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         </AccordionTrigger>
                         <AccordionContent>
 
-                          <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                          <FieldGroup>
                             <Field>
                               <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
                               <InputGroup>
@@ -372,7 +372,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         </AccordionContent>
                       </AccordionItem>
                     </FieldSet>
-                    <FieldSet>
+                    <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
                       <AccordionItem value='debtor'>
                         <AccordionTrigger>
                           <div>
@@ -381,7 +381,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                          <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                          <FieldGroup>
                             <Field>
                               <FieldLabel htmlFor='debtorTaxId'>CIF/NIF:</FieldLabel>
                               <InputGroup>
@@ -442,7 +442,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         </AccordionContent>
                       </AccordionItem>
                     </FieldSet>
-                    <FieldSet>
+                    <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
                       <AccordionItem value='invoice'>
                         <AccordionTrigger>
                           <div>
@@ -451,7 +451,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                          <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                          <FieldGroup>
                             <Field>
                               <FieldLabel htmlFor='svc'>UID de factura:</FieldLabel>
                               <InputGroup>
@@ -542,7 +542,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                       </AccordionItem>
                     </FieldSet>
                     {auction.invoice.buyerInvestor && (
-                      <FieldSet>
+                      <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
                         <AccordionItem value='investor'>
                           <AccordionTrigger>
                             <div>
@@ -551,7 +551,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                             </div>
                           </AccordionTrigger>
                           <AccordionContent>
-                            <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                            <FieldGroup>
                               <Field>
                                 <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
                                 <InputGroup>

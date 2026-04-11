@@ -223,235 +223,237 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
               </CardHeader>
 
               <CardContent className='flex flex-col gap-4'>
-                <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
-                  <Controller
-                    name='taxId'
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>CIF/NIF:</FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='12345678A' required disabled={isFormDisabled} />
-                          <InputGroupAddon>
-                            <IdCardIcon />
-                          </InputGroupAddon>
-                          <InputGroupAddon align='inline-end'>
-                            <button onClick={(e) => copyToClipboard(e, investor?.taxId ?? '')} className='group'>
-                              <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
+                  <FieldGroup>
+                    <Controller
+                      name='taxId'
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>CIF/NIF:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='12345678A' required disabled={isFormDisabled} />
+                            <InputGroupAddon>
+                              <IdCardIcon />
+                            </InputGroupAddon>
+                            <InputGroupAddon align='inline-end'>
+                              <button onClick={(e) => copyToClipboard(e, investor?.taxId ?? '')} className='group'>
+                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span>
-                                    <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className='relative -top-2 right-3'>
-                                  <p className='text-center'>¡Copiado!</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </button>
-                          </InputGroupAddon>
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name='investorType'
-                    control={form.control}
-                    render={({ field }) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>Tipo de inversor:</FieldLabel>
-                        <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''} disabled={isFormDisabled}>
-                          <SelectTrigger>
-                            {field.value ?
-                              (
-                                field.value === InvestorType.INDIVIDUAL
-                                  ? (
-                                    <span className='flex items-center gap-2'>
-                                      <UserIcon className='w-4 h-4' />
-                                      Particular
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>
+                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
-                                  ) : field.value === InvestorType.COMPANY ? (
-                                    <span className='flex items-center gap-2'>
-                                      <BuildingIcon className='w-4 h-4' />
-                                      Empresa
-                                    </span>
-                                  ) : (
-                                    <span className='flex items-center gap-2'>
-                                      {field.value}
-                                    </span>
-                                  )
-                              ) : (
-                                'Selecciona un tipo'
-                              )}
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value={InvestorType.INDIVIDUAL}>
-                              <span className='flex items-center gap-2'>
-                                <UserIcon className='w-4 h-4' />
-                                Particular
-                              </span>
-                            </SelectItem>
-                            <SelectItem value={InvestorType.COMPANY}>
-                              <span className='flex items-center gap-2'>
-                                <BuildingIcon className='w-4 h-4' />
-                                Empresa
-                              </span>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-                </FieldGroup>
-                <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
-                  <Controller
-                    name='companyName'
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='ACME S.L.' required disabled={isFormDisabled} />
-                          <InputGroupAddon>
-                            <BuildingIcon />
-                          </InputGroupAddon>
-                          <InputGroupAddon align='inline-end'>
-                            <button onClick={(e) => copyToClipboard(e, investor?.companyName ?? '')} className='group'>
-                              <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                  </TooltipTrigger>
+                                  <TooltipContent className='relative -top-2 right-3'>
+                                    <p className='text-center'>¡Copiado!</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </button>
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      name='investorType'
+                      control={form.control}
+                      render={({ field }) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>Tipo de inversor:</FieldLabel>
+                          <Select value={field.value || ''} onValueChange={field.onChange} defaultValue={field.value || ''} disabled={isFormDisabled}>
+                            <SelectTrigger>
+                              {field.value ?
+                                (
+                                  field.value === InvestorType.INDIVIDUAL
+                                    ? (
+                                      <span className='flex items-center gap-2'>
+                                        <UserIcon className='w-4 h-4' />
+                                        Particular
+                                      </span>
+                                    ) : field.value === InvestorType.COMPANY ? (
+                                      <span className='flex items-center gap-2'>
+                                        <BuildingIcon className='w-4 h-4' />
+                                        Empresa
+                                      </span>
+                                    ) : (
+                                      <span className='flex items-center gap-2'>
+                                        {field.value}
+                                      </span>
+                                    )
+                                ) : (
+                                  'Selecciona un tipo'
+                                )}
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={InvestorType.INDIVIDUAL}>
+                                <span className='flex items-center gap-2'>
+                                  <UserIcon className='w-4 h-4' />
+                                  Particular
+                                </span>
+                              </SelectItem>
+                              <SelectItem value={InvestorType.COMPANY}>
+                                <span className='flex items-center gap-2'>
+                                  <BuildingIcon className='w-4 h-4' />
+                                  Empresa
+                                </span>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </Field>
+                      )}
+                    />
+                  </FieldGroup>
+                  <FieldGroup>
+                    <Controller
+                      name='companyName'
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='ACME S.L.' required disabled={isFormDisabled} />
+                            <InputGroupAddon>
+                              <BuildingIcon />
+                            </InputGroupAddon>
+                            <InputGroupAddon align='inline-end'>
+                              <button onClick={(e) => copyToClipboard(e, investor?.companyName ?? '')} className='group'>
+                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span>
-                                    <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className='relative -top-2 right-3'>
-                                  <p className='text-center'>¡Copiado!</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </button>
-                          </InputGroupAddon>
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name='name'
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>{
-                          investorType === InvestorType.COMPANY
-                            ? 'Nombre de la empresa'
-                            : 'Nombre completo'}
-                          :
-                        </FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder={'ACME'} required disabled={isFormDisabled} />
-                          <InputGroupAddon>{
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>
+                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className='relative -top-2 right-3'>
+                                    <p className='text-center'>¡Copiado!</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </button>
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      name='name'
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>{
                             investorType === InvestorType.COMPANY
-                              ? <UsersIcon />
-                              : <UserIcon />}
-                          </InputGroupAddon>
-                          <InputGroupAddon align='inline-end'>
-                            <button onClick={(e) => copyToClipboard(e, investor?.name ?? '')} className='group'>
-                              <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              ? 'Nombre de la empresa'
+                              : 'Nombre completo'}
+                            :
+                          </FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder={'ACME'} required disabled={isFormDisabled} />
+                            <InputGroupAddon>{
+                              investorType === InvestorType.COMPANY
+                                ? <UsersIcon />
+                                : <UserIcon />}
+                            </InputGroupAddon>
+                            <InputGroupAddon align='inline-end'>
+                              <button onClick={(e) => copyToClipboard(e, investor?.name ?? '')} className='group'>
+                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span>
-                                    <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className='relative -top-2 right-3'>
-                                  <p className='text-center'>¡Copiado!</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </button>
-                          </InputGroupAddon>
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name='email'
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>Correo:</FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='email' placeholder='m@example.com' required disabled={isFormDisabled} />
-                          <InputGroupAddon>
-                            <MailIcon />
-                          </InputGroupAddon>
-                          <InputGroupAddon align='inline-end'>
-                            <button onClick={(e) => copyToClipboard(e, investor?.email ?? '')} className='group'>
-                              <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>
+                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className='relative -top-2 right-3'>
+                                    <p className='text-center'>¡Copiado!</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </button>
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      name='email'
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Correo:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='email' placeholder='m@example.com' required disabled={isFormDisabled} />
+                            <InputGroupAddon>
+                              <MailIcon />
+                            </InputGroupAddon>
+                            <InputGroupAddon align='inline-end'>
+                              <button onClick={(e) => copyToClipboard(e, investor?.email ?? '')} className='group'>
+                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span>
-                                    <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className='relative -top-2 right-3'>
-                                  <p className='text-center'>¡Copiado!</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </button>
-                          </InputGroupAddon>
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name='phoneNumber'
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='tel' placeholder='654987321' required disabled={isFormDisabled}/>
-                          <InputGroupAddon>
-                            <PhoneIcon />
-                          </InputGroupAddon>
-                          <InputGroupAddon align='inline-end'>
-                            <button onClick={(e) => copyToClipboard(e, investor?.phoneNumber ?? '')} className='group'>
-                              <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>
+                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className='relative -top-2 right-3'>
+                                    <p className='text-center'>¡Copiado!</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </button>
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      name='phoneNumber'
+                      control={form.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='tel' placeholder='654987321' required disabled={isFormDisabled}/>
+                            <InputGroupAddon>
+                              <PhoneIcon />
+                            </InputGroupAddon>
+                            <InputGroupAddon align='inline-end'>
+                              <button onClick={(e) => copyToClipboard(e, investor?.phoneNumber ?? '')} className='group'>
+                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span>
-                                    <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className='relative -top-2 right-3'>
-                                  <p className='text-center'>¡Copiado!</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </button>
-                          </InputGroupAddon>
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                </FieldGroup>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span>
+                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className='relative -top-2 right-3'>
+                                    <p className='text-center'>¡Copiado!</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </button>
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                  </FieldGroup>
+                </FieldSet>
                 <FieldSet>
                   <FieldGroup className='flex flex-row gap-2 items-center justify-end'>
                     <Button type='button' variant='secondary' onClick={handleReset} disabled={JSON.stringify(originalInvestor) === JSON.stringify(investor) && !form.formState.isDirty}>

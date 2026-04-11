@@ -121,7 +121,7 @@ export default function CreateAuctionPage () {
         <h2>Crear subasta</h2>
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
           <Card>
             <CardHeader>
               <h3>Detalles de la subasta</h3>
@@ -129,7 +129,7 @@ export default function CreateAuctionPage () {
             <CardContent className='flex flex-col gap-4'>
               <FieldSet>
                 <FieldLegend>Factura relacionada</FieldLegend>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Controller
                     name='svc'
                     control={form.control}
@@ -197,7 +197,7 @@ export default function CreateAuctionPage () {
                     </InputGroup>
                   </Field>
                 </FieldGroup>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <Field>
                     <FieldLabel htmlFor='invoiceAmount'>Importe:</FieldLabel>
                     <InputGroup>
@@ -234,7 +234,7 @@ export default function CreateAuctionPage () {
 
               <FieldSet>
                 <FieldLegend>Datos de la subasta</FieldLegend>
-                <FieldGroup className='grid md:grid-cols-2 gap-4'>
+                <FieldGroup>
                   <div className='flex flex-col gap-1'>
                     <Controller
                       name='startingPrice'

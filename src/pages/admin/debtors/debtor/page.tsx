@@ -207,8 +207,8 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
               </CardHeader>
 
               <CardContent className='flex flex-col gap-4'>
-                <FieldSet>
-                  <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
+                  <FieldGroup>
                     <Controller
                       name='taxId'
                       control={form.control}
@@ -348,7 +348,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                   </FieldGroup>
                 </FieldSet>
                 <Accordion type='multiple'>
-                  <FieldSet>
+                  <FieldSet className='**:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
                     <AccordionItem value='investor'>
                       <AccordionTrigger>
                         <div>
@@ -357,7 +357,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                         </div>
                       </AccordionTrigger>
                       <AccordionContent>
-                        <FieldGroup className='flex flex-col gap-4 xl:grid xl:grid-cols-2'>
+                        <FieldGroup>
                           <Field>
                             <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
