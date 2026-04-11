@@ -23,6 +23,7 @@ export function useInvoiceColumns (): ColumnDef<Invoice>[] {
       )
     },
     {
+      accessorKey: 'svc',
       header: 'CSV',
       cell: ({row}) => row.original.svc
     },

@@ -23,6 +23,7 @@ export function useBidColumns (): ColumnDef<Bid>[] {
       cell: ({ row }) => formatCurrency(row.original.amount, locale)
     },
     {
+      accessorKey: 'profitability',
       header: 'Rentabilidad',
       cell: ({ row, table }) => {
         const profitability = Number(row.original.profitability)
