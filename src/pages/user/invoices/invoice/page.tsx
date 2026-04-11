@@ -66,7 +66,7 @@ const baseFormSchema = z.object({
 
 const documentFormSchema = z.object({
   svc: z.string()
-    .min(1, 'El identificador de factura es obligatorio')
+    .min(1, 'El CSV es obligatorio')
     .or(z.literal('')),
   file: z.custom<FileList>()
     .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío')
