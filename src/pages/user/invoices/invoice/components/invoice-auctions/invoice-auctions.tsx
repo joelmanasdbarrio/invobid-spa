@@ -10,10 +10,10 @@ import { DataTable } from './data-table'
 export default function InvoiceAuctions ({ invoiceSvc } : { invoiceSvc: string | undefined }) {
   const auctionColumns = useAuctionColumns()
   const [data, setData] = useState<Auction[]>([])
-  const [totalItems, setTotalItems] = useState(0)
+  const [totalItems, setTotalItems] = useState<number>(0)
 
-  const [currentPage, setCurrentPage] = useState(1)
-  const [currentLimit, setCurrentLimit] = useState(10)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [currentLimit, setCurrentLimit] = useState<number>(10)
 
   useEffect(() => {
     if (invoiceSvc) {
@@ -23,7 +23,7 @@ export default function InvoiceAuctions ({ invoiceSvc } : { invoiceSvc: string |
         limit: String(currentLimit)
       }).then(res => {
         setData(res.data)
-        setTotalItems(res['_metadata'].total)
+        setTotalItems(res._metadata.total)
       })
     }
   }, [invoiceSvc, currentLimit, currentPage])

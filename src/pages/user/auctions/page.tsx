@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { getAuctions } from '@/services/auction.api'
-import { AuctionStatus } from '@/types/Auction'
+import { type Auction, AuctionStatus } from '@/types/Auction'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeftIcon, ChevronRightIcon, GavelIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -54,11 +54,11 @@ export default function AuctionsPage () {
     form.reset(defaultForm)
   }, [form, defaultForm])
 
-  const [data, setData] = useState([])
-  const [totalItems, setTotalItems] = useState(0)
+  const [data, setData] = useState<Auction[]>([])
+  const [totalItems, setTotalItems] = useState<number>(0)
 
-  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10))
-  const [currentLimit, setCurrentLimit] = useState(parseInt(searchParams.get('limit') || '10', 10))
+  const [currentPage, setCurrentPage] = useState<number>(parseInt(searchParams.get('page') || '1', 10))
+  const [currentLimit, setCurrentLimit] = useState<number>(parseInt(searchParams.get('limit') || '10', 10))
 
   function onSubmit (data: z.infer<typeof formSchema>) {
     const formData = Object.fromEntries(
@@ -96,7 +96,7 @@ export default function AuctionsPage () {
       limit: String(currentLimit)
     }).then(res => {
       setData(res.data)
-      setTotalItems(res['_metadata'].total)
+      setTotalItems(res._metadata.total)
     })
   }, [loggedInUser, searchParams, currentPage, currentLimit])
 

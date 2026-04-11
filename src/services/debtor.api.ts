@@ -1,9 +1,11 @@
 import fetchApi from '@/lib/fetchApi'
+import type { Debtor } from '@/types/Debtor'
+import type { PaginatedResponse, ResponseOK } from '@/types/Response'
 
 const base_url = import.meta.env.VITE_BASE_URL
 
 export const createDebtor = async (body: FormData) => {
-  return fetchApi(`${base_url}/debtors`, {
+  return fetchApi<ResponseOK<Debtor>>(`${base_url}/debtors`, {
     method: 'POST',
     body
   }, {
@@ -15,7 +17,7 @@ export const createDebtor = async (body: FormData) => {
 
 export const getDebtors = async (queryParams?: Record<string, string>) => {
   const queryString = new URLSearchParams(queryParams).toString()
-  return fetchApi(`${base_url}/debtors?${queryString}`, {
+  return fetchApi<PaginatedResponse<Debtor[]>>(`${base_url}/debtors?${queryString}`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar los deudores'
@@ -23,7 +25,7 @@ export const getDebtors = async (queryParams?: Record<string, string>) => {
 }
 
 export const getDebtorById = async (debtorId: string) => {
-  return fetchApi(`${base_url}/debtors/${debtorId}`, {
+  return fetchApi<ResponseOK<Debtor>>(`${base_url}/debtors/${debtorId}`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar el deudor'
@@ -42,7 +44,7 @@ export const updateDebtorById = async (debtorId: string, body: FormData | string
     fetchOptions.headers = { 'Content-Type': 'application/json' }
   }
 
-  return fetchApi(`${base_url}/debtors/${debtorId}`, fetchOptions, {
+  return fetchApi<ResponseOK<Debtor>>(`${base_url}/debtors/${debtorId}`, fetchOptions, {
     promise: 'Actualizando deudor...',
     resolve: 'Deudor actualizado con éxito',
     reject: 'Error al actualizar el deudor'
@@ -53,7 +55,7 @@ export const updateDebtorById = async (debtorId: string, body: FormData | string
 
 export const countDebtors = async (queryParams?: Record<string, string>) => {
   const queryString = new URLSearchParams(queryParams).toString()
-  return fetchApi(`${base_url}/debtors/lookup/count?${queryString}`, {
+  return fetchApi<ResponseOK<number>>(`${base_url}/debtors/lookup/count?${queryString}`, {
     method: 'GET'
   })
 }

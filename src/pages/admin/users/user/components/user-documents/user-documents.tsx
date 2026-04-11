@@ -2,18 +2,18 @@ import { Button } from '@/components/ui/button.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
 import { DataTable } from '@/pages/admin/users/user/components/user-documents/data-table'
 import { getDocuments } from '@/services/document.api.ts'
-import { DocumentType } from '@/types/Document.ts'
+import { DocumentType, type Document } from '@/types/Document.ts'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useDocumentColumns } from './columns'
 
 export default function UserDocuments ({ investorId } : { investorId: string | undefined }) {
   const documentColumns = useDocumentColumns()
-  const [data, setData] = useState([])
-  const [totalItems, setTotalItems] = useState(0)
+  const [data, setData] = useState<Document[]>([])
+  const [totalItems, setTotalItems] = useState<number>(0)
 
-  const [currentPage, setCurrentPage] = useState(1)
-  const [currentLimit, setCurrentLimit] = useState(10)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [currentLimit, setCurrentLimit] = useState<number>(10)
 
   useEffect(() => {
     if (investorId) {
@@ -24,7 +24,7 @@ export default function UserDocuments ({ investorId } : { investorId: string | u
         limit: String(currentLimit)
       }).then(res => {
         setData(res.data)
-        setTotalItems(res['_metadata'].total)
+        setTotalItems(res._metadata.total)
       })
     }
   }, [investorId, currentLimit, currentPage])

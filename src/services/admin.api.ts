@@ -1,21 +1,11 @@
 import fetchApi from '@/lib/fetchApi'
+import type { AccessTokenResponse, PaginatedResponse, ResponseKO, ResponseOK } from '@/types/Response'
+import type { Admin } from '@/types/User'
 
-// TODO: const base_url = import.meta.env.VITE_BASE_URL
+const base_url = import.meta.env.VITE_BASE_URL
 
-interface CreateAdminResponse {
-  status: string
-  data: {
-    id: string
-    email: string
-    password: string
-    name: string
-    type: string
-  }
-  access_token: string
-}
-
-export const createAdmin = (body: string, onSuccess?: (response: CreateAdminResponse) => void, onReject?: (error: Error) => void) => {
-  return fetchApi<CreateAdminResponse>('http://localhost:3000/api/v1/auth/register/admin', {
+export const createAdmin = (body: string, onSuccess?: (response: AccessTokenResponse<Admin>) => void, onReject?: (error: ResponseKO) => void) => {
+  return fetchApi<AccessTokenResponse<Admin>>(`${base_url}/auth/register/admin`, {
     method: 'POST',
     body,
     headers: { 'Content-Type': 'application/json'}
@@ -30,7 +20,7 @@ export const createAdmin = (body: string, onSuccess?: (response: CreateAdminResp
 }
 
 export const getAdmins = async () => {
-  return fetchApi('http://localhost:3000/api/v1/admins', {
+  return fetchApi<PaginatedResponse<Admin[]>>(`${base_url}/admins`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar los administradores'
@@ -38,7 +28,7 @@ export const getAdmins = async () => {
 }
 
 export const getAdminById = async (adminId: string) => {
-  return fetchApi(`http://localhost:3000/api/v1/admins/${adminId}`, {
+  return fetchApi<ResponseOK<Admin>>(`${base_url}/admins/${adminId}`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar el administrador'
@@ -46,7 +36,7 @@ export const getAdminById = async (adminId: string) => {
 }
 
 export const updateAdminById = async (adminId: string, body: string) => {
-  return fetchApi(`http://localhost:3000/api/v1/admins/${adminId}`, {
+  return fetchApi<ResponseOK<Admin>>(`${base_url}/admins/${adminId}`, {
     method: 'PATCH',
     body,
     headers: { 'Content-Type': 'application/json'}
@@ -58,7 +48,7 @@ export const updateAdminById = async (adminId: string, body: string) => {
 }
 
 export const deleteAdminById = async (adminId: string) => {
-  return fetchApi(`http://localhost:3000/api/v1/admins/${adminId}`, {
+  return fetchApi<ResponseOK<null>>(`${base_url}/admins/${adminId}`, {
     method: 'DELETE'
   }, {
     promise: 'Eliminando administrador...',

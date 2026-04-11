@@ -1,24 +1,11 @@
 import fetchApi from '@/lib/fetchApi'
+import type { AccessTokenResponse, ResponseKO } from '@/types/Response'
+import type { User } from '@/types/User'
 
-interface LoginResponse {
-  status: string
-  data: {
-    id: string,
-    email: string,
-    name: string,
-    type: string,
-    phoneNumber: number,
-    companyName: string,
-    investorType: string,
-    status: string,
-    isOptedInNotificationsEmail: boolean,
-    isOptedInNotificationsSMS: boolean
-  }
-  access_token: string
-}
+const base_url = import.meta.env.VITE_BASE_URL
 
-export const login = (body: string, onSuccess?: (response: LoginResponse) => void, onReject?: (error: Error) => void, activateAccount: boolean = false) => {
-  return fetchApi<LoginResponse>('http://localhost:3000/api/v1/auth/login', {
+export const login = (body: string, onSuccess?: (response: AccessTokenResponse<User>) => void, onReject?: (error: ResponseKO) => void, activateAccount: boolean = false) => {
+  return fetchApi<AccessTokenResponse<User>>(`${base_url}/auth/login`, {
     method: 'POST',
     body,
     headers: {

@@ -2,17 +2,18 @@ import { Button } from '@/components/ui/button.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
 import { DataTable } from '@/pages/admin/users/user/components/user-debtors/data-table'
 import { getDebtors } from '@/services/debtor.api'
+import type { Debtor } from '@/types/Debtor'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useDebtorColumns } from './columns'
 
 export default function UserDebtors ({ investorId } : { investorId: string | undefined }) {
   const debtorColumns = useDebtorColumns()
-  const [data, setData] = useState([])
-  const [totalItems, setTotalItems] = useState(0)
+  const [data, setData] = useState<Debtor[]>([])
+  const [totalItems, setTotalItems] = useState<number>(0)
 
-  const [currentPage, setCurrentPage] = useState(1)
-  const [currentLimit, setCurrentLimit] = useState(10)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [currentLimit, setCurrentLimit] = useState<number>(10)
 
   useEffect(() => {
     if (investorId) {
@@ -22,7 +23,7 @@ export default function UserDebtors ({ investorId } : { investorId: string | und
         limit: String(currentLimit)
       }).then(res => {
         setData(res.data)
-        setTotalItems(res['_metadata'].total)
+        setTotalItems(res._metadata.total)
       })
     }
   }, [investorId, currentLimit, currentPage])
