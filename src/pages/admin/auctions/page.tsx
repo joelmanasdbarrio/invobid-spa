@@ -95,7 +95,18 @@ export default function AdminAuctionsPage () {
   }, [searchParams, currentPage, currentLimit])
 
   function handleClear () {
-    form.reset(defaultForm)
+    form.reset({
+      invoiceSvc: undefined,
+      sellerCompanyName: undefined,
+      buyerCompanyName: undefined,
+      debtorCompanyName: undefined,
+      maxAmount: undefined,
+      minAmount: undefined,
+      auctionDateStart: undefined,
+      auctionDateEnd: undefined,
+      status: undefined,
+      includeDeleted: undefined
+    })
     setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
   }
 

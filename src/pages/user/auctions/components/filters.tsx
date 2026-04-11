@@ -107,8 +107,8 @@ export default function AuctionFilters (
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
                     <Select
                       value={field.value}
-                      onValueChange={(value) => field.onChange(value)}
-                      defaultValue={field.value}
+                      onValueChange={(value) => field.onChange(value === '__NONE__' ? undefined : value)}
+                      defaultValue={field.value || '__NONE__'}
                     >
                       <SelectTrigger>
                         {field.value ? (
@@ -142,7 +142,7 @@ export default function AuctionFilters (
                         )}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem>
+                        <SelectItem value='__NONE__'>
                           <button
                             type='button'
                             onClick={() => field.onChange(undefined)}

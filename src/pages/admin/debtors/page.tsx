@@ -32,7 +32,7 @@ export default function AdminDebtorsPage () {
     companyName: searchParams.get('companyName') || '',
     taxId: searchParams.get('taxId') || '',
     investorId: searchParams.get('investorId') || '',
-    status: searchParams.get('status') as DebtorStatus | undefined,
+    status: searchParams.get('status') as DebtorStatus || undefined,
     includeDeleted: searchParams.get('includeDeleted') ? searchParams.get('includeDeleted') === 'true' : undefined
   }), [searchParams])
 
@@ -87,7 +87,15 @@ export default function AdminDebtorsPage () {
   }, [searchParams, currentPage, currentLimit])
 
   function handleClear () {
-    form.reset(defaultForm)
+    form.reset({
+      email: '',
+      phoneNumber: undefined,
+      companyName: '',
+      taxId: '',
+      investorId: '',
+      status: undefined,
+      includeDeleted: undefined
+    })
     setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
   }
 
