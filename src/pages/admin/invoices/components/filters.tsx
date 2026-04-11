@@ -203,8 +203,8 @@ export default function InvoiceFilters (
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
                     <Select
                       value={field.value}
-                      onValueChange={(value) => field.onChange(value)}
-                      defaultValue={field.value}
+                      onValueChange={(value) => field.onChange(value === '__NONE__' ? undefined : value)}
+                      defaultValue={field.value || '__NONE__'}
                     >
                       <SelectTrigger>
                         {field.value ? (
@@ -234,7 +234,7 @@ export default function InvoiceFilters (
                         )}
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem>
+                        <SelectItem value='__NONE__'>
                           <button
                             type='button'
                             onClick={() => field.onChange(undefined)}
