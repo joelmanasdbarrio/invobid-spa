@@ -197,7 +197,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         <CircleGaugeIcon className='w-5 h-5 rounded-full text-blue-600'/>
                         {watchedStatus === AuctionStatus.TRANSITIONING && 'En transición'}
                       </Button>
-                      <Button type='button' title='Cancelada' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', AuctionStatus.CANCELLED, { shouldDirty: true })}>
+                      <Button type='button' title='Cancelada' disabled={auction.status !== AuctionStatus.TRANSITIONING} variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', AuctionStatus.CANCELLED, { shouldDirty: true })}>
                         <CircleSlashIcon className='w-5 h-5 rounded-full text-red-600'/>
                         {watchedStatus === AuctionStatus.CANCELLED && 'Cancelada'}
                       </Button>
