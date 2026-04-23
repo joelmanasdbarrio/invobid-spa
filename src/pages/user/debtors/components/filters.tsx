@@ -125,7 +125,7 @@ export default function DebtorFilters (
                     <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
                     <Select
                       value={field.value}
-                      onValueChange={(value) => field.onChange(value === '__NONE__' ? '' : value)}
+                      onValueChange={(value) => field.onChange(value === '__NONE__' ? undefined : value)}
                       defaultValue={field.value || '__NONE__'}
                     >
                       <SelectTrigger>

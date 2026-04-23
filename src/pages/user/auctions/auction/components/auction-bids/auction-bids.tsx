@@ -9,10 +9,10 @@ import { DataTable } from './data-table'
 
 export function AuctionBids ({ auctionId } : { auctionId: string | undefined }) {
   const [data, setData] = useState<Bid[]>([])
-  const [totalItems, setTotalItems] = useState(0)
+  const [totalItems, setTotalItems] = useState<number>(0)
 
-  const [currentPage, setCurrentPage] = useState(1)
-  const [currentLimit, setCurrentLimit] = useState(10)
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [currentLimit, setCurrentLimit] = useState<number>(10)
 
   const bidColumns = useBidColumns(currentPage, currentLimit, totalItems)
 
@@ -24,7 +24,7 @@ export function AuctionBids ({ auctionId } : { auctionId: string | undefined }) 
         limit: String(currentLimit)
       }).then(res => {
         setData(res.data)
-        setTotalItems(res['_metadata'].total)
+        setTotalItems(res._metadata.total)
       })
     }
   }, [auctionId, currentLimit, currentPage])

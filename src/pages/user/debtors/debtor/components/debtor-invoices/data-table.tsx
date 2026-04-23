@@ -1,0 +1,88 @@
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
+import type { Invoice } from '@/types/Invoice'
+import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
+import { FileTextIcon } from 'lucide-react'
+import { useState } from 'react'
+
+interface DataTableProps<TData extends Invoice, TValue> {
+  columns: ColumnDef<TData, TValue>[]
+  data: TData[]
+  totalItems: number
+}
+
+export function DataTable<TData extends Invoice, TValue> ({
+  columns,
+  data,
+  totalItems
+}: DataTableProps<TData, TValue>) {
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    state: {
+      columnVisibility
+    }
+  })
+
+  return (
+    <div className='rounded-xl border shadow-sm'>
+      <div className='w-full flex flex-col sm:flex-row md:items-center justify-between gap-2 p-6'>
+        <div className='flex gap-2 items-center justify-between sm:justify-start md:justify-between w-full'>
+          <div className='flex items-center gap-2'>
+            <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+              <FileTextIcon className='w-6 h-6' />
+            </span>
+            <h3>Facturas relacionadas</h3>
+          </div>
+          <span className='text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-lg'>{totalItems} resultado{totalItems !== 1 && 's'}</span>
+        </div>
+      </div>
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <TableHead key={header.id} className='bg-accent first:ps-6 last:pe-6'>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                  </TableHead>
+                )
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && 'selected'}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id} className='first:ps-6 last:pe-6'>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className='h-24 text-center'>
+                No hay resultados.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}

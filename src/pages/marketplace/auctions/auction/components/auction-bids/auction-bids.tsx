@@ -81,11 +81,13 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
   const currentDiscount = calcDiscount(faceValue, latestBidAmount)
   const currentProfitability = calcProfitability(faceValue, buyerPercentage, latestBidAmount)
 
+  const minimumNextBid = latestBidAmount * (1 + Number(import.meta.env.VITE_SMALLEST_BID_INCREMENT_PERCENTAGE) / 100)
+
   const profitabilityReductions = [-0.1, -0.25, -0.5, -1]
   const profitabilityReductionAmounts = profitabilityReductions.map(delta => {
     if (faceValue <= 0) return 0
     const targetProfitability = currentProfitability + delta
-    return Math.max(Math.ceil(invertProfitability(faceValue, buyerPercentage, targetProfitability) * 100) / 100, latestBidAmount)
+    return Math.max(Math.ceil(invertProfitability(faceValue, buyerPercentage, targetProfitability) * 100) / 100, minimumNextBid)
   })
 
   const [previewDiscount, setPreviewDiscount] = useState<number | null>(null)
@@ -99,10 +101,11 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
   const displayProfitability = previewProfitability ?? previewInputProfitability ?? currentProfitability
 
   function handleBidInputChange (v: string) {
-    setBidInput(v)
+    const rounded = v && Number(v) > 0 ? String(Math.ceil(Number(v) * 100) / 100) : v
+    setBidInput(rounded)
     setBidInputInvalid(false)
-    if (v && faceValue > 0 && Number(v) > 0) {
-      const delta = currentProfitability - calcProfitability(faceValue, buyerPercentage, Number(v))
+    if (rounded && faceValue > 0 && Number(rounded) > 0) {
+      const delta = currentProfitability - calcProfitability(faceValue, buyerPercentage, Number(rounded))
       setProfitabilityInput(delta > 0 ? delta.toFixed(2) : '')
     } else {
       setProfitabilityInput('')
@@ -114,7 +117,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
     setProfitabilityInputInvalid(false)
     if (v && faceValue > 0) {
       const targetProfitability = currentProfitability - Number(v)
-      const amount = Math.ceil(invertProfitability(faceValue, buyerPercentage, targetProfitability) * 100) / 100
+      const amount = Math.max(Math.ceil(invertProfitability(faceValue, buyerPercentage, targetProfitability) * 100) / 100, minimumNextBid)
       setBidInput(String(amount))
       setBidInputInvalid(false)
     } else {
@@ -152,7 +155,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
         <CardHeader className='flex flex-row items-center justify-between py-6'>
           <div className='flex items-center gap-2'>
             <span className='rounded-md p-1 bg-primary/20 text-primary'>
-              <HistoryIcon className='w-4 h-4' />
+              <HistoryIcon className='size-4' />
             </span>
             <h3>Historial de pujas</h3>
           </div>
@@ -179,7 +182,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
                 {formatCurrency(latestBidAmount, locale, auction?.invoice.currency)}
               </span>
               <span className='line-through lg:text-lg'>
-                {formatCurrency(auction?.invoice.amount, locale, auction?.invoice.currency)}
+                {formatCurrency(auction?.invoice.amount ?? 0, locale, auction?.invoice.currency)}
               </span>
             </div>
           </div>
@@ -187,7 +190,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
             <Tooltip>
               <TooltipTrigger>
                 <ColorBadge
-                  color={auction?.invoice.rating >= 4.9 ? 'green' : auction?.invoice.rating >= 4.5 ? 'yellow' : 'red'}
+                  color={(auction?.invoice.rating ?? 0) >= 4.9 ? 'green' : (auction?.invoice.rating ?? 0) >= 4.5 ? 'yellow' : 'red'}
                   icon={<ShieldCheckIcon className='size-4 lg:size-8' />}
                   className='px-4 rounded-full'
                 >
@@ -201,7 +204,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
             <Tooltip>
               <TooltipTrigger>
                 <ColorBadge
-                  color={auction?.invoice.extRating >= 4.9 ? 'green' : auction?.invoice.extRating >= 4.5 ? 'yellow' : 'red'}
+                  color={(auction?.invoice.extRating ?? 0) >= 4.9 ? 'green' : (auction?.invoice.extRating ?? 0) >= 4.5 ? 'yellow' : 'red'}
                   icon={<ShieldCheckIcon className='size-4 lg:size-8' />}
                   className='px-4 rounded-full'
                 >
@@ -237,7 +240,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
         <div className='grow flex flex-col gap-2 p-4 pb-0'>
           <div className='grid lg:grid-cols-2 lg:grid-rows-1 gap-2'>
             <InputGroup>
-              <InputGroupInput placeholder='Valor final' type='number' min={latestBidAmount} step={100} disabled={isDisabled} value={bidInput} aria-invalid={bidInputInvalid} onChange={e => handleBidInputChange(e.target.value)} />
+              <InputGroupInput placeholder='Valor final' type='number' min={minimumNextBid} step={100} disabled={isDisabled} value={bidInput} aria-invalid={bidInputInvalid} onChange={e => handleBidInputChange(e.target.value)} />
               <InputGroupAddon align='inline-end'>
                 €
               </InputGroupAddon>

@@ -1,3 +1,4 @@
+import type { ResponseKO } from '@/types/Response'
 import { toast } from 'sonner'
 
 export async function downloadFile (
@@ -63,9 +64,9 @@ export default function fetchApi<T = Record<string, unknown>> (
     reject?: string
   },
   onResolve?: (response: T) => void,
-  onReject?: (error: Error) => void
+  onReject?: (error: ResponseKO) => void
 ) {
-  const fetchRequest = async () => {
+  const fetchRequest = async (): Promise<T> => {
     const response = await fetch(url, {
       credentials: 'include',
       ...options

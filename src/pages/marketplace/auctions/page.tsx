@@ -52,11 +52,11 @@ export default function MarketplaceAvailableAuctionsPage () {
   }, [form, defaultForm])
 
   const [data, setData] = useState<Auction[]>([])
-  const [totalItems, setTotalItems] = useState(0)
+  const [totalItems, setTotalItems] = useState<number>(0)
   const socketRef = useRef<Socket | null>(null)
 
-  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10))
-  const [currentLimit, setCurrentLimit] = useState(parseInt(searchParams.get('limit') || '10', 10))
+  const [currentPage, setCurrentPage] = useState<number>(parseInt(searchParams.get('page') || '1', 10))
+  const [currentLimit, setCurrentLimit] = useState<number>(parseInt(searchParams.get('limit') || '10', 10))
 
   function onSubmit (data: z.infer<typeof formSchema>) {
     const formData = Object.fromEntries(
@@ -84,7 +84,7 @@ export default function MarketplaceAvailableAuctionsPage () {
       page: String(currentPage),
       limit: String(currentLimit)
     }).then(async res => {
-      const auctions: Auction[] = res.data
+      const auctions = res.data
       const bidResults = await Promise.all(
         auctions.map(a => getBids({ auctionId: a.id, page: '1', limit: '1' }))
       )
@@ -92,7 +92,7 @@ export default function MarketplaceAvailableAuctionsPage () {
         auctions[i].bids = bidRes.data
       })
       setData(auctions)
-      setTotalItems(res['_metadata'].total)
+      setTotalItems(res._metadata.total)
     })
   }, [searchParams, currentPage, currentLimit])
 

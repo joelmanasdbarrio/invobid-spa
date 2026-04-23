@@ -1,17 +1,18 @@
 import { Button } from '@/components/ui/button'
 import { DialogTrigger } from '@/components/ui/dialog'
+import { type Auction } from '@/types/Auction'
 import { type ColumnDef, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
 import { ListFilterIcon } from 'lucide-react'
 import { useState } from 'react'
 import AuctionCard from './auction-card'
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends Auction, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[],
   totalItems: number
 }
 
-export function DataTable<TData, TValue> ({
+export function DataTable<TData extends Auction, TValue> ({
   columns,
   data,
   totalItems

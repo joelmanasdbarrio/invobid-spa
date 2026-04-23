@@ -166,64 +166,66 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
           <GavelIcon className='w-6 h-6' />
         </span>
         <h2>Gestionar subasta</h2>
+        {auction?.status === AuctionStatus.DRAFT && (
+          <Form {...validateForm}>
+            <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
+              <Button
+                variant='outline'
+                className='group'
+                disabled={!auction}
+                onClick={() => {
+                  validateForm.setValue('status', AuctionStatus.PUBLISHED)
+                  validateForm.handleSubmit(onSubmitValidate)()
+                }}
+              >
+                <CircleCheckIcon className='shrink-0' />
+                <span className='overflow-hidden'>
+                  Publicar
+                </span>
+              </Button>
+            </form>
+          </Form>
+        )}
       </div>
-      <Card>
-        <CardHeader className='md:grid-cols-[auto_1fr] grid-rows-1'>
-          <div className='flex flex-wrap gap-2 items-center'>
-            <h3>Detalles de la subasta <span className='text-primary'>{auction?.invoice?.svc}</span></h3>
-            {auction?.status === AuctionStatus.DRAFT && (
-              <ColorBadge color='yellow' icon={<CircleDashedIcon />}>
-                Borrador
-              </ColorBadge>
-            )}
-            {auction?.status === AuctionStatus.PUBLISHED && (
-              <ColorBadge color='green' icon={<CircleCheckIcon />}>
-                Publicada
-              </ColorBadge>
-            )}
-            {auction?.status === AuctionStatus.TRANSITIONING && (
-              <ColorBadge color='blue' icon={<CircleGaugeIcon />}>
-                En transición
-              </ColorBadge>
-            )}
-            {auction?.status === AuctionStatus.CANCELLED && (
-              <ColorBadge color='red' icon={<CircleSlashIcon />}>
-                Cancelada
-              </ColorBadge>
-            )}
-            {auction?.status === AuctionStatus.FINISHED && (
-              <ColorBadge color='purple' icon={<GavelIcon />}>
-                Finalizada
-              </ColorBadge>
-            )}
-          </div>
-          {auction?.status === AuctionStatus.DRAFT && (
-            <Form {...validateForm}>
-              <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
-                <Button
-                  variant='outline'
-                  className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
-                  disabled={!auction}
-                  onClick={() => {
-                    validateForm.setValue('status', AuctionStatus.PUBLISHED)
-                    validateForm.handleSubmit(onSubmitValidate)()
-                  }}
-                >
-                  <CircleCheckIcon className='shrink-0' />
-                  <span className='overflow-hidden'>
-                    Publicar
-                  </span>
-                </Button>
-              </form>
-            </Form>
-          )}
-        </CardHeader>
-        <CardContent>
-          <Form {...baseForm}>
-            <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4'>
+      <Form {...baseForm}>
+        <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
+          <Card>
+            <CardHeader>
+              <div className='flex flex-wrap gap-2 items-center'>
+                <h3>Detalles de la subasta <span className='text-primary'>{auction?.invoice?.svc}</span></h3>
+                <div className='ms-auto'>
+                  {auction?.status === AuctionStatus.DRAFT && (
+                    <ColorBadge color='yellow' icon={<CircleDashedIcon />}>
+                      Borrador
+                    </ColorBadge>
+                  )}
+                  {auction?.status === AuctionStatus.PUBLISHED && (
+                    <ColorBadge color='green' icon={<CircleCheckIcon />}>
+                      Publicada
+                    </ColorBadge>
+                  )}
+                  {auction?.status === AuctionStatus.TRANSITIONING && (
+                    <ColorBadge color='blue' icon={<CircleGaugeIcon />}>
+                      En transición
+                    </ColorBadge>
+                  )}
+                  {auction?.status === AuctionStatus.CANCELLED && (
+                    <ColorBadge color='red' icon={<CircleSlashIcon />}>
+                      Cancelada
+                    </ColorBadge>
+                  )}
+                  {auction?.status === AuctionStatus.FINISHED && (
+                    <ColorBadge color='purple' icon={<GavelIcon />}>
+                      Finalizada
+                    </ColorBadge>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className='flex flex-col gap-4'>
               <FieldSet>
                 <FieldLegend>Factura relacionada</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
+                <FieldGroup>
                   <Controller
                     name='svc'
                     control={baseForm.control}
@@ -295,45 +297,96 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
 
               <FieldSet>
                 <FieldLegend>Datos de la subasta</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-2'>
-                  <Controller
-                    name='startingPrice'
-                    control={baseForm.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>Precio inicial:</FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput
-                            id={field.name}
-                            type='number'
-                            step='0.01'
-                            placeholder='1000'
-                            disabled={isFormDisabled}
-                            value={field.value}
-                            onChange={e => field.onChange(e.target.valueAsNumber)}
-                            onBlur={() => {
-                              if (field.value !== undefined && !isNaN(field.value)) {
-                                field.onChange(Math.round(field.value * 100) / 100)
-                              }
-                              field.onBlur()
-                            }}
-                            ref={field.ref}
-                          />
-                          <InputGroupAddon>€</InputGroupAddon>
-                          <InputGroupAddon align='inline-end'>
-                            {field.value !== undefined && selectedInvoice?.amount && (
-                              <span className='text-sm text-muted-foreground'>
-                                {`${new Intl.NumberFormat(locale, { maximumFractionDigits: 2, signDisplay: 'always' }).format((field.value / selectedInvoice.amount - 1) * 100)}%`}
-                              </span>
-                            )}
-                          </InputGroupAddon>
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
+                <FieldGroup>
+                  <div className='flex flex-col gap-2'>
+                    <Controller
+                      name='startingPrice'
+                      control={baseForm.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Precio inicial:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput
+                              id={field.name}
+                              type='number'
+                              step='0.01'
+                              placeholder='1000'
+                              disabled={isFormDisabled}
+                              value={field.value}
+                              onChange={e => field.onChange(e.target.valueAsNumber)}
+                              onBlur={() => {
+                                if (field.value !== undefined && !isNaN(field.value)) {
+                                  field.onChange(Math.round(field.value * 100) / 100)
+                                }
+                                field.onBlur()
+                              }}
+                              ref={field.ref}
+                            />
+                            <InputGroupAddon>€</InputGroupAddon>
+                            <InputGroupAddon align='inline-end'>
+                              {field.value !== undefined && selectedInvoice?.amount && (
+                                <span className='text-sm text-muted-foreground'>
+                                  {`${new Intl.NumberFormat(locale, { maximumFractionDigits: 2, signDisplay: 'always' }).format((field.value / selectedInvoice.amount - 1) * 100)}%`}
+                                </span>
+                              )}
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <div className='flex gap-2'>
+                      <ButtonGroup>
+                        <Button
+                          variant='outline'
+                          type='button'
+                          onClick={() => applyDiscount(3)}
+                          disabled={isFormDisabled}
+                        >
+                          -3%
+                        </Button>
+                        <Button
+                          variant='outline'
+                          type='button'
+                          onClick={() => applyDiscount(5)}
+                          disabled={isFormDisabled}
+                        >
+                          -5%
+                        </Button>
+                        <Button
+                          variant='outline'
+                          type='button'
+                          onClick={() => applyDiscount(10)}
+                          disabled={isFormDisabled}
+                        >
+                          -10%
+                        </Button>
+                        <Button
+                          variant='outline'
+                          type='button'
+                          onClick={() => applyDiscount(20)}
+                          disabled={isFormDisabled}
+                        >
+                          -20%
+                        </Button>
+                      </ButtonGroup>
+                      <InputGroup className='w-full'>
+                        <InputGroupInput
+                          type='number'
+                          placeholder='Descuento...'
+                          disabled={isFormDisabled}
+                          onChange={(e) => {
+                            const discountPercent = parseFloat(e.target.value) || 0
+                            applyDiscount(discountPercent)
+                          }}
+                        />
+                        <InputGroupAddon>-</InputGroupAddon>
+                        <InputGroupAddon align='inline-end'>%</InputGroupAddon>
+                      </InputGroup>
+                    </div>
+                  </div>
                   <Field
                     data-invalid={!!baseForm.formState.errors.auctionDateEnd}
                   >
@@ -350,71 +403,23 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                     />
                     {baseForm.formState.errors.auctionDateEnd && <FieldError errors={[baseForm.formState.errors.auctionDateEnd]} />}
                   </Field>
-                  <div className='flex gap-2'>
-                    <ButtonGroup>
-                      <Button
-                        variant='outline'
-                        type='button'
-                        onClick={() => applyDiscount(3)}
-                        disabled={isFormDisabled}
-                      >
-                        -3%
-                      </Button>
-                      <Button
-                        variant='outline'
-                        type='button'
-                        onClick={() => applyDiscount(5)}
-                        disabled={isFormDisabled}
-                      >
-                        -5%
-                      </Button>
-                      <Button
-                        variant='outline'
-                        type='button'
-                        onClick={() => applyDiscount(10)}
-                        disabled={isFormDisabled}
-                      >
-                        -10%
-                      </Button>
-                      <Button
-                        variant='outline'
-                        type='button'
-                        onClick={() => applyDiscount(20)}
-                        disabled={isFormDisabled}
-                      >
-                        -20%
-                      </Button>
-                    </ButtonGroup>
-                    <InputGroup className='w-40'>
-                      <InputGroupInput
-                        type='number'
-                        placeholder='Descuento...'
-                        disabled={isFormDisabled}
-                        onChange={(e) => {
-                          const discountPercent = parseFloat(e.target.value) || 0
-                          applyDiscount(discountPercent)
-                        }}
-                      />
-                      <InputGroupAddon>-</InputGroupAddon>
-                      <InputGroupAddon align='inline-end'>%</InputGroupAddon>
-                    </InputGroup>
-                  </div>
-                  <Button
-                    className='w-min self-end justify-self-end'
-                    disabled={JSON.stringify(originalAuction) === JSON.stringify(auction) && !baseForm.formState.isDirty}
-                    title='Guardar cambios'
-                  >
-                    <SaveIcon />
-                    <span>
-                      Guardar cambios
-                    </span>
-                  </Button>
                 </FieldGroup>
               </FieldSet>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+          <Button
+            className='w-min self-end justify-self-end'
+            disabled={JSON.stringify(originalAuction) === JSON.stringify(auction) && !baseForm.formState.isDirty}
+            title='Guardar cambios'
+          >
+            <SaveIcon />
+            <span>
+              Guardar cambios
+            </span>
+          </Button>
+        </form>
+      </Form>
+
       <Tabs defaultValue='bids' className='gap-4'>
         <TabsList>
           <TabsTrigger value='bids'>Pujas</TabsTrigger>

@@ -66,23 +66,26 @@ const baseFormSchema = z.object({
 
 const documentFormSchema = z.object({
   svc: z.string()
-    .min(1, 'El identificador de factura es obligatorio')
+    .min(1, 'El CSV es obligatorio')
     .or(z.literal('')),
   file: z.custom<FileList>()
-    .refine((files) => files && files.length > 0, 'El documento es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
-}).refine((data) => {
-  if (data.file || data.svc) {
-    return data.file && data.svc
+    .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío')
+}).superRefine((data, ctx) => {
+  const hasFile = ((data.file as FileList | undefined)?.length ?? 0) > 0
+  const hasSvc = !!data.svc
+  if (hasFile && !hasSvc) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'El CSV es obligatorio', path: ['svc'] })
   }
-  return true
+  if (!hasFile && hasSvc) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'El documento es obligatorio', path: ['file'] })
+  }
 })
 
 export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {invoiceId} = useParams<{ invoiceId: string }>()
   const [invoice, setInvoice] = useState<Invoice | undefined>()
   const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
-  const [verifiedDebtors, setVerifiedDebtors] = useState<[Debtor]>()
+  const [verifiedDebtors, setVerifiedDebtors] = useState<Debtor[]>()
   const [debtorSearch, setDebtorSearch] = useState('')
   const [isLoadingDebtors, setIsLoadingDebtors] = useState(false)
 
@@ -142,7 +145,6 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
 
   useEffect(() => {
     if (!loggedInUser) return
-
     const timer = setTimeout(() => {
       setIsLoadingDebtors(true)
       getDebtors({
@@ -172,11 +174,12 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
   function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
     if (!invoiceId) return
     const formData = new FormData()
-    formData.append('svc', data.svc)
-    formData.append('file', data.file[0])
-    updateInvoiceById(invoiceId, formData)
-      .then(res => setInvoice(res.data))
-      .then(() => navigate(`/user/invoices/${invoiceId}`))
+    if (data.file?.[0] && data.svc) {
+      formData.append('svc', data.svc)
+      formData.append('file', data.file[0])
+      updateInvoiceById(invoiceId, formData)
+        .then(res => setInvoice(res.data))
+    }
   }
 
   function onSubmitValidate (data: z.infer<typeof validateFormSchema>) {
@@ -214,59 +217,61 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
           <FileTextIcon className='w-6 h-6' />
         </span>
         <h2>Gestionar factura</h2>
+        {(invoice?.status === InvoiceStatus.CORRECTION || invoice?.status === InvoiceStatus.PENDING) && (
+          <Form {...validateForm}>
+            <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
+              <Button
+                variant='outline'
+                className='group'
+                disabled={isFormDisabled}
+                onClick={() => {
+                  validateForm.setValue('status', InvoiceStatus.PENDING)
+                  validateForm.handleSubmit(onSubmitValidate)()
+                }}
+              >
+                <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-200' />
+                <span className='overflow-hidden'>
+                  Solicitar verificación
+                </span>
+              </Button>
+            </form>
+          </Form>
+        )}
       </div>
-      <Card>
-        <CardHeader className='md:grid-cols-[auto_1fr]'>
-          <div className='flex flex-wrap gap-2 items-center'>
-            <h3>Detalles de la factura <span className='text-primary'>{invoice?.svc}</span></h3>
-            {invoice?.status === InvoiceStatus.PENDING && (
-              <ColorBadge color='yellow' icon={<ClockIcon />}>
-                Pendiente
-              </ColorBadge>
-            )}
-            {invoice?.status === InvoiceStatus.VERIFIED && (
-              <ColorBadge color='green' icon={<CheckCheckIcon />}>
-                Verificada
-              </ColorBadge>
-            )}
-            {invoice?.status === InvoiceStatus.CORRECTION && (
-              <ColorBadge color='red' icon={<CircleAlertIcon />}>
-                Corrección
-              </ColorBadge>
-            )}
-            {invoice?.status === InvoiceStatus.DENIED && (
-              <ColorBadge color='gray' icon={<OctagonXIcon />}>
-                Denegada
-              </ColorBadge>
-            )}
-          </div>
-          {(invoice?.status === InvoiceStatus.CORRECTION || invoice?.status === InvoiceStatus.PENDING) && (
-            <Form {...validateForm}>
-              <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='ms-auto flex md:justify-end'>
-                <Button
-                  variant='outline'
-                  className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-200'
-                  disabled={isFormDisabled}
-                  onClick={() => {
-                    validateForm.setValue('status', InvoiceStatus.PENDING)
-                    validateForm.handleSubmit(onSubmitValidate)()
-                  }}
-                >
-                  <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-200' />
-                  <span className='overflow-hidden'>
-                    Solicitar verificación
-                  </span>
-                </Button>
-              </form>
-            </Form>
-          )}
-        </CardHeader>
-        <CardContent className='grid md:grid-cols-[1fr_200px] gap-4'>
-          <Form {...baseForm}>
-            <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='col-span-full flex flex-col gap-4'>
+      <Form {...baseForm}>
+        <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
+          <Card>
+            <CardHeader>
+              <div className='flex flex-wrap gap-2 items-center'>
+                <h3>Detalles de la factura <span className='text-primary'>{invoice?.svc}</span></h3>
+                <div className='ms-auto'>
+                  {invoice?.status === InvoiceStatus.PENDING && (
+                    <ColorBadge color='yellow' icon={<ClockIcon />}>
+                      Pendiente
+                    </ColorBadge>
+                  )}
+                  {invoice?.status === InvoiceStatus.VERIFIED && (
+                    <ColorBadge color='green' icon={<CheckCheckIcon />}>
+                      Verificada
+                    </ColorBadge>
+                  )}
+                  {invoice?.status === InvoiceStatus.CORRECTION && (
+                    <ColorBadge color='red' icon={<CircleAlertIcon />}>
+                      Corrección
+                    </ColorBadge>
+                  )}
+                  {invoice?.status === InvoiceStatus.DENIED && (
+                    <ColorBadge color='gray' icon={<OctagonXIcon />}>
+                      Denegada
+                    </ColorBadge>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
               <FieldSet>
                 <FieldLegend>Información básica</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                <FieldGroup>
                   <Controller
                     name='debtorId'
                     control={baseForm.control}
@@ -316,7 +321,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                     )}
                   />
                 </FieldGroup>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                <FieldGroup>
                   <Controller
                     name='amount'
                     control={baseForm.control}
@@ -373,25 +378,28 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                       </Field>
                     )}
                   />
-                  <Button
-                    className='w-min self-end justify-self-end'
-                    disabled={JSON.stringify(originalInvoice) === JSON.stringify(invoice) && !baseForm.formState.isDirty}
-                    title='Guardar cambios'
-                  >
-                    <SaveIcon />
-                    <span className='lg:hidden'>
-                      Guardar cambios
-                    </span>
-                  </Button>
                 </FieldGroup>
               </FieldSet>
-            </form>
-          </Form>
-          <Form {...documentForm}>
-            <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='col-span-full flex flex-col gap-4'>
+            </CardContent>
+          </Card>
+          <Button
+            className='w-min self-end justify-self-end'
+            disabled={JSON.stringify(originalInvoice) === JSON.stringify(invoice) && !baseForm.formState.isDirty}
+            title='Guardar cambios'
+          >
+            <SaveIcon />
+            Guardar cambios
+          </Button>
+        </form>
+      </Form>
+
+      <Form {...documentForm}>
+        <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
+          <Card>
+            <CardContent>
               <FieldSet>
                 <FieldLegend>Actualizar documento</FieldLegend>
-                <FieldGroup className='grid grid-cols-1 lg:grid-cols-[1fr_1fr_minmax(10px,40px)]'>
+                <FieldGroup>
                   <Controller
                     name='svc'
                     control={documentForm.control}
@@ -448,22 +456,20 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                       </Field>
                     )}
                   />
-                  <Button
-                    className='w-min self-end justify-self-end'
-                    disabled={!documentForm.formState.isDirty}
-                    title='Actualizar documentos'
-                  >
-                    <SaveIcon />
-                    <span className='lg:hidden'>
-                      Actualizar documentos
-                    </span>
-                  </Button>
                 </FieldGroup>
               </FieldSet>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+          <Button
+            className='w-min self-end justify-self-end'
+            disabled={!documentForm.formState.isDirty}
+            title='Actualizar documentos'
+          >
+            <SaveIcon />
+            Actualizar documentos
+          </Button>
+        </form>
+      </Form>
 
       <Tabs defaultValue='auctions' className='gap-4'>
         <TabsList>

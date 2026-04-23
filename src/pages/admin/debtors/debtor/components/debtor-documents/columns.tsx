@@ -35,16 +35,28 @@ export function useDocumentColumns (): ColumnDef<Document>[] {
       header: 'Tipo de documento',
       cell: ({row}) => {
         switch (row.original.type) {
-          case DocumentType.MODELO_111:
+          case DocumentType.TAX_111_QUARTERLY:
             return (
               <ColorBadge color='blue'>
-                Modelo 111
+                Modelo 111 trimestral
               </ColorBadge>
             )
-          case DocumentType.MODELO_303:
+          case DocumentType.TAX_111_ANNUAL:
             return (
               <ColorBadge color='green'>
-                Modelo 303
+                Modelo 111 anual
+              </ColorBadge>
+            )
+          case DocumentType.TAX_303_QUARTERLY:
+            return (
+              <ColorBadge color='blue'>
+                Modelo 303 trimestral
+              </ColorBadge>
+            )
+          case DocumentType.TAX_303_ANNUAL:
+            return (
+              <ColorBadge color='green'>
+                Modelo 303 anual
               </ColorBadge>
             )
           default:
