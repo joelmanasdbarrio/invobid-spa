@@ -1,14 +1,15 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
+import type { Auction } from '@/types/Auction'
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
 import { useState } from 'react'
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends Auction, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   totalItems: number
 }
 
-export function DataTable<TData, TValue> ({
+export function DataTable<TData extends Auction, TValue> ({
   columns,
   data,
   totalItems

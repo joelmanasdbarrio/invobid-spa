@@ -182,7 +182,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
                 {formatCurrency(latestBidAmount, locale, auction?.invoice.currency)}
               </span>
               <span className='line-through lg:text-lg'>
-                {formatCurrency(auction?.invoice.amount, locale, auction?.invoice.currency)}
+                {formatCurrency(auction?.invoice.amount ?? 0, locale, auction?.invoice.currency)}
               </span>
             </div>
           </div>
@@ -190,7 +190,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
             <Tooltip>
               <TooltipTrigger>
                 <ColorBadge
-                  color={auction?.invoice.rating >= 4.9 ? 'green' : auction?.invoice.rating >= 4.5 ? 'yellow' : 'red'}
+                  color={(auction?.invoice.rating ?? 0) >= 4.9 ? 'green' : (auction?.invoice.rating ?? 0) >= 4.5 ? 'yellow' : 'red'}
                   icon={<ShieldCheckIcon className='size-4 lg:size-8' />}
                   className='px-4 rounded-full'
                 >
@@ -204,7 +204,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
             <Tooltip>
               <TooltipTrigger>
                 <ColorBadge
-                  color={auction?.invoice.extRating >= 4.9 ? 'green' : auction?.invoice.extRating >= 4.5 ? 'yellow' : 'red'}
+                  color={(auction?.invoice.extRating ?? 0) >= 4.9 ? 'green' : (auction?.invoice.extRating ?? 0) >= 4.5 ? 'yellow' : 'red'}
                   icon={<ShieldCheckIcon className='size-4 lg:size-8' />}
                   className='px-4 rounded-full'
                 >

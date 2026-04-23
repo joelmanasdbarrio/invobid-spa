@@ -57,7 +57,7 @@ const formSchema = z.object({
 })
 
 export default function CreateInvoicePage () {
-  const [verifiedDebtors, setVerifiedDebtors] = useState<[Debtor]>()
+  const [verifiedDebtors, setVerifiedDebtors] = useState<Debtor[]>()
   const [debtorSearch, setDebtorSearch] = useState('')
   const [isLoadingDebtors, setIsLoadingDebtors] = useState(false)
 

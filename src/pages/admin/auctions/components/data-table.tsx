@@ -7,13 +7,13 @@ import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type Visibi
 import { ListFilterIcon } from 'lucide-react'
 import { useState } from 'react'
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends Auction, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[],
   totalItems: number
 }
 
-export function DataTable<TData, TValue> ({
+export function DataTable<TData extends Auction, TValue> ({
   columns,
   data,
   totalItems

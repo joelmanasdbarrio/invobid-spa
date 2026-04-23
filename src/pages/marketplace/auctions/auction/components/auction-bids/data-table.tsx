@@ -1,16 +1,17 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import type { Bid } from '@/types/Bid'
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef, type VisibilityState } from '@tanstack/react-table'
 import { CrownIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends Bid, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   totalItems: number
   onLoadMore?: () => void
 }
 
-export function DataTable<TData, TValue> ({
+export function DataTable<TData extends Bid, TValue> ({
   columns,
   data,
   totalItems,

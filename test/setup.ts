@@ -6,7 +6,7 @@ class ResizeObserverMock {
   unobserve () {}
   disconnect () {}
 }
-global.ResizeObserver = ResizeObserverMock
+globalThis.ResizeObserver = ResizeObserverMock
 
 // Radix UI and react-day-picker use matchMedia for responsive behaviour
 Object.defineProperty(window, 'matchMedia', {
