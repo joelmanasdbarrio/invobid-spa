@@ -43,7 +43,6 @@ import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
 import z from 'zod'
 import { DebtorChangeHistory } from './components/debtor-change-history'
-import DebtorDocuments from './components/debtor-documents/debtor-documents'
 
 const formSchema = z.object({
   status: z.enum(DebtorStatus).optional(),
@@ -490,7 +489,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
         <DebtorChangeHistory debtor={debtor} />
       </div>
 
-      <DebtorDocuments debtorId={debtor?.id ?? ''} />
+      {/* <DebtorDocuments debtorId={debtor?.id ?? ''} /> */}
     </section>
   )
 }

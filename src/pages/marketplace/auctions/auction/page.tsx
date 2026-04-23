@@ -70,7 +70,7 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
 
       <MarketplaceAuctionBids auction={auction} />
 
-      {auction && (
+      {auction && auction.date.start && auction.date.end && (
         <div className='px-6'>
           <ProgressBar
             dateStart={auction.date.start}

@@ -45,6 +45,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
       cell: ({row}) => formatCurrency(row.original.price.start, locale, row.original.invoice.currency)
     },
     {
+      accessorKey: 'date.start',
       header: 'Fecha de inicio',
       cell: ({row}) => row.original.date.start ?
         formatDateTime(row.original.date.start, locale) : (
@@ -52,6 +53,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
         )
     },
     {
+      accessorKey: 'date.end',
       header: 'Fecha de finalización',
       cell: ({row}) => formatDateTime(row.original.date.end, locale)
     },

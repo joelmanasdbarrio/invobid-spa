@@ -1,12 +1,11 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { createDebtor } from '@/services/debtor.api'
-import { DocumentType } from '@/types/Document'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { FileIcon, HandCoinsIcon, IdCardIcon, KeyRoundIcon, MailIcon, PhoneIcon, SaveIcon, UsersIcon } from 'lucide-react'
+import { HandCoinsIcon, IdCardIcon, MailIcon, PhoneIcon, SaveIcon, UsersIcon } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import z from 'zod'
@@ -71,15 +70,15 @@ export default function CreateDebtorPage () {
     formData.append('email', data.email)
     formData.append('phoneNumber', data.phoneNumber)
 
-    formData.append(DocumentType.TAX_111_QUARTERLY, data.modelo111Quarterly[0])
-    formData.append('modelo111QuarterlyCsv', data.modelo111QuarterlyCsv)
-    formData.append(DocumentType.TAX_303_QUARTERLY, data.modelo303Quarterly[0])
-    formData.append('modelo303QuarterlyCsv', data.modelo303QuarterlyCsv)
+    // formData.append(DocumentType.TAX_111_QUARTERLY, data.modelo111Quarterly[0])
+    // formData.append('modelo111QuarterlyCsv', data.modelo111QuarterlyCsv)
+    // formData.append(DocumentType.TAX_303_QUARTERLY, data.modelo303Quarterly[0])
+    // formData.append('modelo303QuarterlyCsv', data.modelo303QuarterlyCsv)
 
-    formData.append(DocumentType.TAX_111_ANNUAL, data.modelo111Annual[0])
-    formData.append('modelo111AnnualCsv', data.modelo111AnnualCsv)
-    formData.append(DocumentType.TAX_303_ANNUAL, data.modelo303Annual[0])
-    formData.append('modelo303AnnualCsv', data.modelo303AnnualCsv)
+    // formData.append(DocumentType.TAX_111_ANNUAL, data.modelo111Annual[0])
+    // formData.append('modelo111AnnualCsv', data.modelo111AnnualCsv)
+    // formData.append(DocumentType.TAX_303_ANNUAL, data.modelo303Annual[0])
+    // formData.append('modelo303AnnualCsv', data.modelo303AnnualCsv)
 
     createDebtor(formData).then(res => navigate(`/debtors/${res.data.id}`))
   }
@@ -181,7 +180,7 @@ export default function CreateDebtorPage () {
             </CardContent>
           </Card>
 
-          <Card>
+          {/* <Card>
             <CardContent className='flex flex-col gap-4'>
               <FieldSet>
                 <FieldLegend>Documentación trimestral</FieldLegend>
@@ -387,7 +386,7 @@ export default function CreateDebtorPage () {
                 </FieldGroup>
               </FieldSet>
             </CardContent>
-          </Card>
+          </Card> */}
 
           <Button
             className='w-min self-end justify-self-end'

@@ -1,4 +1,3 @@
-import type { Document } from './Document'
 import type { Invoice } from './Invoice'
 import type { Investor } from './User'
 
@@ -11,7 +10,7 @@ export type Debtor = {
   taxId: string;
   status: DebtorStatus;
   lastCommunication?: string;
-  documents: Array<Document>;
+  // documents: Array<Document>;
   invoices: Array<Invoice>;
   createdAt: string;
   updatedAt: string;

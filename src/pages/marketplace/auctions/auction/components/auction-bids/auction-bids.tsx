@@ -155,7 +155,7 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
         <CardHeader className='flex flex-row items-center justify-between py-6'>
           <div className='flex items-center gap-2'>
             <span className='rounded-md p-1 bg-primary/20 text-primary'>
-              <HistoryIcon className='w-4 h-4' />
+              <HistoryIcon className='size-4' />
             </span>
             <h3>Historial de pujas</h3>
           </div>
