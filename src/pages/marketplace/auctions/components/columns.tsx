@@ -3,9 +3,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useLocale } from '@/hooks/use-locale'
 import { formatCurrency } from '@/lib/format-currency'
 import { formatDateTime } from '@/lib/format-date'
-import { AuctionStatus, type Auction } from '@/types/Auction'
+import { type Auction } from '@/types/Auction'
 import type { ColumnDef } from '@tanstack/react-table'
-import { BadgeEuroIcon, BuildingIcon, CalendarIcon, CalendarXIcon, FileText, HandCoinsIcon, MoveRightIcon, PercentIcon, ShieldCheckIcon, TrendingUpIcon } from 'lucide-react'
+import { BadgeEuroIcon, BuildingIcon, CalendarIcon, CalendarXIcon, FileText, HandCoinsIcon, PercentIcon, ShieldCheckIcon, TrendingUpIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { ProgressBar } from './progress-bar'
 
@@ -22,7 +22,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
           <Tooltip>
             <TooltipTrigger>
               <ColorBadge
-                color={row.original.invoice.rating >= 4.9 ? 'green' : row.original.invoice.rating >= 4.5 ? 'yellow' : 'red'}
+                color={(row.original.invoice.rating ?? 0) >= 4.9 ? 'green' : (row.original.invoice.rating ?? 0) >= 4.5 ? 'yellow' : 'red'}
                 icon={<ShieldCheckIcon/>}
                 className='px-1'
               >
@@ -36,7 +36,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
           <Tooltip>
             <TooltipTrigger>
               <ColorBadge
-                color={row.original.invoice.extRating >= 4.9 ? 'green' : row.original.invoice.extRating >= 4.5 ? 'yellow' : 'red'}
+                color={(row.original.invoice.extRating ?? 0) >= 4.9 ? 'green' : (row.original.invoice.extRating ?? 0) >= 4.5 ? 'yellow' : 'red'}
                 icon={<ShieldCheckIcon/>}
                 className='px-1'
               >
@@ -100,29 +100,29 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
       header: 'datetime',
       cell: ({row}) => (
         <div className='grid grid-cols-[auto_1fr] gap-2 text-xs text-muted-foreground items-end'>
-          {row.original.status === AuctionStatus.PUBLISHED
-            ? (
-              <>
-                <CalendarIcon className='w-4 h-4 inline-block' />
-                <ProgressBar
-                  dateStart={row.original.date.start}
-                  dateEnd={row.original.date.end}
-                />
-                <CalendarXIcon className='w-4 h-4 inline-block' />
-                {formatDateTime(row.original.invoice.dueDate, locale)}
-              </>
-            ) : (
-              <>
-                <span className='flex gap-2 items-center'>
-                  <CalendarIcon className='w-4 h-4 inline-block' />
-                  {formatDateTime(row.original.date.start, locale)} <MoveRightIcon className='w-2 h-2' /> {formatDateTime(row.original.date.end, locale)}
-                </span>
-                <span className='text-xs text-muted-foreground flex items-center gap-2 justify-end'>
-                  <CalendarXIcon className='w-4 h-4 inline-block' />
-                  {formatDateTime(row.original.invoice.dueDate, locale)}
-                </span>
-              </>
-            )}
+          {row.original.date.start &&
+          // ? (
+          <>
+            <CalendarIcon className='w-4 h-4 inline-block' />
+            <ProgressBar
+              dateStart={row.original.date.start}
+              dateEnd={row.original.date.end}
+            />
+            <CalendarXIcon className='w-4 h-4 inline-block' />
+            {formatDateTime(row.original.invoice.dueDate, locale)}
+          </>
+            // ) : (
+            //   <>
+            //     <span className='flex gap-2 items-center'>
+            //       <CalendarIcon className='w-4 h-4 inline-block' />
+            //       {formatDateTime(row.original.date.start, locale)} <MoveRightIcon className='w-2 h-2' /> {formatDateTime(row.original.date.end, locale)}
+            //     </span>
+            //     <span className='text-xs text-muted-foreground flex items-center gap-2 justify-end'>
+            //       <CalendarXIcon className='w-4 h-4 inline-block' />
+            //       {formatDateTime(row.original.invoice.dueDate, locale)}
+            //     </span>
+            //   </>
+          }
         </div>
       )
     }

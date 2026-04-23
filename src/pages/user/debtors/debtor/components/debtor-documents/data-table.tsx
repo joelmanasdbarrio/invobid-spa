@@ -1,15 +1,16 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx'
+import type { Document } from '@/types/Document'
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
 import { FileIcon } from 'lucide-react'
 import { useState } from 'react'
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends Document, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   totalItems: number
 }
 
-export function DataTable<TData, TValue> ({
+export function DataTable<TData extends Document, TValue> ({
   columns,
   data,
   totalItems

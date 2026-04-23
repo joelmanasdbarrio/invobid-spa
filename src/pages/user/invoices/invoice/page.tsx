@@ -85,7 +85,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
   const {invoiceId} = useParams<{ invoiceId: string }>()
   const [invoice, setInvoice] = useState<Invoice | undefined>()
   const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
-  const [verifiedDebtors, setVerifiedDebtors] = useState<[Debtor]>()
+  const [verifiedDebtors, setVerifiedDebtors] = useState<Debtor[]>()
   const [debtorSearch, setDebtorSearch] = useState('')
   const [isLoadingDebtors, setIsLoadingDebtors] = useState(false)
 

@@ -3,19 +3,20 @@ import { DialogTrigger } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { cn } from '@/lib/utils'
+import type { Auction } from '@/types/Auction'
 import { InvestorType, type Investor } from '@/types/User'
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef, type VisibilityState } from '@tanstack/react-table'
 import { ListFilterIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends Auction, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[],
   totalItems: number
 }
 
-export function DataTable<TData, TValue> ({
+export function DataTable<TData extends Auction, TValue> ({
   columns,
   data,
   totalItems
@@ -82,7 +83,7 @@ export function DataTable<TData, TValue> ({
                 data-state={row.getIsSelected() && 'selected'}
                 className={
                   cn({
-                    'bg-red-600/10': row.original.deletedAt != null
+                    'bg-red-600/10': (row.original as Auction).deletedAt != null
                   })
                 }
               >

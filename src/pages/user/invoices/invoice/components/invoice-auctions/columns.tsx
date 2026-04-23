@@ -47,7 +47,10 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
     {
       accessorKey: 'date.start',
       header: 'Fecha de inicio',
-      cell: ({row}) => formatDateTime(row.original.date.start, locale)
+      cell: ({row}) => row.original.date.start ?
+        formatDateTime(row.original.date.start, locale) : (
+          <span className='text-sm text-gray-500'>Pendiente</span>
+        )
     },
     {
       accessorKey: 'date.end',
