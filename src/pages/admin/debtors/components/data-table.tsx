@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { DialogTrigger } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import type { Debtor } from '@/types/Debtor'
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
 import { ListFilterIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -71,7 +72,7 @@ export function DataTable<TData, TValue> ({
                 data-state={row.getIsSelected() && 'selected'}
                 className={
                   cn({
-                    'bg-red-600/10': row.original.deletedAt != null
+                    'bg-red-600/10': (row.original as Debtor).deletedAt != null
                   })
                 }
               >

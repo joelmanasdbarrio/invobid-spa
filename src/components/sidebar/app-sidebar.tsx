@@ -62,13 +62,15 @@ export function AppSidebar () {
         }
         <CommonSidebarContent />
       </SidebarContent>
-      <SidebarFooter>
-        <UserSidebarDropdown
-          name={loggedInUser?.name}
-          email={loggedInUser?.email}
-        />
-        <ModeToggle />
-      </SidebarFooter>
+      {loggedInUser && (
+        <SidebarFooter>
+          <UserSidebarDropdown
+            name={loggedInUser?.name}
+            email={loggedInUser?.email}
+          />
+          <ModeToggle />
+        </SidebarFooter>
+      )}
     </Sidebar>
   )
 }

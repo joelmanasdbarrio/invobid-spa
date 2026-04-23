@@ -2,21 +2,19 @@ import { ColorBadge } from '@/components/color-badge'
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getDebtorById, updateDebtorById } from '@/services/debtor.api'
 import { DebtorStatus, type Debtor } from '@/types/Debtor'
-import { DocumentType } from '@/types/Document'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CheckCheckIcon, CircleAlertIcon, ClockIcon, FileIcon, HandCoinsIcon, IdCardIcon, KeyRoundIcon, MailIcon, OctagonXIcon, PhoneIcon, RefreshCcwIcon, SaveIcon, UsersIcon } from 'lucide-react'
+import { CheckCheckIcon, CircleAlertIcon, ClockIcon, HandCoinsIcon, IdCardIcon, MailIcon, OctagonXIcon, PhoneIcon, RefreshCcwIcon, SaveIcon, UsersIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import z from 'zod'
-import DebtorDocuments from './components/debtor-documents/debtor-documents'
 import DebtorInvoices from './components/debtor-invoices/debtor-invoices'
 
 const validateFormSchema = z.object({
@@ -30,46 +28,46 @@ const baseFormSchema = z.object({
   phoneNumber: z.coerce.number<number>().min(6, 'El número de teléfono debe tener al menos 6 caracteres')
 })
 
-const documentFormSchema = z.object({
-  modelo111QuarterlyCsv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 111 trimestral')
-    .or(z.literal('')),
-  modelo111Quarterly: z.custom<FileList | undefined>()
-    .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío'),
-  modelo303QuarterlyCsv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 303 trimestral')
-    .or(z.literal('')),
-  modelo303Quarterly: z.custom<FileList | undefined>()
-    .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío'),
+// const documentFormSchema = z.object({
+//   modelo111QuarterlyCsv: z.string()
+//     .min(1, 'El CSV es obligatorio para el modelo 111 trimestral')
+//     .or(z.literal('')),
+//   modelo111Quarterly: z.custom<FileList | undefined>()
+//     .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío'),
+//   modelo303QuarterlyCsv: z.string()
+//     .min(1, 'El CSV es obligatorio para el modelo 303 trimestral')
+//     .or(z.literal('')),
+//   modelo303Quarterly: z.custom<FileList | undefined>()
+//     .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío'),
 
-  modelo111AnnualCsv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 111 anual')
-    .or(z.literal('')),
-  modelo111Annual: z.custom<FileList | undefined>()
-    .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío'),
-  modelo303AnnualCsv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 303 anual')
-    .or(z.literal('')),
-  modelo303Annual: z.custom<FileList | undefined>()
-    .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío')
-}).superRefine((data, ctx) => {
-  const pairs = [
-    { file: 'modelo111Quarterly', svc: 'modelo111QuarterlyCsv' },
-    { file: 'modelo303Quarterly', svc: 'modelo303QuarterlyCsv' },
-    { file: 'modelo111Annual', svc: 'modelo111AnnualCsv' },
-    { file: 'modelo303Annual', svc: 'modelo303AnnualCsv' }
-  ] as const
-  for (const { file, svc } of pairs) {
-    const hasFile = ((data[file] as FileList | undefined)?.length ?? 0) > 0
-    const hasSvc = !!data[svc]
-    if (hasFile && !hasSvc) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'El CSV es obligatorio', path: [svc] })
-    }
-    if (!hasFile && hasSvc) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'El documento es obligatorio', path: [file] })
-    }
-  }
-})
+//   modelo111AnnualCsv: z.string()
+//     .min(1, 'El CSV es obligatorio para el modelo 111 anual')
+//     .or(z.literal('')),
+//   modelo111Annual: z.custom<FileList | undefined>()
+//     .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío'),
+//   modelo303AnnualCsv: z.string()
+//     .min(1, 'El CSV es obligatorio para el modelo 303 anual')
+//     .or(z.literal('')),
+//   modelo303Annual: z.custom<FileList | undefined>()
+//     .refine((files) => !files || files.length === 0 || files[0].size > 0, 'El documento no puede estar vacío')
+// }).superRefine((data, ctx) => {
+//   const pairs = [
+//     { file: 'modelo111Quarterly', svc: 'modelo111QuarterlyCsv' },
+//     { file: 'modelo303Quarterly', svc: 'modelo303QuarterlyCsv' },
+//     { file: 'modelo111Annual', svc: 'modelo111AnnualCsv' },
+//     { file: 'modelo303Annual', svc: 'modelo303AnnualCsv' }
+//   ] as const
+//   for (const { file, svc } of pairs) {
+//     const hasFile = ((data[file] as FileList | undefined)?.length ?? 0) > 0
+//     const hasSvc = !!data[svc]
+//     if (hasFile && !hasSvc) {
+//       ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'El CSV es obligatorio', path: [svc] })
+//     }
+//     if (!hasFile && hasSvc) {
+//       ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'El documento es obligatorio', path: [file] })
+//     }
+//   }
+// })
 
 export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {debtorId} = useParams<{ debtorId: string }>()
@@ -97,20 +95,20 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
     }
   })
 
-  const documentForm = useForm<z.infer<typeof documentFormSchema>>({
-    resolver: zodResolver(documentFormSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      modelo111QuarterlyCsv: '',
-      modelo111Quarterly: undefined,
-      modelo303QuarterlyCsv: '',
-      modelo303Quarterly: undefined,
-      modelo111AnnualCsv: '',
-      modelo111Annual: undefined,
-      modelo303AnnualCsv: '',
-      modelo303Annual: undefined
-    }
-  })
+  // const documentForm = useForm<z.infer<typeof documentFormSchema>>({
+  //   resolver: zodResolver(documentFormSchema),
+  //   mode: 'onTouched',
+  //   defaultValues: {
+  //     modelo111QuarterlyCsv: '',
+  //     modelo111Quarterly: undefined,
+  //     modelo303QuarterlyCsv: '',
+  //     modelo303Quarterly: undefined,
+  //     modelo111AnnualCsv: '',
+  //     modelo111Annual: undefined,
+  //     modelo303AnnualCsv: '',
+  //     modelo303Annual: undefined
+  //   }
+  // })
 
   useEffect(() => {
     baseForm.reset({
@@ -148,28 +146,28 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
       .then(() => navigate(`/user/debtors/${debtorId}`))
   }
 
-  function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
-    if (!debtorId) return
-    const formData = new FormData()
-    if (data.modelo111Quarterly?.[0] && data.modelo111QuarterlyCsv) {
-      formData.append(DocumentType.TAX_111_QUARTERLY, data.modelo111Quarterly[0])
-      formData.append('modelo111QuarterlyCsv', data.modelo111QuarterlyCsv)
-    }
-    if (data.modelo303Quarterly?.[0] && data.modelo303QuarterlyCsv) {
-      formData.append(DocumentType.TAX_303_QUARTERLY, data.modelo303Quarterly[0])
-      formData.append('modelo303QuarterlyCsv', data.modelo303QuarterlyCsv)
-    }
-    if (data.modelo111Annual?.[0] && data.modelo111AnnualCsv) {
-      formData.append(DocumentType.TAX_111_ANNUAL, data.modelo111Annual[0])
-      formData.append('modelo111AnnualCsv', data.modelo111AnnualCsv)
-    }
-    if (data.modelo303Annual?.[0] && data.modelo303AnnualCsv) {
-      formData.append(DocumentType.TAX_303_ANNUAL, data.modelo303Annual[0])
-      formData.append('modelo303AnnualCsv', data.modelo303AnnualCsv)
-    }
-    updateDebtorById(debtorId, formData)
-      .then(res => setDebtor(res.data))
-  }
+  // function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
+  //   if (!debtorId) return
+  //   const formData = new FormData()
+  //   if (data.modelo111Quarterly?.[0] && data.modelo111QuarterlyCsv) {
+  //     formData.append(DocumentType.TAX_111_QUARTERLY, data.modelo111Quarterly[0])
+  //     formData.append('modelo111QuarterlyCsv', data.modelo111QuarterlyCsv)
+  //   }
+  //   if (data.modelo303Quarterly?.[0] && data.modelo303QuarterlyCsv) {
+  //     formData.append(DocumentType.TAX_303_QUARTERLY, data.modelo303Quarterly[0])
+  //     formData.append('modelo303QuarterlyCsv', data.modelo303QuarterlyCsv)
+  //   }
+  //   if (data.modelo111Annual?.[0] && data.modelo111AnnualCsv) {
+  //     formData.append(DocumentType.TAX_111_ANNUAL, data.modelo111Annual[0])
+  //     formData.append('modelo111AnnualCsv', data.modelo111AnnualCsv)
+  //   }
+  //   if (data.modelo303Annual?.[0] && data.modelo303AnnualCsv) {
+  //     formData.append(DocumentType.TAX_303_ANNUAL, data.modelo303Annual[0])
+  //     formData.append('modelo303AnnualCsv', data.modelo303AnnualCsv)
+  //   }
+  //   updateDebtorById(debtorId, formData)
+  //     .then(res => setDebtor(res.data))
+  // }
 
   function onSubmitValidate (data: z.infer<typeof validateFormSchema>) {
     if (!debtorId) return
@@ -350,7 +348,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
         </form>
       </Form>
 
-      <Form {...documentForm}>
+      {/* <Form {...documentForm}>
         <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
           <Card>
             <CardContent className='flex flex-col gap-4'>
@@ -565,19 +563,19 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
             Actualizar documentos
           </Button>
         </form>
-      </Form>
+      </Form> */}
 
       <Tabs defaultValue='invoices' className='gap-4'>
         <TabsList>
           <TabsTrigger value='invoices'>Facturas</TabsTrigger>
-          <TabsTrigger value='documents'>Documentos</TabsTrigger>
+          {/* <TabsTrigger value='documents'>Documentos</TabsTrigger> */}
         </TabsList>
         <TabsContent value='invoices'>
           <DebtorInvoices debtorId={debtorId} />
         </TabsContent>
-        <TabsContent value='documents'>
+        {/* <TabsContent value='documents'>
           <DebtorDocuments debtorId={debtorId} />
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
 
       {(debtor?.status && debtor.status !== DebtorStatus.VERIFIED) && (
