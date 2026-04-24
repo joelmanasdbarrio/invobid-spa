@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button.tsx'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
-import { DataTable } from '@/pages/admin/users/user/components/user-invoices/data-table'
+import { DataTable } from '@/pages/admin/users/user/components/user-auctions/data-table'
 import { getAuctions } from '@/services/auction.api'
 import type { Auction } from '@/types/Auction'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'

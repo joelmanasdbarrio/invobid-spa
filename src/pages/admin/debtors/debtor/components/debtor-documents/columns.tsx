@@ -1,9 +1,8 @@
-import { ColorBadge } from '@/components/color-badge'
 import { Button } from '@/components/ui/button.tsx'
 import { useLocale } from '@/hooks/use-locale'
 import { formatDateTime } from '@/lib/format-date'
 import { downloadDocument } from '@/services/document.api.ts'
-import { DocumentType, type Document } from '@/types/Document.ts'
+import { type Document } from '@/types/Document.ts'
 import type { ColumnDef } from '@tanstack/react-table'
 import { DownloadIcon } from 'lucide-react'
 import { useMemo } from 'react'
@@ -30,40 +29,40 @@ export function useDocumentColumns (): ColumnDef<Document>[] {
       accessorKey: 'title',
       header: 'Título'
     },
-    {
-      accessorKey: 'type',
-      header: 'Tipo de documento',
-      cell: ({row}) => {
-        switch (row.original.type) {
-          case DocumentType.TAX_111_QUARTERLY:
-            return (
-              <ColorBadge color='blue'>
-                Modelo 111 trimestral
-              </ColorBadge>
-            )
-          case DocumentType.TAX_111_ANNUAL:
-            return (
-              <ColorBadge color='green'>
-                Modelo 111 anual
-              </ColorBadge>
-            )
-          case DocumentType.TAX_303_QUARTERLY:
-            return (
-              <ColorBadge color='blue'>
-                Modelo 303 trimestral
-              </ColorBadge>
-            )
-          case DocumentType.TAX_303_ANNUAL:
-            return (
-              <ColorBadge color='green'>
-                Modelo 303 anual
-              </ColorBadge>
-            )
-          default:
-            return row.original.type
-        }
-      }
-    },
+    // {
+    //   accessorKey: 'type',
+    //   header: 'Tipo de documento',
+    //   cell: ({row}) => {
+    //     switch (row.original.type) {
+    //       case DocumentType.TAX_111_QUARTERLY:
+    //         return (
+    //           <ColorBadge color='blue'>
+    //             Modelo 111 trimestral
+    //           </ColorBadge>
+    //         )
+    //       case DocumentType.TAX_111_ANNUAL:
+    //         return (
+    //           <ColorBadge color='green'>
+    //             Modelo 111 anual
+    //           </ColorBadge>
+    //         )
+    //       case DocumentType.TAX_303_QUARTERLY:
+    //         return (
+    //           <ColorBadge color='blue'>
+    //             Modelo 303 trimestral
+    //           </ColorBadge>
+    //         )
+    //       case DocumentType.TAX_303_ANNUAL:
+    //         return (
+    //           <ColorBadge color='green'>
+    //             Modelo 303 anual
+    //           </ColorBadge>
+    //         )
+    //       default:
+    //         return row.original.type
+    //     }
+    //   }
+    // },
     {
       accessorKey: 'value',
       header: 'Valor'
