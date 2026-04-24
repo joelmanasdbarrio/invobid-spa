@@ -57,7 +57,25 @@ npm run lint       # Lint
 
 ## Production
 
-The SPA is **not deployed standalone**. In production it is built and served automatically as part of the `invobid-api` Docker Compose setup — nginx serves the compiled static files and reverse-proxies `/api/` and `/socket.io/` to the NestJS container.
+The SPA is **not deployed standalone**. In production a pre-built Docker image is published to GitHub Container Registry and served by nginx, which also reverse-proxies `/api/` and `/socket.io/` to the NestJS container.
 
-See [invobid-api/README.md](../invobid-api/README.md) for the full production deployment guide.
+### Image publishing
+
+Images are built and pushed by GitHub Actions (`.github/workflows/ci.yml`) on two events:
+
+| Event | Image tag produced |
+|---|---|
+| Push to `release/vX.Y.Z` branch | `ghcr.io/joelmanasdbarrio/invobid-spa:vX.Y.Z-rc.N` |
+| Push of `vX.Y.Z` git tag | `ghcr.io/joelmanasdbarrio/invobid-spa:vX.Y.Z` + `:latest` |
+
+The publish job only runs after unit tests pass.
+
+The production `VITE_SOCKET_URL` value is read from a GitHub Actions repository variable. Set it once in the repo settings:
+**Settings → Secrets and variables → Actions → Variables → New repository variable**
+- Name: `VITE_SOCKET_URL`
+- Value: `https://invobid.com`
+
+All other `VITE_*` values are hardcoded in the workflow (they are already public in the compose configuration).
+
+See [invobid-api/README.md](../invobid-api/README.md) for the full server deployment guide.
 ```
