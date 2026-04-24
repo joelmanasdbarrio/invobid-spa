@@ -1,73 +1,63 @@
-# React + TypeScript + Vite
+# Invobid SPA
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite front-end for the Invobid invoice bidding platform.
 
-Currently, two official plugins are available:
+## Local development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Prerequisites
 
-## React Compiler
+- [Node.js 22+](https://nodejs.org/)
+- [invobid-api](../invobid-api) running locally (see its README)
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+### Setup
 
-## Expanding the ESLint configuration
+1. Install dependencies:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```sh
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Copy the environment template:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```sh
+cp .env.template .env
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+The default values in `.env.template` point to the local API and can be used as-is.
+
+3. Start the development server with HMR:
+
+```sh
+npm run dev
+```
+
+App: [`http://localhost:5173`](http://localhost:5173)
+
+### Environment variables
+
+All variables are baked into the static build at compile time (`import.meta.env`). Changes require a rebuild.
+
+| Variable | Default | Description |
+|---|---|---|
+| `VITE_BASE_URL` | `http://localhost:3000/api/v1` | API base URL |
+| `VITE_SOCKET_URL` | `http://localhost:3000` | Socket.IO server URL |
+| `VITE_APP_NAME` | `!nvobid` | Application display name |
+| `VITE_EXT_RATING_PROVIDER` | `Einforma` | External credit rating provider name |
+| `VITE_SMALLEST_BID_INCREMENT_PERCENTAGE` | `0.1` | Minimum bid increment percentage |
+
+### Other commands
+
+```sh
+npm run build      # Production build (outputs to dist/)
+npm run test       # Run unit tests
+npm run lint       # Lint
+```
+
+---
+
+## Production
+
+The SPA is **not deployed standalone**. In production it is built and served automatically as part of the `invobid-api` Docker Compose setup — nginx serves the compiled static files and reverse-proxies `/api/` and `/socket.io/` to the NestJS container.
+
+See [invobid-api/README.md](../invobid-api/README.md) for the full production deployment guide.
 ```
