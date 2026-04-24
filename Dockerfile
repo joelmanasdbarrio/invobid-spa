@@ -1,0 +1,26 @@
+# Stage 1: Build
+FROM node:22-alpine AS builder
+WORKDIR /app
+
+ARG VITE_BASE_URL=/api/v1
+ARG VITE_SOCKET_URL
+ARG VITE_APP_NAME=!nvobid
+ARG VITE_EXT_RATING_PROVIDER=Einforma
+ARG VITE_SMALLEST_BID_INCREMENT_PERCENTAGE=0.1
+
+ENV VITE_BASE_URL=$VITE_BASE_URL \
+    VITE_SOCKET_URL=$VITE_SOCKET_URL \
+    VITE_APP_NAME=$VITE_APP_NAME \
+    VITE_EXT_RATING_PROVIDER=$VITE_EXT_RATING_PROVIDER \
+    VITE_SMALLEST_BID_INCREMENT_PERCENTAGE=$VITE_SMALLEST_BID_INCREMENT_PERCENTAGE
+
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Stage 2: Serve
+FROM nginx:1.27-alpine AS production
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80 443
