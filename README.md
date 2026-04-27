@@ -78,4 +78,20 @@ The production `VITE_SOCKET_URL` value is read from a GitHub Actions repository 
 All other `VITE_*` values are hardcoded in the workflow (they are already public in the compose configuration).
 
 See [invobid-api/README.md](../invobid-api/README.md) for the full server deployment guide.
-```
+
+### RC image cleanup
+
+To avoid accumulating old release-candidate container versions in GHCR, a scheduled workflow runs from [.github/workflows/cleanup-old-images.yml](.github/workflows/cleanup-old-images.yml).
+
+| Trigger | Behavior |
+|---|---|
+| Daily schedule (`0 6 * * *`) | Deletes `invobid-api` container versions tagged like `vX.Y.Z-rc.N` when older than `RC_RETENTION_DAYS` |
+| Manual trigger (`workflow_dispatch`) | Allows on-demand cleanup run from the Actions tab |
+
+Configure retention in repository settings as an Actions variable:
+
+- Name: `RC_RETENTION_DAYS`
+- Example value: `7`
+- Fallback behavior: defaults to `7` if the variable is missing or invalid
+
+Only RC-tagged versions are targeted. Stable release tags such as `vX.Y.Z` and `latest` are not affected.
