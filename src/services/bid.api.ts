@@ -6,7 +6,7 @@ const base_url = import.meta.env.VITE_BASE_URL
 
 export const getBids = async (queryParams?: Record<string, string>) => {
   const queryString = new URLSearchParams(queryParams).toString()
-  return fetchApi<PaginatedResponse<Bid[]>>(`${base_url}/bid?${queryString}`, {
+  return fetchApi<PaginatedResponse<Bid[]>>(`${base_url}/bids?${queryString}`, {
     method: 'GET'
   }, {
     reject: 'Error al cargar las pujas'
