@@ -111,18 +111,29 @@ export default function MarketplaceAuctionsPage () {
   }, [searchParams, currentPage, currentLimit, loggedInUser])
 
   useEffect(() => {
+    if (!loggedInUser) return
     const socket = connectSocketIO('/auctions')
     socketRef.current = socket
 
-    socket.on('auction-bid-update', ({ auctionId, bid }: { auctionId: string; bid: Bid }) => {
-      setData(prev => prev.map(a => a.id === auctionId ? { ...a, bids: [bid] } : a))
+    socket.on('auction-bid-update', async ({ auctionId }: { auctionId: string }) => {
+      const bids: Bid[] = []
+
+      const latestBid = await getBids({ auctionId, page: '1', limit: '1' }).then(res => res.data[0])
+      if (latestBid) bids.push(latestBid)
+
+      if (latestBid?.investor?.id !== loggedInUser.id) {
+        const investorLatestBid = await getBids({ auctionId, investorId: loggedInUser.id, page: '1', limit: '1' }).then(res => res.data[0])
+        if (investorLatestBid && investorLatestBid.id !== latestBid?.id) bids.push(investorLatestBid)
+      }
+
+      setData(prev => prev.map(a => a.id === auctionId ? { ...a, bids } : a))
     })
 
     return () => {
       socket.disconnect()
       socketRef.current = null
     }
-  }, [])
+  }, [loggedInUser])
 
   function handleClear () {
     form.reset({
