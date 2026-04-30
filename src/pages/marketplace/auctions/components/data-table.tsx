@@ -44,7 +44,7 @@ export function DataTable<TData extends Auction, TValue> ({
           </Button>
         </DialogTrigger>
       </div>
-      <div className='w-full'>
+      <div className='w-full flex justify-center'>
         {table.getRowModel().rows?.length ? (
           <div className='grid 2xl:grid-cols-2 gap-4'>
             {table.getRowModel().rows.map(row => (

@@ -29,7 +29,7 @@ const formSchema = z.object({
   hasBidded: z.boolean().default(false).optional()
 })
 
-export default function MarketplaceAvailableAuctionsPage () {
+export default function MarketplaceAuctionsPage () {
   const auctionColumns = useAuctionColumns()
   const [searchParams, setSearchParams] = useSearchParams()
 

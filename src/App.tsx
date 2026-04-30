@@ -14,7 +14,8 @@ import AdminUserPage from './pages/admin/users/user/page'
 import DashboardPage from './pages/dashboard/page'
 import Login from './pages/login/page'
 import MarketplaceAuctionPage from './pages/marketplace/auctions/auction/page'
-import MarketplaceAvailableAuctionsPage from './pages/marketplace/auctions/page'
+import MarketplaceAuctionsPage from './pages/marketplace/auctions/page'
+import MarketplaceInvoicesPage from './pages/marketplace/invoices/page'
 import NotFoundPage from './pages/not-found'
 import ProfilePage from './pages/profile/page'
 import Register from './pages/register/page'
@@ -85,8 +86,12 @@ function App () {
 
           {/* Marketplace */}
           <Route path='/marketplace/auctions'>
-            <Route index element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Subastas activas', href: '/marketplace/auctions' }]}><MarketplaceAvailableAuctionsPage /></MainLayout></ProtectedRoute>} />
+            <Route index element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Subastas activas', href: '/marketplace/auctions' }]}><MarketplaceAuctionsPage /></MainLayout></ProtectedRoute>} />
             <Route path=':auctionId' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Subastas activas', href: '/marketplace/auctions' }, { label: lastBreadcrumb, href: '/marketplace/auctions/:auctionId' }]}><MarketplaceAuctionPage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
+          </Route>
+
+          <Route path='/marketplace/invoices'>
+            <Route index element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Facturas compradas', href: '/marketplace/invoices' }]}><MarketplaceInvoicesPage /></MainLayout></ProtectedRoute>} />
           </Route>
 
           <Route path='*' element={<ProtectedRoute><MainLayout><NotFoundPage /></MainLayout></ProtectedRoute>} />
