@@ -12,6 +12,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/c
 import { useLogout } from '@/hooks/use-logout'
 import { CircleUserIcon, EllipsisVerticalIcon, LogOutIcon, SettingsIcon } from 'lucide-react'
 import { Link } from 'react-router'
+import { ThemeToggle } from '../dark-mode/mode-toggle'
 
 export default function UserSidebarDropdown ({ name, email }: {name: string, email: string
 }) {
@@ -68,6 +69,9 @@ export default function UserSidebarDropdown ({ name, email }: {name: string, ema
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <SettingsIcon /> Configuración
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <ThemeToggle />
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
