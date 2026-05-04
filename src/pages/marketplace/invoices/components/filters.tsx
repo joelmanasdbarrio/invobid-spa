@@ -32,7 +32,7 @@ export default function MarketplaceInvoiceFilters (
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup className='grid grid-cols-1 md:grid-cols-4 2xl:grid-cols-8 gap-4'>
+            <FieldGroup className='grid md:grid-cols-4 xl:grid-cols-8 gap-4'>
               <Controller
                 name='invoiceSvc'
                 control={form.control}
@@ -225,7 +225,7 @@ export default function MarketplaceInvoiceFilters (
                   </Field>
                 )}
               />
-              <div className='xl:col-start-4 2xl:col-start-8 justify-end items-end flex gap-2'>
+              <div className='md:col-start-4 xl:col-start-8 justify-end items-end flex gap-2'>
                 <Button type='submit'>Filtrar</Button>
                 <Button type='button' variant='outline' onClick={handleClear}>Limpiar</Button>
               </div>
