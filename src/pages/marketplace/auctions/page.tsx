@@ -2,8 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
-import { connectSocketIO } from '@/lib/socket.io'
-import { getAuctions } from '@/services/auction.api'
+import { connectAuctionSocket, getAuctions } from '@/services/auction.api'
 import { getBids } from '@/services/bid.api'
 import { AuctionStatus, type Auction } from '@/types/Auction'
 import type { Bid } from '@/types/Bid'
@@ -112,10 +111,7 @@ export default function MarketplaceAuctionsPage () {
 
   useEffect(() => {
     if (!loggedInUser) return
-    const socket = connectSocketIO('/auctions')
-    socketRef.current = socket
-
-    socket.on('auction-bid-update', async ({ auctionId }: { auctionId: string }) => {
+    const socket = connectAuctionSocket(async ({ auctionId, newEndDate }) => {
       const bids: Bid[] = []
 
       const latestBid = await getBids({ auctionId, page: '1', limit: '1' }).then(res => res.data[0])
@@ -126,8 +122,14 @@ export default function MarketplaceAuctionsPage () {
         if (investorLatestBid && investorLatestBid.id !== latestBid?.id) bids.push(investorLatestBid)
       }
 
-      setData(prev => prev.map(a => a.id === auctionId ? { ...a, bids } : a))
+      setData(prev => prev.map(a => {
+        if (a.id !== auctionId) return a
+        const updated = { ...a, bids }
+        if (newEndDate) updated.date = { ...a.date, end: newEndDate }
+        return updated
+      }))
     })
+    socketRef.current = socket
 
     return () => {
       socket.disconnect()

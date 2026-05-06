@@ -8,8 +8,7 @@ import { useLocale } from '@/hooks/use-locale'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { calcDiscount, calcProfitability, invertProfitability } from '@/lib/auction-metrics'
 import { formatCurrency } from '@/lib/format-currency'
-import { connectSocketIO, socketEmit } from '@/lib/socket.io'
-import { getBids } from '@/services/bid.api'
+import { connectBidSocket, getBids, placeBid } from '@/services/bid.api'
 import { AuctionStatus, type Auction } from '@/types/Auction'
 import type { Bid } from '@/types/Bid'
 import { EyeIcon, HistoryIcon, PercentIcon, ShieldCheckIcon, TrendingUpIcon, XIcon } from 'lucide-react'
@@ -18,7 +17,7 @@ import type { Socket } from 'socket.io-client'
 import { useBidColumns } from './columns'
 import { DataTable } from './data-table'
 
-export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined}) {
+export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auction: Auction | undefined; onAuctionExtended?: (newEndDate: string) => void }) {
   const { locale } = useLocale()
   const loggedInUser = useLoggedInUser()
 
@@ -56,21 +55,17 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
   useEffect(() => {
     if (!auction?.id) return
 
-    const s = connectSocketIO('/auctions')
-    socketRef.current = s
-
-    s.on('viewer-count', (count: number) => setViewerCount(count))
-    s.on('new-bid', (newBid: Bid) => {
-      setBids((prev) => [newBid, ...prev])
-      setTotalItems((prev) => prev + 1)
+    const socket = connectBidSocket(auction.id, {
+      onViewerCount: (count) => setViewerCount(count),
+      onNewBid: (newBid) => {
+        setBids((prev) => [newBid, ...prev])
+        setTotalItems((prev) => prev + 1)
+      }
     })
-
-    s.on('connect', () => {
-      s.emit('join-auction', { auctionId: auction.id })
-    })
+    socketRef.current = socket
 
     return () => {
-      s.disconnect()
+      socket.disconnect()
       socketRef.current = null
     }
   }, [auction?.id])
@@ -134,8 +129,17 @@ export function MarketplaceAuctionBids ({auction}: {auction: Auction | undefined
 
   function handlePlaceBid () {
     if (!socketRef.current || !auction?.id) return
-    socketEmit(socketRef.current, 'place-bid', { auctionId: auction.id, amount: Number(bidInput) }, { reject: 'Error al realizar la oferta' })
-      .then(() => clearInputs())
+    placeBid(socketRef.current, auction.id, Number(bidInput))
+      .then(() => {
+        clearInputs()
+        if (onAuctionExtended && auction.date.end) {
+          const extensionMs = Number(import.meta.env.VITE_AUCTION_EXTENSION_MINUTES) * 60 * 1000
+          const endTime = new Date(auction.date.end).getTime()
+          if (endTime - Date.now() <= extensionMs) {
+            onAuctionExtended(new Date(Date.now() + extensionMs).toISOString())
+          }
+        }
+      })
       .catch(() => { setBidInputInvalid(true); setProfitabilityInputInvalid(true) })
   }
 
