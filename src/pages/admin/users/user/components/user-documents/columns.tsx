@@ -1,3 +1,4 @@
+import { DocumentPreview } from '@/components/document-preview'
 import { Button } from '@/components/ui/button.tsx'
 import { useLocale } from '@/hooks/use-locale'
 import { formatDateTime } from '@/lib/format-date'
@@ -18,12 +19,15 @@ export function useDocumentColumns (): ColumnDef<Document>[] {
         const extension = row.original.filename.split('.').pop()
         const filename = `${row.original.title}.${extension}`
         return (
-          <Button variant='ghost' onClick={() => downloadDocument(row.original.id, filename)}>
-            <DownloadIcon className='w-4 h-4' />
-          </Button>
+          <div className='flex items-center gap-1'>
+            <DocumentPreview document={row.original} triggerOnly />
+            <Button variant='ghost' onClick={() => downloadDocument(row.original.id, filename)}>
+              <DownloadIcon className='w-4 h-4' />
+            </Button>
+          </div>
         )
       },
-      size: 10
+      size: 20
     },
     {
       accessorKey: 'title',

@@ -15,6 +15,7 @@ import DashboardPage from './pages/dashboard/page'
 import Login from './pages/login/page'
 import MarketplaceAuctionPage from './pages/marketplace/auctions/auction/page'
 import MarketplaceAuctionsPage from './pages/marketplace/auctions/page'
+import MarketplaceInvoicePage from './pages/marketplace/invoices/invoice/page'
 import MarketplaceInvoicesPage from './pages/marketplace/invoices/page'
 import NotFoundPage from './pages/not-found'
 import ProfilePage from './pages/profile/page'
@@ -92,6 +93,7 @@ function App () {
 
           <Route path='/marketplace/invoices'>
             <Route index element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Facturas compradas', href: '/marketplace/invoices' }]}><MarketplaceInvoicesPage /></MainLayout></ProtectedRoute>} />
+            <Route path=':invoiceId' element={<ProtectedRoute userType={UserType.INVESTOR}><MainLayout breadcrumbs={[{ label: 'Dashboard', href: '/' }, { label: 'Facturas compradas', href: '/marketplace/invoices' }, { label: lastBreadcrumb, href: '/marketplace/invoices/:invoiceId' }]}><MarketplaceInvoicePage setLastBreadcrumb={setLastBreadcrumb} /></MainLayout></ProtectedRoute>} />
           </Route>
 
           <Route path='*' element={<ProtectedRoute><MainLayout><NotFoundPage /></MainLayout></ProtectedRoute>} />

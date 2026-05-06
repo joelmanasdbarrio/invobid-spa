@@ -11,7 +11,7 @@ export type Invoice = {
   auctions: Auction[];
   status: InvoiceStatus;
   lastCommunication?: string;
-  document: Document;
+  documents: Document[];
   debtor: Debtor;
   amount: number;
   currency: Currency;
