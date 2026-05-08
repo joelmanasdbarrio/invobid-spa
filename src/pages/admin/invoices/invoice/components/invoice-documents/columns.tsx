@@ -20,7 +20,7 @@ export function useDocumentColumns (): ColumnDef<Document>[] {
         const filename = `${row.original.title}.${extension}`
         return (
           <div className='flex items-center gap-1'>
-            <DocumentPreview document={row.original} triggerOnly />
+            <DocumentPreview document={row.original} triggerOnly protectedDocument />
             <Button variant='ghost' onClick={() => downloadDocument(row.original.id, filename)}>
               <DownloadIcon className='w-4 h-4' />
             </Button>
