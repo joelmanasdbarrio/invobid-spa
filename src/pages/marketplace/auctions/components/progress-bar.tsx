@@ -25,7 +25,7 @@ export function ProgressBar ({ dateStart, dateEnd }: { dateStart: string; dateEn
 
   return (
     <div className='flex flex-col gap-1 w-full'>
-      <div className='flex items-center justify-between text-xs text-muted-foreground'>
+      <div className='flex items-center justify-between text-center text-xs text-muted-foreground'>
         <span title={`Fecha de inicio ${formatDateTime(dateStart, locale)}`}>{formatDateTime(dateStart, locale)}</span>
         <MoveRightIcon className='w-2 h-2' />
         {(end - now) < 0

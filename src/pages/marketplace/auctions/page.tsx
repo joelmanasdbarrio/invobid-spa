@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
-import { connectSocketIO } from '@/lib/socket.io'
-import { getAuctions } from '@/services/auction.api'
+import useLoggedInUser from '@/hooks/use-loggedInUser'
+import { connectAuctionSocket, getAuctions } from '@/services/auction.api'
 import { getBids } from '@/services/bid.api'
 import { AuctionStatus, type Auction } from '@/types/Auction'
 import type { Bid } from '@/types/Bid'
@@ -24,10 +24,11 @@ const formSchema = z.object({
   maxAmount: z.number().min(0).optional(),
   minRating: z.number().min(0).optional(),
   minDiscount: z.number().min(0).optional(),
-  minProfitability: z.number().min(0).optional()
+  minProfitability: z.number().min(0).optional(),
+  hasBidded: z.boolean().default(false).optional()
 })
 
-export default function MarketplaceAvailableAuctionsPage () {
+export default function MarketplaceAuctionsPage () {
   const auctionColumns = useAuctionColumns()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -38,7 +39,8 @@ export default function MarketplaceAvailableAuctionsPage () {
     maxAmount: searchParams.get('maxAmount') ? Number(searchParams.get('maxAmount')) : undefined,
     minRating: searchParams.get('minRating') ? Number(searchParams.get('minRating')) : undefined,
     minDiscount: searchParams.get('minDiscount') ? Number(searchParams.get('minDiscount')) : undefined,
-    minProfitability: searchParams.get('minProfitability') ? Number(searchParams.get('minProfitability')) : undefined
+    minProfitability: searchParams.get('minProfitability') ? Number(searchParams.get('minProfitability')) : undefined,
+    hasBidded: searchParams.get('hasBidded') ? searchParams.get('hasBidded') === 'true' : undefined
   }), [searchParams])
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -70,11 +72,17 @@ export default function MarketplaceAvailableAuctionsPage () {
     setSearchParams(newParams)
   }
 
+  const loggedInUser = useLoggedInUser()
   useEffect(() => {
+    if (!loggedInUser) return
     const filters: Record<string, string> = {}
     searchParams.forEach((value, key) => {
       if (key !== 'page' && key !== 'limit') {
-        filters[key] = value
+        if (value === 'true') {
+          filters[key] = '1'
+        } else if (value !== 'false') {
+          filters[key] = value
+        }
       }
     })
 
@@ -85,30 +93,49 @@ export default function MarketplaceAvailableAuctionsPage () {
       limit: String(currentLimit)
     }).then(async res => {
       const auctions = res.data
-      const bidResults = await Promise.all(
-        auctions.map(a => getBids({ auctionId: a.id, page: '1', limit: '1' }))
-      )
-      bidResults.forEach((bidRes, i) => {
-        auctions[i].bids = bidRes.data
-      })
+
+      await Promise.all(auctions.map(async a => {
+        a.bids = []
+
+        const latestBid = await getBids({ auctionId: a.id, page: '1', limit: '1' }).then(res => res.data[0])
+        if (latestBid) a.bids.push(latestBid)
+
+        if (latestBid?.investor?.id === loggedInUser.id) return
+        const investorLatestBid = await getBids({ auctionId: a.id, investorId: loggedInUser.id, page: '1', limit: '1' }).then(res => res.data[0])
+        if (investorLatestBid && investorLatestBid.id !== latestBid?.id) a.bids.push(investorLatestBid)
+      }))
       setData(auctions)
       setTotalItems(res._metadata.total)
     })
-  }, [searchParams, currentPage, currentLimit])
+  }, [searchParams, currentPage, currentLimit, loggedInUser])
 
   useEffect(() => {
-    const socket = connectSocketIO('/auctions')
-    socketRef.current = socket
+    if (!loggedInUser) return
+    const socket = connectAuctionSocket(async ({ auctionId, newEndDate }) => {
+      const bids: Bid[] = []
 
-    socket.on('auction-bid-update', ({ auctionId, bid }: { auctionId: string; bid: Bid }) => {
-      setData(prev => prev.map(a => a.id === auctionId ? { ...a, bids: [bid] } : a))
+      const latestBid = await getBids({ auctionId, page: '1', limit: '1' }).then(res => res.data[0])
+      if (latestBid) bids.push(latestBid)
+
+      if (latestBid?.investor?.id !== loggedInUser.id) {
+        const investorLatestBid = await getBids({ auctionId, investorId: loggedInUser.id, page: '1', limit: '1' }).then(res => res.data[0])
+        if (investorLatestBid && investorLatestBid.id !== latestBid?.id) bids.push(investorLatestBid)
+      }
+
+      setData(prev => prev.map(a => {
+        if (a.id !== auctionId) return a
+        const updated = { ...a, bids }
+        if (newEndDate) updated.date = { ...a.date, end: newEndDate }
+        return updated
+      }))
     })
+    socketRef.current = socket
 
     return () => {
       socket.disconnect()
       socketRef.current = null
     }
-  }, [])
+  }, [loggedInUser])
 
   function handleClear () {
     form.reset({
@@ -118,7 +145,8 @@ export default function MarketplaceAvailableAuctionsPage () {
       maxAmount: undefined,
       minRating: undefined,
       minDiscount: undefined,
-      minProfitability: undefined
+      minProfitability: undefined,
+      hasBidded: undefined
     })
     setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
   }

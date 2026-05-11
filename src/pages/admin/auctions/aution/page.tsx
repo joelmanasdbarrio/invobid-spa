@@ -667,7 +667,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
 
                           {watchedStatus === AuctionStatus.FINISHED && (
                             <DialogDescription>
-                              Al finalizar la subasta, se fijarán los valores de cierre (precio, descuento y rentabilidad) basados en la puja ganadora y se transferirá la propiedad de la factura al inversor ganador: <b>{`${auction.bids[0].investor.companyName} (${auction.bids[0].investor.taxId})`}</b>.
+                              Al finalizar la subasta, se fijarán los valores de cierre (precio, descuento y rentabilidad) basados en la puja ganadora y se transferirá la propiedad de la factura al inversor ganador: <b>{`${auction.bids[0].investor!.companyName} (${auction.bids[0].investor!.taxId})`}</b>.
                             </DialogDescription>
                           )}
 

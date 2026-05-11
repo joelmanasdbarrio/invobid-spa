@@ -24,3 +24,17 @@ export const downloadDocument = async (documentId: string, filename: string) => 
     }
   )
 }
+
+export const previewDocument = async (documentId: string): Promise<string> => {
+  const response = await fetch(`${base_url}/documents/${documentId}/preview`, {
+    method: 'GET',
+    credentials: 'include'
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to load document preview: ${response.status}`)
+  }
+
+  const blob = await response.blob()
+  return URL.createObjectURL(blob)
+}

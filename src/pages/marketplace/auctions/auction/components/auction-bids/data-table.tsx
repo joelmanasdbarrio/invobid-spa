@@ -71,7 +71,7 @@ export function DataTable<TData extends Bid, TValue> ({
           {table.getRowModel().rows.length ? (
             <>
               {table.getRowModel().rows.map((row, i) => (
-                <TableRow key={row.id} className='first-of-type:bg-yellow-500/15 min-h-24'>
+                <TableRow key={row.id} className={'min-h-24' + ' ' + (row.original.investor !== null && 'bg-yellow-500/15')}>
                   {row.getVisibleCells().map((cell, j) => (
                     <TableCell key={cell.id}>
                       {(i === 0 && j === 0) && <CrownIcon className='size-4 text-yellow-600' />}

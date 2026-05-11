@@ -1,6 +1,8 @@
 import fetchApi from '@/lib/fetchApi'
+import { connectSocketIO } from '@/lib/socket.io'
 import { type Auction } from '@/types/Auction'
 import { type PaginatedResponse, type ResponseOK } from '@/types/Response'
+import type { Socket } from 'socket.io-client'
 
 const base_url = import.meta.env.VITE_BASE_URL
 
@@ -66,4 +68,12 @@ export const countAuctions = async (queryParams?: Record<string, string>) => {
   return fetchApi<ResponseOK<number>>(`${base_url}/auctions/lookup/count?${queryString}`, {
     method: 'GET'
   })
+}
+
+export const connectAuctionSocket = (
+  onBidUpdate: (data: { auctionId: string; newEndDate: string | null }) => void
+): Socket => {
+  const socket = connectSocketIO('/auctions')
+  socket.on('auction-bid-update', onBidUpdate)
+  return socket
 }
