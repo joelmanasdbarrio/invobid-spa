@@ -1,3 +1,4 @@
+import { ThemeToggle } from '@/components/dark-mode/mode-toggle'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -12,8 +13,6 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/c
 import { useLogout } from '@/hooks/use-logout'
 import { CircleUserIcon, EllipsisVerticalIcon, LogOutIcon, SettingsIcon } from 'lucide-react'
 import { Link } from 'react-router'
-import { ThemeToggle } from '../dark-mode/mode-toggle'
-
 export default function UserSidebarDropdown ({ name, email }: {name: string, email: string
 }) {
   const { isMobile } = useSidebar()
@@ -26,7 +25,7 @@ export default function UserSidebarDropdown ({ name, email }: {name: string, ema
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size='lg'
-              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
+              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground p-0'
             >
               <Avatar className='h-8 w-8 rounded-lg grayscale'>
                 <AvatarFallback className='rounded-lg'>{name.split(' ')[0].charAt(0) + name.split(' ')[name.split(' ').length - 1].charAt(0)}</AvatarFallback>

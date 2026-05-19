@@ -1,4 +1,3 @@
-import { AppSidebar } from '@/components/sidebar/app-sidebar.tsx'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,6 +10,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbS
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
+import { AppSidebar } from '@/layouts/components/app-sidebar'
 import { type Investor, InvestorStatus, UserType } from '@/types/User'
 import { AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import { CircleAlertIcon, ClockIcon, OctagonXIcon } from 'lucide-react'

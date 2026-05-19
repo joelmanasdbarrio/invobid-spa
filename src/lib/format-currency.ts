@@ -6,6 +6,6 @@
  * @param currency - ISO 4217 currency code (e.g. "EUR", "USD"). Defaults to "EUR".
  * @returns Formatted currency string (e.g. "1.234,56 €" for es-ES/EUR, "$1,234.56" for en-US/USD)
  */
-export function formatCurrency (amount: number, locale: string, currency = 'EUR'): string {
+export function formatCurrency (amount: number, locale?: string, currency: string = 'EUR'): string {
   return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount)
 }

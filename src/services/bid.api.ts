@@ -33,6 +33,21 @@ export const connectBidSocket = (
   return socket
 }
 
+export const connectBalanceSocket = (
+  handlers: {
+    onBalanceUpdate: (reservedBalance: number) => void
+  }
+): Socket => {
+  const socket = connectSocketIO('/auctions')
+
+  socket.on('connect', () => socket.emit('join-balance'))
+  socket.on('balance-update', ({ reservedBalance }: { reservedBalance: number }) =>
+    handlers.onBalanceUpdate(reservedBalance)
+  )
+
+  return socket
+}
+
 export const placeBid = (socket: Socket, auctionId: string, amount: number): Promise<void> => {
   return socketEmit(socket, 'place-bid', { auctionId, amount }, { reject: 'Error al realizar la oferta' })
 }
