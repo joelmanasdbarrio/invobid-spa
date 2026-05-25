@@ -1,3 +1,4 @@
+import type { Auction } from './Auction'
 import type { Debtor } from './Debtor'
 import type { Document } from './Document'
 import type { Investor } from './User'
@@ -7,9 +8,10 @@ export type Invoice = {
   svc: string;
   sellerInvestor: Investor;
   buyerInvestor?: Investor;
+  auctions: Auction[];
   status: InvoiceStatus;
   lastCommunication?: string;
-  document: Document;
+  documents: Document[];
   debtor: Debtor;
   amount: number;
   currency: Currency;

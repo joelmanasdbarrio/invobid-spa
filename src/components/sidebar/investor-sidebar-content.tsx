@@ -22,8 +22,8 @@ import { Link, useLocation } from 'react-router'
 
 export function InvestorSidebarContent () {
   const location = useLocation()
-  const loggedInUser = useLoggedInUser()
-  const [isDisabled] = useState(!(loggedInUser as Investor)?.status.includes(InvestorStatus.VERIFIED))
+  const loggedInUser = useLoggedInUser() as Investor
+  const [isDisabled] = useState(!loggedInUser?.status.includes(InvestorStatus.VERIFIED))
 
   const [correctionDebtorsCount, setCorrectionDebtorsCount] = useState(0)
   useEffect(() => {
@@ -44,10 +44,10 @@ export function InvestorSidebarContent () {
       <SidebarGroupContent>
         <SidebarGroupLabel>Inversión</SidebarGroupLabel>
         <SidebarMenu>
-          <Collapsible className='group/collapsible' disabled={isDisabled}>
+          <Collapsible className='group/collapsible' disabled={isDisabled} defaultOpen={location.pathname.startsWith('/marketplace/auctions')}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton>
+                <SidebarMenuButton isActive={location.pathname.startsWith('/marketplace/auctions')}>
                   <Gavel /> Subastas
                   <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                 </SidebarMenuButton>
@@ -56,14 +56,14 @@ export function InvestorSidebarContent () {
                 <SidebarMenuSub className={'m-0 pe-0'}>
                   <SidebarMenuSubItem>
                     <Link to='/marketplace/auctions'>
-                      <SidebarMenuButton isActive={location.pathname.startsWith('/marketplace/auctions')}>
+                      <SidebarMenuButton>
                         Disponibles
                       </SidebarMenuButton>
                     </Link>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
-                    <Link to='/marketplace/auctions/bids'>
-                      <SidebarMenuButton isActive={location.pathname.startsWith('/marketplace/auctions/bids')}>
+                    <Link to='/marketplace/auctions?hasBidded=true'>
+                      <SidebarMenuButton>
                         Pujadas
                       </SidebarMenuButton>
                     </Link>
@@ -83,14 +83,11 @@ export function InvestorSidebarContent () {
               <CollapsibleContent>
                 <SidebarMenuSub className={'m-0 pe-0'}>
                   <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Disponibles
-                    </SidebarMenuButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuButton>
-                      Invertidas
-                    </SidebarMenuButton>
+                    <Link to='/marketplace/invoices'>
+                      <SidebarMenuButton isActive={location.pathname.startsWith('/marketplace/invoices')}>
+                        Adquiridas
+                      </SidebarMenuButton>
+                    </Link>
                   </SidebarMenuSubItem>
                 </SidebarMenuSub>
               </CollapsibleContent>
@@ -101,53 +98,51 @@ export function InvestorSidebarContent () {
       <SidebarGroupContent>
         <SidebarGroupLabel>Gestión</SidebarGroupLabel>
         <SidebarMenu>
-          {
-            (loggedInUser && (loggedInUser as Investor).investorType === InvestorType.COMPANY) && (
-              <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/debtors')} disabled={isDisabled}>
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild className={'group/collapsible'}>
-                    <SidebarMenuButton>
-                      <HandCoinsIcon /> Deudores
-                      {correctionDebtorsCount > 0 && (
-                        <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
-                      )}
-                      <ChevronRightIcon className='ms-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub className={'m-0 pe-0'}>
-                      <SidebarMenuSubItem>
-                        <Link to='/debtors'>
-                          <SidebarMenuButton isActive={location.pathname === '/debtors'}>
-                            Mis deudores
-                            {correctionDebtorsCount > 0 && (
-                              <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
-                                {correctionDebtorsCount > 99 ? '+99' : correctionDebtorsCount}
-                              </Badge>
-                            )}
-                          </SidebarMenuButton>
-                        </Link>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <Link to='/debtors/create'>
-                          <SidebarMenuButton isActive={location.pathname === '/debtors/create'}>
-                            Nuevo deudor
-                          </SidebarMenuButton>
-                        </Link>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-            )
-          }
+          {(loggedInUser && loggedInUser.investorType === InvestorType.COMPANY) && (
+            <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/debtors')} disabled={isDisabled}>
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild className={'group/collapsible'}>
+                  <SidebarMenuButton>
+                    <HandCoinsIcon /> Deudores
+                    {correctionDebtorsCount > 0 && (
+                      <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
+                    )}
+                    <ChevronRightIcon className='ms-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub className={'m-0 pe-0'}>
+                    <SidebarMenuSubItem>
+                      <Link to='/debtors'>
+                        <SidebarMenuButton isActive={location.pathname === '/debtors'}>
+                          Mis deudores
+                          {correctionDebtorsCount > 0 && (
+                            <Badge variant={'destructive'} className={'ms-auto font-mono px-1.5'}>
+                              {correctionDebtorsCount > 99 ? '+99' : correctionDebtorsCount}
+                            </Badge>
+                          )}
+                        </SidebarMenuButton>
+                      </Link>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <Link to='/debtors/create'>
+                        <SidebarMenuButton isActive={location.pathname === '/debtors/create'}>
+                          Nuevo deudor
+                        </SidebarMenuButton>
+                      </Link>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          )}
 
           <Collapsible className='group/collapsible' defaultOpen={location.pathname.startsWith('/invoices')} disabled={isDisabled}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild className={'group/collapsible'}>
                 <SidebarMenuButton>
                   <FileText /> Facturas
-                  {(loggedInUser && (loggedInUser as Investor).investorType === InvestorType.COMPANY) && correctionInvoicesCount > 0 && (
+                  {(loggedInUser && loggedInUser.investorType === InvestorType.COMPANY) && correctionInvoicesCount > 0 && (
                     <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
                   )}
                   <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
@@ -155,7 +150,7 @@ export function InvestorSidebarContent () {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub className={'m-0 pe-0'}>
-                  {loggedInUser && (loggedInUser as Investor).investorType === InvestorType.COMPANY && (
+                  {loggedInUser && loggedInUser.investorType === InvestorType.COMPANY && (
                     <SidebarMenuSubItem>
                       <Link to='/invoices'>
                         <SidebarMenuButton isActive={location.pathname === '/invoices'}>

@@ -68,7 +68,12 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
         <h2>Consultar subasta</h2>
       </div>
 
-      <MarketplaceAuctionBids auction={auction} />
+      <MarketplaceAuctionBids
+        auction={auction}
+        onAuctionExtended={(newEndDate) =>
+          setAuction(prev => prev ? { ...prev, date: { ...prev.date, end: newEndDate } } : prev)
+        }
+      />
 
       {auction && auction.date.start && auction.date.end && (
         <div className='px-6'>

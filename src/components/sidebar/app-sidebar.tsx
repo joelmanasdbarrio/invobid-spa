@@ -15,7 +15,6 @@ import {
 import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 import { UserType } from '@/types/User.ts'
 import { Link, useLocation } from 'react-router'
-import { ModeToggle } from '../dark-mode/mode-toggle.tsx'
 import { AdminSidebarContent } from './admin-sidebar-content'
 import { InvestorSidebarContent } from './investor-sidebar-content'
 
@@ -68,7 +67,6 @@ export function AppSidebar () {
             name={loggedInUser?.name}
             email={loggedInUser?.email}
           />
-          <ModeToggle />
         </SidebarFooter>
       )}
     </Sidebar>
