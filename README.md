@@ -41,7 +41,7 @@ All variables are baked into the static build at compile time (`import.meta.env`
 |---|---|---|
 | `VITE_BASE_URL` | `http://localhost:3000/api/v1` | API base URL |
 | `VITE_SOCKET_URL` | `http://localhost:3000` | Socket.IO server URL |
-| `VITE_APP_NAME` | `!nvobid` | Application display name |
+| `VITE_APP_NAME` | `Invobid` | Application display name |
 | `VITE_EXT_RATING_PROVIDER` | `Einforma` | External credit rating provider name |
 | `VITE_SMALLEST_BID_INCREMENT_PERCENTAGE` | `0.1` | Minimum bid increment percentage |
 
