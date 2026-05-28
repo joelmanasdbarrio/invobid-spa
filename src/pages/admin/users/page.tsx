@@ -1,0 +1,181 @@
+import { Button } from '@/components/ui/button.tsx'
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog.tsx'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
+import { investorColumns } from '@/pages/admin/users/components/columns'
+import { DataTable } from '@/pages/admin/users/components/data-table'
+import UserFilters from '@/pages/admin/users/components/filters'
+import { getInvestors } from '@/services/investor.api.ts'
+import { InvestorStatus, InvestorType, type Investor } from '@/types/User'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { ChevronLeftIcon, ChevronRightIcon, UserIcon } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useSearchParams } from 'react-router'
+import { z } from 'zod'
+
+const formSchema = z.object({
+  email: z.string().optional(),
+  name: z.string().optional(),
+  companyName: z.string().optional(),
+  phoneNumber: z.number().positive().optional(),
+  taxId: z.string().optional(),
+  investorType: z.enum(InvestorType).optional(),
+  status: z.enum(InvestorStatus).optional(),
+  includeDeleted: z.boolean().default(false).optional()
+})
+
+export default function AdminUsersPage () {
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const defaultForm = useMemo(() => ({
+    email: searchParams.get('email') || '',
+    name: searchParams.get('name') || '',
+    companyName: searchParams.get('companyName') || '',
+    phoneNumber: searchParams.get('phoneNumber') ? Number(searchParams.get('phoneNumber')) : undefined,
+    taxId: searchParams.get('taxId') || '',
+    investorType: searchParams.has('investorType') ? (searchParams.get('investorType') as InvestorType) : undefined,
+    status: searchParams.has('status') ? (searchParams.get('status') as InvestorStatus) : undefined,
+    includeDeleted: searchParams.get('includeDeleted') ? searchParams.get('includeDeleted') === 'true' : undefined
+  }), [searchParams])
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    mode: 'onTouched',
+    defaultValues: defaultForm
+  })
+
+  useEffect(() => {
+    form.reset(defaultForm)
+  }, [form, defaultForm])
+
+  const [data, setData] = useState<Investor[]>([])
+  const [totalItems, setTotalItems] = useState<number>(0)
+
+  const [currentPage, setCurrentPage] = useState<number>(parseInt(searchParams.get('page') || '1', 10))
+  const [currentLimit, setCurrentLimit] = useState<number>(parseInt(searchParams.get('limit') || '10', 10))
+
+  function onSubmit (data: z.infer<typeof formSchema>) {
+    const formData = Object.fromEntries(
+      Object.entries(data).filter(
+        ([, value]) => value !== '' && value !== undefined
+      )
+    )
+    const newParams = new URLSearchParams(formData as Record<string, string>)
+    newParams.set('page', '1')
+    newParams.set('limit', currentLimit.toString())
+    setSearchParams(newParams)
+  }
+
+  useEffect(() => {
+    const filters: Record<string, string|number> = {}
+    searchParams.forEach((value, key) => {
+      if (key !== 'page' && key !== 'limit') {
+        if (value === 'true') {
+          filters[key] = '1'
+        } else if (value !== 'false') {
+          filters[key] = value
+        }
+      }
+    })
+
+    getInvestors({
+      ...filters,
+      page: String(currentPage),
+      limit: String(currentLimit)
+    }).then(res => {
+      setData(res.data)
+      setTotalItems(res._metadata.total)
+    })
+  }, [currentLimit, currentPage, searchParams])
+
+  function handleClear () {
+    form.reset({
+      email: '',
+      name: '',
+      companyName: '',
+      phoneNumber: undefined,
+      taxId: '',
+      investorType: undefined,
+      status: undefined,
+      includeDeleted: undefined
+    })
+    setSearchParams(new URLSearchParams({ page: '1', limit: '10' }))
+  }
+
+  function handlePageChange (newPage: number) {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set('page', newPage.toString())
+    setCurrentPage(newPage)
+    setSearchParams(newParams)
+  }
+
+  function handleLimitChange (newLimit: number) {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set('limit', newLimit.toString())
+    newParams.set('page', '1')
+    setCurrentLimit(newLimit)
+    setCurrentPage(1)
+    setSearchParams(newParams)
+  }
+
+  return (
+    <div className='flex flex-col gap-4'>
+      <div className='flex items-center gap-2'>
+        <span className='rounded-lg p-1 bg-primary/20 text-primary'>
+          <UserIcon className='w-6 h-6' />
+        </span>
+        <h2>Consultar usuarios</h2>
+      </div>
+      <Dialog>
+        <div className='hidden md:block'>
+          <UserFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
+        </div>
+
+        <DialogContent className='max-h-svh overflow-scroll'>
+          <DialogHeader className='font-bold text-lg'>
+            Filtrar usuarios
+          </DialogHeader>
+          <UserFilters form={form} onSubmit={onSubmit} handleClear={handleClear} />
+        </DialogContent>
+
+        <DataTable columns={investorColumns} data={data} totalItems={totalItems} />
+      </Dialog>
+
+      <div className='flex items-center justify-between gap-2 text-accent-foreground'>
+        <div className='flex items-center justify-center gap-2'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeftIcon />
+          </Button>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage * currentLimit >= totalItems}
+          >
+            <ChevronRightIcon />
+          </Button>
+          Página {currentPage} de {Math.ceil(totalItems / currentLimit)}
+        </div>
+        <div className='flex items-center gap-2'>
+          <Select value={String(currentLimit)} onValueChange={value => handleLimitChange(Number(value))}>
+            <span className='text-sm'>Filas por página</span>
+            <SelectTrigger>
+              {currentLimit}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='5'>5</SelectItem>
+              <SelectItem value='10'>10</SelectItem>
+              <SelectItem value='20'>20</SelectItem>
+              <SelectItem value='50'>50</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  )
+}

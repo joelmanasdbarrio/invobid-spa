@@ -1,0 +1,42 @@
+import type { Auction } from './Auction'
+import type { Debtor } from './Debtor'
+import type { Document } from './Document'
+import type { Investor } from './User'
+
+export type Invoice = {
+  id: string;
+  svc: string;
+  sellerInvestor: Investor;
+  buyerInvestor?: Investor;
+  auctions: Auction[];
+  status: InvoiceStatus;
+  lastCommunication?: string;
+  documents: Document[];
+  debtor: Debtor;
+  amount: number;
+  currency: Currency;
+  dueDate: string;
+  transactionFee: TransactionFee;
+  rating?: number;
+  extRating?: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
+}
+
+export type TransactionFee = {
+  sellerPercentage: number;
+  buyerPercentage: number;
+}
+
+export enum InvoiceStatus {
+  PENDING = 'pending',
+  VERIFIED = 'verified',
+  CORRECTION = 'correction',
+  DENIED = 'denied'
+}
+
+export enum Currency {
+  EUR = 'EUR',
+  USD = 'USD',
+}

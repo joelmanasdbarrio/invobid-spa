@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Invobid SPA
 
-## Getting Started
+React + TypeScript + Vite front-end for the Invobid invoice bidding platform.
 
-First, run the development server:
+## Local development
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Prerequisites
+
+- [Node.js 22+](https://nodejs.org/)
+- [invobid-api](../invobid-api) running locally (see its README)
+
+### Setup
+
+1. Install dependencies:
+
+```sh
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Copy the environment template:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sh
+cp .env.template .env
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The default values in `.env.template` point to the local API and can be used as-is.
 
-## Learn More
+3. Start the development server with HMR:
 
-To learn more about Next.js, take a look at the following resources:
+```sh
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+App: [`http://localhost:5173`](http://localhost:5173)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Environment variables
 
-## Deploy on Vercel
+All variables are baked into the static build at compile time (`import.meta.env`). Changes require a rebuild.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Variable | Default | Description |
+|---|---|---|
+| `VITE_BASE_URL` | `http://localhost:3000/api/v1` | API base URL |
+| `VITE_SOCKET_URL` | `http://localhost:3000` | Socket.IO server URL |
+| `VITE_APP_NAME` | `!nvobid` | Application display name |
+| `VITE_EXT_RATING_PROVIDER` | `Einforma` | External credit rating provider name |
+| `VITE_SMALLEST_BID_INCREMENT_PERCENTAGE` | `0.1` | Minimum bid increment percentage |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Other commands
+
+```sh
+npm run build      # Production build (outputs to dist/)
+npm run test       # Run unit tests
+npm run lint       # Lint
+```
+
+---
+
+## Production
+
+The SPA is **not deployed standalone**. In production a pre-built Docker image is published to GitHub Container Registry and served by nginx, which also reverse-proxies `/api/` and `/socket.io/` to the NestJS container.
+
+### Image publishing
+
+Images are built and pushed by GitHub Actions (`.github/workflows/ci.yml`) on two events:
+
+| Event | Image tag produced |
+|---|---|
+| Push to `release/vX.Y.Z` branch | `ghcr.io/joelmanasdbarrio/invobid-spa:vX.Y.Z-rc.N` |
+| Push of `vX.Y.Z` git tag | `ghcr.io/joelmanasdbarrio/invobid-spa:vX.Y.Z` + `:latest` |
+
+The publish job only runs after unit tests pass.
+
+The production `VITE_SOCKET_URL` value is read from a GitHub Actions repository variable. Set it once in the repo settings:
+**Settings → Secrets and variables → Actions → Variables → New repository variable**
+- Name: `VITE_SOCKET_URL`
+- Value: `https://invobid.com`
+
+All other `VITE_*` values are hardcoded in the workflow (they are already public in the compose configuration).
+
+See [invobid-api/README.md](../invobid-api/README.md) for the full server deployment guide.
+
+### RC image cleanup
+
+To avoid accumulating old release-candidate container versions in GHCR, a scheduled workflow runs from [.github/workflows/cleanup-old-images.yml](.github/workflows/cleanup-old-images.yml).
+
+| Trigger | Behavior |
+|---|---|
+| Daily schedule (`0 6 * * *`) | Deletes `invobid-api` container versions tagged like `vX.Y.Z-rc.N` when older than `RC_RETENTION_DAYS` |
+| Manual trigger (`workflow_dispatch`) | Allows on-demand cleanup run from the Actions tab |
+
+Configure retention in repository settings as an Actions variable:
+
+- Name: `RC_RETENTION_DAYS`
+- Example value: `7`
+- Fallback behavior: defaults to `7` if the variable is missing or invalid
+
+Only RC-tagged versions are targeted. Stable release tags such as `vX.Y.Z` and `latest` are not affected.
