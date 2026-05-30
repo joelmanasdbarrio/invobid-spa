@@ -111,6 +111,10 @@
 }
 
 @layer base {
+  html {
+    overflow: hidden;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }

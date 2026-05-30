@@ -1,16 +1,25 @@
 import { Button } from '@/components/ui/button'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
-import { Separator } from '@/components/ui/separator'
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
 import { AuthContext } from '@/contexts/auth.context'
 import { formatCurrency } from '@/lib/format-currency'
 import { connectBalanceSocket } from '@/services/bid.api'
 import type { Investor } from '@/types/User'
-import { WalletIcon } from 'lucide-react'
+import { EllipsisVerticalIcon, WalletIcon } from 'lucide-react'
 import { useContext, useEffect } from 'react'
 import { Link } from 'react-router'
 
 export default function InvestorBalance () {
+  const { isMobile } = useSidebar()
   const { loggedInUser, setLoggedInUser } = useContext(AuthContext)!
   const investor = loggedInUser as Investor
 
@@ -29,39 +38,61 @@ export default function InvestorBalance () {
   }, [investor?.id, setLoggedInUser])
 
   return (
-    <HoverCard openDelay={10} closeDelay={100}>
-      <HoverCardTrigger className='rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'>
-        <Item className='p-0 gap-2' size='sm'>
-          <ItemMedia variant='icon' className='bg-primary/20 text-primary'>
-            <WalletIcon className='size-4' />
-          </ItemMedia>
-          <ItemContent className='gap-0'>
-            <ItemTitle>Saldo disponible</ItemTitle>
-            <ItemDescription>{formatCurrency((investor?.bankAccount.balance || 0) - (investor?.bankAccount.reservedBalance || 0))}</ItemDescription>
-          </ItemContent>
-        </Item>
-      </HoverCardTrigger>
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size='lg'
+              className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground p-0'
+            >
+              <Item className='p-0 gap-2' size='sm'>
+                <ItemMedia variant='icon' className='bg-primary/20 text-primary'>
+                  <WalletIcon className='size-4' />
+                </ItemMedia>
+                <ItemContent className='gap-0'>
+                  <ItemTitle>Saldo disponible</ItemTitle>
+                  <ItemDescription>{formatCurrency((investor?.bankAccount.balance || 0) - (investor?.bankAccount.reservedBalance || 0))}</ItemDescription>
+                </ItemContent>
+              </Item>
+              <EllipsisVerticalIcon className='ml-auto size-4' />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg'
+            side={isMobile ? 'bottom' : 'right'}
+            align='end'
+            sideOffset={4}
+          >
+            <DropdownMenuLabel className='p-0 font-normal'>
+              <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
+                <span className='text-muted-foreground'>Saldo disponible</span>
+                <span className='font-semibold text-primary'>{formatCurrency((investor?.bankAccount.balance || 0) - (investor?.bankAccount.reservedBalance || 0))}</span>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
+                <span className='text-muted-foreground'>Saldo contable</span>
+                <span className='font-semibold'>{formatCurrency(investor?.bankAccount.balance || 0)}</span>
+              </div>
+              <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
+                <span className='text-muted-foreground'>Pujas pendientes</span>
+                <span className='font-semibold text-destructive'>{formatCurrency(investor?.bankAccount.reservedBalance || 0)}</span>
+              </div>
 
-      <HoverCardContent className='grid grid-cols-2 gap-2 w-max'>
-        <span className='text-muted-foreground'>Saldo contable</span>
-        <span className='font-semibold'>{formatCurrency(investor?.bankAccount.balance || 0)}</span>
-
-        <span className='text-muted-foreground'>Pujas pendientes</span>
-        <span className='font-semibold text-destructive'>{formatCurrency(investor?.bankAccount.reservedBalance || 0)}</span>
-
-        <Separator className='col-span-2' />
-
-        <span className='text-muted-foreground'>Saldo disponible</span>
-        <span className='font-semibold text-primary'>{formatCurrency((investor?.bankAccount.balance || 0) - (investor?.bankAccount.reservedBalance || 0))}</span>
-
-        <div className='col-span-2'>
-          <Button variant='secondary' size='sm' className='w-full' asChild>
-            <Link to='/profile#bank-account'>
-              Ver cartera
-            </Link>
-          </Button>
-        </div>
-      </HoverCardContent>
-    </HoverCard>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Button variant='secondary' size='sm' className='w-full' asChild>
+                <Link to='/profile#bank-account'>
+                  Ver cartera
+                </Link>
+              </Button>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
   )
 }

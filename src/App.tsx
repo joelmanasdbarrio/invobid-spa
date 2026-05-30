@@ -37,7 +37,7 @@ function App () {
 
   return (
     <ThemeProvider defaultTheme='light' storageKey='dark-theme'>
-      <main className='antialiased w-dvw h-dvh flex flex-col p-0!'>
+      <main className='antialiased w-dvw h-dvh flex flex-col p-0! overflow-hidden'>
         <Routes>
           {/* Public Routes */}
           <Route path='/register' element={<Register /> }/>

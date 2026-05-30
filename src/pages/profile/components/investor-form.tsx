@@ -364,7 +364,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>Nueva contraseña:</FieldLabel>
                         <InputGroup>
-                          <InputGroupInput {...field} id={field.name} type='password' autoComplete='off' disabled={isFormDisabled} />
+                          <InputGroupInput {...field} id={field.name} type='password' autoComplete='new-password' disabled={isFormDisabled} />
                           <InputGroupAddon>
                             <EllipsisIcon />
                           </InputGroupAddon>
@@ -382,7 +382,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>Repetir nueva contraseña:</FieldLabel>
                         <InputGroup>
-                          <InputGroupInput {...field} id={field.name} type='password' disabled={isFormDisabled} />
+                          <InputGroupInput {...field} id={field.name} type='password' autoComplete='new-password' disabled={isFormDisabled} />
                           <InputGroupAddon>
                             <EllipsisIcon />
                           </InputGroupAddon>
