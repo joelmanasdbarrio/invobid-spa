@@ -64,24 +64,20 @@ export default function InvestorBalance () {
             align='end'
             sideOffset={4}
           >
-            <DropdownMenuLabel className='p-0 font-normal'>
-              <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
-                <span className='text-muted-foreground'>Saldo disponible</span>
-                <span className='font-semibold text-primary'>{formatCurrency((investor?.bankAccount.balance || 0) - (investor?.bankAccount.reservedBalance || 0))}</span>
-              </div>
+            <DropdownMenuLabel className='grid grid-cols-[1fr_auto] items-center gap-2 px-1 py-1.5 text-left text-sm'>
+              <span className='text-muted-foreground'>Saldo disponible</span>
+              <span className='font-semibold text-primary'>{formatCurrency((investor?.bankAccount.balance || 0) - (investor?.bankAccount.reservedBalance || 0))}</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
-                <span className='text-muted-foreground'>Saldo contable</span>
-                <span className='font-semibold'>{formatCurrency(investor?.bankAccount.balance || 0)}</span>
-              </div>
-              <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
-                <span className='text-muted-foreground'>Pujas pendientes</span>
-                <span className='font-semibold text-destructive'>{formatCurrency(investor?.bankAccount.reservedBalance || 0)}</span>
-              </div>
-
+            <DropdownMenuGroup className='grid grid-cols-[1fr_auto] items-center gap-2 px-1 py-1.5 text-left text-sm'>
+              <span className='text-muted-foreground'>Saldo contable</span>
+              <span className='font-semibold'>{formatCurrency(investor?.bankAccount.balance || 0)}</span>
             </DropdownMenuGroup>
+            <DropdownMenuGroup className='grid grid-cols-[1fr_auto] items-center gap-2 px-1 py-1.5 text-left text-sm'>
+              <span className='text-muted-foreground'>Pujas pendientes</span>
+              <span className='font-semibold text-destructive'>{formatCurrency(investor?.bankAccount.reservedBalance || 0)}</span>
+            </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Button variant='secondary' size='sm' className='w-full' asChild>

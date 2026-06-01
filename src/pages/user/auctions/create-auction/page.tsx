@@ -54,10 +54,12 @@ export default function CreateAuctionPage () {
     }
   })
 
+  const watchedStartingPrice = useWatch({ control: form.control, name: 'startingPrice' })
   const watchedsvc = useWatch({ control: form.control, name: 'svc' })
   const watchedDateEnd = useWatch({ control: form.control, name: 'auctionDateEnd' })
 
   const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedsvc)
+  const selectedInvoceSellerFee = selectedInvoice?.transactionFee.sellerPercentage ?? 0
   const invoiceDueDate = selectedInvoice?.dueDate
 
   const auctionEndMaxDate = invoiceDueDate
@@ -274,6 +276,12 @@ export default function CreateAuctionPage () {
                         </Field>
                       )}
                     />
+                    {watchedStartingPrice > 0 && selectedInvoceSellerFee > 0 && (
+                      <div className='text-xs text-muted-foreground flex items-center justify-end gap-4'>
+                        <span>Comisión ({Number(selectedInvoceSellerFee).toFixed(2)}%):</span>
+                        <span>-{(Number(selectedInvoceSellerFee) / 100 * Number(watchedStartingPrice)).toFixed(2)}€</span>
+                      </div>
+                    )}
                     <div className='flex gap-2'>
                       <ButtonGroup>
                         <Button
