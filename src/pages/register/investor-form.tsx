@@ -127,7 +127,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
                   <Field className='hidden'>
                     <FieldLabel htmlFor={field.name}>Tipo de empresa</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput {...field} id={field.name} required value={investorType} />
+                      <InputGroupInput {...field} id={field.name} required value={investorType ?? ''} />
                     </InputGroup>
                   </Field>
                 )}

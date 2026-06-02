@@ -168,7 +168,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       dueDate: toDateOnlyString(data.dueDate)
     }))
       .then(res => setInvoice(res.data))
-      .then(() => navigate(`/user/invoices/${invoiceId}`))
+      .then(() => navigate(`/invoices/${invoiceId}`))
   }
 
   function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
@@ -188,7 +188,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       status: data.status
     }))
       .then(res => setInvoice(res.data))
-      .then(() => navigate(`/user/invoices/${invoiceId}`))
+      .then(() => navigate(`/invoices/${invoiceId}`))
   }
 
   const invoiceStatusTextMap: {

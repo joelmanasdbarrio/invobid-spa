@@ -11,6 +11,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLocale } from '@/hooks/use-locale'
+import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { formatCurrency } from '@/lib/format-currency'
 import { getAuctionById, updateAuctionById } from '@/services/auction.api'
 import { AuctionStatus, type Auction } from '@/types/Auction'
@@ -98,12 +99,15 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
 
   function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
     e.preventDefault()
-    navigator.clipboard.writeText(String(text))
     const button = e.currentTarget
-    button.setAttribute('data-copied', 'true')
-    setTimeout(() => {
-      button.removeAttribute('data-copied')
-    }, 2000)
+    performCopyToClipboard(text).then(success => {
+      if (success) {
+        button.setAttribute('data-copied', 'true')
+        setTimeout(() => {
+          button.removeAttribute('data-copied')
+        }, 2000)
+      }
+    })
   }
 
   // Helper: Get the latest bid
@@ -480,7 +484,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                             <Field>
                               <FieldLabel htmlFor='invoiceRating'>Rating:</FieldLabel>
                               <InputGroup>
-                                <InputGroupInput id='invoiceRating' value={auction.invoice?.rating} type='text' placeholder='ACME S.L.' required disabled />
+                                <InputGroupInput id='invoiceRating' value={auction.invoice?.rating ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                                 <InputGroupAddon>
                                   %
                                 </InputGroupAddon>
@@ -555,7 +559,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                               <Field>
                                 <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
                                 <InputGroup>
-                                  <InputGroupInput id='investorTaxId' value={auction.invoice.buyerInvestor?.taxId} type='text' placeholder='12345678A' required disabled />
+                                  <InputGroupInput id='investorTaxId' value={auction.invoice.buyerInvestor?.taxId ?? ''} type='text' placeholder='12345678A' required disabled />
                                   <InputGroupAddon>
                                     <IdCardIcon />
                                   </InputGroupAddon>
@@ -580,7 +584,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                               <Field>
                                 <FieldLabel htmlFor='investorCompanyName'>Razón social:</FieldLabel>
                                 <InputGroup>
-                                  <InputGroupInput id='investorCompanyName' value={auction.invoice.buyerInvestor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                                  <InputGroupInput id='investorCompanyName' value={auction.invoice.buyerInvestor?.companyName ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                                   <InputGroupAddon>
                                     <BuildingIcon />
                                   </InputGroupAddon>

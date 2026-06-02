@@ -11,6 +11,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLocale } from '@/hooks/use-locale'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
+import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { formatCurrency } from '@/lib/format-currency'
 import { parseLocalDate } from '@/lib/format-date'
 import { createAuction } from '@/services/auction.api'
@@ -95,7 +96,7 @@ export default function CreateAuctionPage () {
       startingPrice: data.startingPrice,
       auctionDateEnd: data.auctionDateEnd.toISOString()
     }))
-      .then(res => navigate(`/user/auctions/${res.data.id}`))
+      .then(res => navigate(`/auctions/${res.data.id}`))
   }
 
   function applyDiscount (discountPercent: number) {
@@ -106,12 +107,15 @@ export default function CreateAuctionPage () {
 
   function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
     e.preventDefault()
-    navigator.clipboard.writeText(String(text))
     const button = e.currentTarget
-    button.setAttribute('data-copied', 'true')
-    setTimeout(() => {
-      button.removeAttribute('data-copied')
-    }, 2000)
+    performCopyToClipboard(text).then(success => {
+      if (success) {
+        button.setAttribute('data-copied', 'true')
+        setTimeout(() => {
+          button.removeAttribute('data-copied')
+        }, 2000)
+      }
+    })
   }
 
   return (
@@ -192,7 +196,7 @@ export default function CreateAuctionPage () {
                   <Field>
                     <FieldLabel htmlFor='invoiceRating'>Rating:</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput id='invoiceRating' value={selectedInvoice?.rating} type='text' placeholder='ACME S.L.' required disabled />
+                      <InputGroupInput id='invoiceRating' value={selectedInvoice?.rating ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                       <InputGroupAddon>
                         %
                       </InputGroupAddon>

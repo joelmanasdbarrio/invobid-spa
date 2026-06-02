@@ -5,6 +5,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSet 
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLocale } from '@/hooks/use-locale'
+import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { formatCurrency } from '@/lib/format-currency'
 import { getInvoiceById } from '@/services/invoice.api'
 import type { Invoice } from '@/types/Invoice'
@@ -45,12 +46,15 @@ export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLast
 
   function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
     e.preventDefault()
-    navigator.clipboard.writeText(String(text))
     const button = e.currentTarget
-    button.setAttribute('data-copied', 'true')
-    setTimeout(() => {
-      button.removeAttribute('data-copied')
-    }, 2000)
+    performCopyToClipboard(text).then(success => {
+      if (success) {
+        button.setAttribute('data-copied', 'true')
+        setTimeout(() => {
+          button.removeAttribute('data-copied')
+        }, 2000)
+      }
+    })
   }
 
   return (

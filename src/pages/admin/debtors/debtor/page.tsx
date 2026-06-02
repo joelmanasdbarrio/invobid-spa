@@ -17,6 +17,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegen
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { getDebtorById, updateDebtorById } from '@/services/debtor.api'
 import { type Debtor, DebtorStatus } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -140,20 +141,24 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
 
   function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
     e.preventDefault()
-    navigator.clipboard.writeText(String(text))
     const button = e.currentTarget
-    button.setAttribute('data-copied', 'true')
-    setTimeout(() => {
-      button.removeAttribute('data-copied')
-    }, 2000)
+    performCopyToClipboard(text).then(success => {
+      if (success) {
+        button.setAttribute('data-copied', 'true')
+        setTimeout(() => {
+          button.removeAttribute('data-copied')
+        }, 2000)
+      }
+    })
   }
 
   const updateNotesMap: Record<string, string> = {
     correctVerification: 'Deudor verificado correctamente',
     updatedCompanyName: 'Se ha actualizado la razón social',
-    incorrect111Document: 'El modelo 111 de hacienda es incorrecto o no es legible',
-    incorrect303Document: 'El modelo 303 de hacienda es incorrecto o no es legible',
-    incorrectBothDocuments: 'Los modelos 111 & 303 de hacienda son incorrectos o no legibles'
+    insolvent: 'El deudor se ha declarado insolvente'
+    // incorrect111Document: 'El modelo 111 de hacienda es incorrecto o no es legible',
+    // incorrect303Document: 'El modelo 303 de hacienda es incorrecto o no es legible',
+    // incorrectBothDocuments: 'Los modelos 111 & 303 de hacienda son incorrectos o no legibles'
   }
 
   return (
@@ -360,7 +365,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                           <Field>
                             <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='investorTaxId' value={debtor?.investor?.taxId} type='text' placeholder='12345678A' required disabled />
+                              <InputGroupInput id='investorTaxId' value={debtor?.investor?.taxId ?? ''} type='text' placeholder='12345678A' required disabled />
                               <InputGroupAddon>
                                 <IdCardIcon />
                               </InputGroupAddon>
@@ -385,7 +390,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                           <Field>
                             <FieldLabel htmlFor='investorCompanyName'>Razón social:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='investorCompanyName' value={debtor?.investor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                              <InputGroupInput id='investorCompanyName' value={debtor?.investor?.companyName ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                               <InputGroupAddon>
                                 <BuildingIcon />
                               </InputGroupAddon>

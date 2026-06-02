@@ -326,7 +326,7 @@ export default function CreateInvoicePage () {
           <Button
             className='w-min self-end justify-self-end'
             disabled={!baseForm.formState.isDirty}
-            title='Crear deudor'
+            title='Subir factura'
           >
             <SaveIcon />
             Subir factura

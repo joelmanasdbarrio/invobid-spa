@@ -19,6 +19,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLocale } from '@/hooks/use-locale'
+import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { formatCurrency } from '@/lib/format-currency'
 import { getInvoiceById, updateInvoiceById } from '@/services/invoice.api'
 import { type Invoice, InvoiceStatus } from '@/types/Invoice'
@@ -128,12 +129,15 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
 
   function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
     e.preventDefault()
-    navigator.clipboard.writeText(String(text))
     const button = e.currentTarget
-    button.setAttribute('data-copied', 'true')
-    setTimeout(() => {
-      button.removeAttribute('data-copied')
-    }, 2000)
+    performCopyToClipboard(text).then(success => {
+      if (success) {
+        button.setAttribute('data-copied', 'true')
+        setTimeout(() => {
+          button.removeAttribute('data-copied')
+        }, 2000)
+      }
+    })
   }
 
   const updateNotesMap: Record<string, string> = {
@@ -231,7 +235,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                     <Field>
                       <FieldLabel htmlFor='svc'>UID de factura:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput id='svc' value={invoice?.svc} type='text' placeholder='0' required disabled />
+                        <InputGroupInput id='svc' value={invoice?.svc ?? ''} type='text' placeholder='0' required disabled />
                         <InputGroupAddon>
                           #
                         </InputGroupAddon>
@@ -285,7 +289,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                     <Field>
                       <FieldLabel htmlFor='buyerPercentage'>Comisión del inversor:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput id='buyerPercentage' value={invoice?.transactionFee?.buyerPercentage} type='number' placeholder='0' required disabled />
+                        <InputGroupInput id='buyerPercentage' value={invoice?.transactionFee?.buyerPercentage ?? ''} type='number' placeholder='0' required disabled />
                         <InputGroupAddon>
                           %
                         </InputGroupAddon>
@@ -310,7 +314,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                     <Field>
                       <FieldLabel htmlFor='sellerPercentage'>Comisión del cedente:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput id='sellerPercentage' value={invoice?.transactionFee?.sellerPercentage} type='number' placeholder='0' required disabled />
+                        <InputGroupInput id='sellerPercentage' value={invoice?.transactionFee?.sellerPercentage ?? ''} type='number' placeholder='0' required disabled />
                         <InputGroupAddon>
                           %
                         </InputGroupAddon>
@@ -348,7 +352,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           <Field>
                             <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='investorTaxId' value={invoice?.sellerInvestor?.taxId} type='text' placeholder='12345678A' required disabled />
+                              <InputGroupInput id='investorTaxId' value={invoice?.sellerInvestor?.taxId ?? ''} type='text' placeholder='12345678A' required disabled />
                               <InputGroupAddon>
                                 <IdCardIcon />
                               </InputGroupAddon>
@@ -373,7 +377,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           <Field>
                             <FieldLabel htmlFor='investorCompanyName'>Razón social:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='investorCompanyName' value={invoice?.sellerInvestor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                              <InputGroupInput id='investorCompanyName' value={invoice?.sellerInvestor?.companyName ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                               <InputGroupAddon>
                                 <BuildingIcon />
                               </InputGroupAddon>
@@ -418,7 +422,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           <Field>
                             <FieldLabel htmlFor='debtorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='debtorTaxId' value={invoice?.debtor?.taxId} type='text' placeholder='12345678A' required disabled />
+                              <InputGroupInput id='debtorTaxId' value={invoice?.debtor?.taxId ?? ''} type='text' placeholder='12345678A' required disabled />
                               <InputGroupAddon>
                                 <IdCardIcon />
                               </InputGroupAddon>
@@ -443,7 +447,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           <Field>
                             <FieldLabel htmlFor='debtorCompanyName'>Razón social:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='debtorCompanyName' value={invoice?.debtor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                              <InputGroupInput id='debtorCompanyName' value={invoice?.debtor?.companyName ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                               <InputGroupAddon>
                                 <BuildingIcon />
                               </InputGroupAddon>
@@ -489,7 +493,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                             <Field>
                               <FieldLabel htmlFor='investorTaxId'>CIF/NIF del inversor:</FieldLabel>
                               <InputGroup>
-                                <InputGroupInput id='investorTaxId' value={invoice?.buyerInvestor?.taxId} type='text' placeholder='12345678A' required disabled />
+                                <InputGroupInput id='investorTaxId' value={invoice?.buyerInvestor?.taxId ?? ''} type='text' placeholder='12345678A' required disabled />
                                 <InputGroupAddon>
                                   <IdCardIcon />
                                 </InputGroupAddon>
@@ -514,7 +518,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                             <Field>
                               <FieldLabel htmlFor='investorCompanyName'>Razón social del inversor:</FieldLabel>
                               <InputGroup>
-                                <InputGroupInput id='investorCompanyName' value={invoice?.buyerInvestor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                                <InputGroupInput id='investorCompanyName' value={invoice?.buyerInvestor?.companyName ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                                 <InputGroupAddon>
                                   <BuildingIcon />
                                 </InputGroupAddon>

@@ -14,29 +14,29 @@ const formSchema = z.object({
   companyName: z.string().min(2, 'El nombre de la empresa debe tener al menos 2 caracteres'),
   taxId: z.string().min(7, 'El NIF/CIF debe tener al menos 7 caracteres'),
   email: z.email('Correo electrónico no válido'),
-  phoneNumber: z.string().min(6, 'El número de teléfono debe tener al menos 6 caracteres'),
+  phoneNumber: z.string().min(6, 'El número de teléfono debe tener al menos 6 caracteres')
 
-  modelo111QuarterlyCsv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 111 trimestral'),
-  modelo111Quarterly: z.custom<FileList>()
-    .refine((files) => files && files.length > 0, 'El documento es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío'),
-  modelo303QuarterlyCsv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 303 trimestral'),
-  modelo303Quarterly: z.custom<FileList>()
-    .refine((files) => files && files.length > 0, 'El documento es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío'),
+  // modelo111QuarterlyCsv: z.string()
+  //   .min(1, 'El CSV es obligatorio para el modelo 111 trimestral'),
+  // modelo111Quarterly: z.custom<FileList>()
+  //   .refine((files) => files && files.length > 0, 'El documento es obligatorio')
+  //   .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío'),
+  // modelo303QuarterlyCsv: z.string()
+  //   .min(1, 'El CSV es obligatorio para el modelo 303 trimestral'),
+  // modelo303Quarterly: z.custom<FileList>()
+  //   .refine((files) => files && files.length > 0, 'El documento es obligatorio')
+  //   .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío'),
 
-  modelo111AnnualCsv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 111 Annual'),
-  modelo111Annual: z.custom<FileList>()
-    .refine((files) => files && files.length > 0, 'El documento es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío'),
-  modelo303AnnualCsv: z.string()
-    .min(1, 'El CSV es obligatorio para el modelo 303 Annual'),
-  modelo303Annual: z.custom<FileList>()
-    .refine((files) => files && files.length > 0, 'El documento es obligatorio')
-    .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
+  // modelo111AnnualCsv: z.string()
+  //   .min(1, 'El CSV es obligatorio para el modelo 111 Annual'),
+  // modelo111Annual: z.custom<FileList>()
+  //   .refine((files) => files && files.length > 0, 'El documento es obligatorio')
+  //   .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío'),
+  // modelo303AnnualCsv: z.string()
+  //   .min(1, 'El CSV es obligatorio para el modelo 303 Annual'),
+  // modelo303Annual: z.custom<FileList>()
+  //   .refine((files) => files && files.length > 0, 'El documento es obligatorio')
+  //   .refine((files) => files?.[0]?.size > 0, 'El documento no puede estar vacío')
 })
 
 export default function CreateDebtorPage () {
@@ -47,28 +47,28 @@ export default function CreateDebtorPage () {
       companyName: '',
       taxId: '',
       email: '',
-      phoneNumber: '',
+      phoneNumber: ''
 
-      modelo111QuarterlyCsv: '',
-      modelo111Quarterly: undefined,
-      modelo303QuarterlyCsv: '',
-      modelo303Quarterly: undefined,
+      // modelo111QuarterlyCsv: '',
+      // modelo111Quarterly: undefined,
+      // modelo303QuarterlyCsv: '',
+      // modelo303Quarterly: undefined,
 
-      modelo111AnnualCsv: '',
-      modelo111Annual: undefined,
-      modelo303AnnualCsv: '',
-      modelo303Annual: undefined
+      // modelo111AnnualCsv: '',
+      // modelo111Annual: undefined,
+      // modelo303AnnualCsv: '',
+      // modelo303Annual: undefined
     }
   })
 
   const navigate = useNavigate()
   function onSubmit (data: z.infer<typeof formSchema>) {
-    const formData = new FormData()
+    // const formData = new FormData()
 
-    formData.append('companyName', data.companyName)
-    formData.append('taxId', data.taxId)
-    formData.append('email', data.email)
-    formData.append('phoneNumber', data.phoneNumber)
+    // formData.append('companyName', data.companyName)
+    // formData.append('taxId', data.taxId)
+    // formData.append('email', data.email)
+    // formData.append('phoneNumber', data.phoneNumber)
 
     // formData.append(DocumentType.TAX_111_QUARTERLY, data.modelo111Quarterly[0])
     // formData.append('modelo111QuarterlyCsv', data.modelo111QuarterlyCsv)
@@ -80,7 +80,13 @@ export default function CreateDebtorPage () {
     // formData.append(DocumentType.TAX_303_ANNUAL, data.modelo303Annual[0])
     // formData.append('modelo303AnnualCsv', data.modelo303AnnualCsv)
 
-    createDebtor(formData).then(res => navigate(`/debtors/${res.data.id}`))
+    // createDebtor(formData).then(res => navigate(`/debtors/${res.data.id}`))
+    createDebtor({
+      companyName: data.companyName,
+      taxId: data.taxId,
+      email: data.email,
+      phoneNumber: data.phoneNumber
+    }).then(res => navigate(`/debtors/${res.data.id}`))
   }
 
   return (

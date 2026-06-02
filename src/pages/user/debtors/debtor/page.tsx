@@ -143,7 +143,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
       phoneNumber: data.phoneNumber
     }))
       .then(res => setDebtor(res.data))
-      .then(() => navigate(`/user/debtors/${debtorId}`))
+      .then(() => navigate(`/debtors/${debtorId}`))
   }
 
   // function onSubmitDocument (data: z.infer<typeof documentFormSchema>) {
@@ -175,7 +175,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
       status: data.status
     }))
       .then(res => setDebtor(res.data))
-      .then(() => navigate(`/user/debtors/${debtorId}`))
+      .then(() => navigate(`/debtors/${debtorId}`))
   }
 
   const debtorStatusTextMap: {

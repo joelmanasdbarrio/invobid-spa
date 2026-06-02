@@ -10,10 +10,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { AuthContext } from '@/contexts/auth.context'
 import { useLogout } from '@/hooks/use-logout'
@@ -33,9 +34,11 @@ import {
   UserIcon,
   UsersIcon
 } from 'lucide-react'
-import { useCallback, useContext, useEffect } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
+import { useLocation } from 'react-router'
 import { z } from 'zod'
+import BankAccountForm from './bank-account-form'
 
 const validateFormSchema = z.object({
   status: z.enum(InvestorStatus)
@@ -47,7 +50,7 @@ const baseFormSchema = z.object({
   companyName: z.string()
     .min(1, 'La razón social es obligatoria'),
   email: z.email('Correo electrónico no válido'),
-  phoneNumber: z.number()
+  phoneNumber: z.coerce.number<number>()
     .min(6, 'El número de teléfono es obligatorio')
 })
 
@@ -84,6 +87,16 @@ const documentFormSchema = z.object({
 })
 
 export default function InvestorProfileForm ({ user }: { user: Investor }) {
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState('contact')
+
+  useEffect(() => {
+    const hash = location.hash.slice(1)
+    if (hash) {
+      setActiveTab(hash)
+    }
+  }, [location.hash])
+
   const authContext = useContext(AuthContext)
   if (!authContext) {
     throw new Error('AuthContext must be used within AuthProvider')
@@ -210,81 +223,114 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
   }
 
   return (
-    <>
-      <Form {...validateForm}>
-        <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='flex md:justify-end'>
-          {(user.status === InvestorStatus.CORRECTION || user.status === InvestorStatus.PENDING) && (
-            <Button
-              variant='outline'
-              className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-300'
-              disabled={user.status === InvestorStatus.PENDING || isFormDisabled}
-              onClick={() => {
-                validateForm.setValue('status', InvestorStatus.PENDING)
-                validateForm.handleSubmit(onSubmitValidate)()
-              }}
-            >
-              <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-300' />
-              <span className='overflow-hidden'>
-                Solicitar verificación
-              </span>
-            </Button>
-          )}
-        </form>
-      </Form>
-      <Form {...baseForm}>
-        <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
-          <Card>
-            <CardContent className='flex flex-col gap-4'>
-              <FieldSet>
-                <FieldLegend>Información de contacto</FieldLegend>
-                <FieldGroup>
-                  <Controller
-                    name='name'
-                    control={baseForm.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>{
-                          user?.type === UserType.INVESTOR && user.investorType === InvestorType.COMPANY
-                            ? 'Nombre de la empresa:'
-                            : 'Nombre completo:'}
-                        </FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder={'ACME'} required disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled} />
-                          <InputGroupAddon>{
-                            user?.type === UserType.INVESTOR && user.investorType === InvestorType.COMPANY
-                              ? <UsersIcon />
-                              : <UserIcon />}
-                          </InputGroupAddon>
-                          {user?.type === UserType.INVESTOR && user.investorType === InvestorType.INDIVIDUAL && (
-                            <InputGroupAddon align={'inline-end'}>
-                              <Tooltip>
-                                <TooltipTrigger className='leading-1'>
-                                  <CircleQuestionMarkIcon className='w-4 h-4'/>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p className='text-center'>Nombre y apellidos según <br /> documento de identificación</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </InputGroupAddon>
-                          )}
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                  {user.investorType !== InvestorType.INDIVIDUAL && (
+    <Tabs value={activeTab} onValueChange={setActiveTab} className='w-full'>
+      <div className='flex flex-col md:flex-row items-end md:items-center justify-between'>
+        <div className='overflow-scroll w-full'>
+          <TabsList>
+            <TabsTrigger value='contact'>Información de contacto</TabsTrigger>
+            <TabsTrigger value='password'>Contraseña</TabsTrigger>
+            <TabsTrigger value='notifications'>Notificaciones</TabsTrigger>
+            {(user.status !== InvestorStatus.VERIFIED && user.status !== InvestorStatus.DENIED) && (
+              <TabsTrigger value='documents'>Documentos</TabsTrigger>
+            )}
+            <TabsTrigger value='bank-account'>Cartera de fondos</TabsTrigger>
+          </TabsList>
+        </div>
+        <Form {...validateForm}>
+          <form onSubmit={validateForm.handleSubmit(onSubmitValidate)} className='flex md:justify-end'>
+            {(user.status === InvestorStatus.CORRECTION || user.status === InvestorStatus.PENDING) && (
+              <Button
+                variant='outline'
+                className='group md:w-10 md:hover:w-full md:max-w-min md:gap-0 md:hover:gap-2 duration-300'
+                disabled={user.status === InvestorStatus.PENDING || isFormDisabled}
+                onClick={() => {
+                  validateForm.setValue('status', InvestorStatus.PENDING)
+                  validateForm.handleSubmit(onSubmitValidate)()
+                }}
+              >
+                <RefreshCcwIcon className='transition-all group-hover:rotate-180 duration-300' />
+                <span className='overflow-hidden'>
+                  Solicitar verificación
+                </span>
+              </Button>
+            )}
+          </form>
+        </Form>
+      </div>
+      <TabsContent value='contact'>
+        <Form {...baseForm}>
+          <form onSubmit={baseForm.handleSubmit(onSubmitBase)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
+            <Card>
+              <CardContent className='flex flex-col gap-4'>
+                <FieldSet>
+                  <FieldLegend>Información de contacto</FieldLegend>
+                  <FieldGroup>
                     <Controller
-                      name='companyName'
+                      name='name'
                       control={baseForm.control}
                       render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
+                          <FieldLabel htmlFor={field.name}>{
+                            user?.type === UserType.INVESTOR && user.investorType === InvestorType.COMPANY
+                              ? 'Nombre de la empresa:'
+                              : 'Nombre completo:'}
+                          </FieldLabel>
                           <InputGroup>
-                            <InputGroupInput {...field} id={field.name} type='text' disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled || user.investorType === InvestorType.INDIVIDUAL} />
+                            <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder={'ACME'} required disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled} />
+                            <InputGroupAddon>{
+                              user?.type === UserType.INVESTOR && user.investorType === InvestorType.COMPANY
+                                ? <UsersIcon />
+                                : <UserIcon />}
+                            </InputGroupAddon>
+                            {user?.type === UserType.INVESTOR && user.investorType === InvestorType.INDIVIDUAL && (
+                              <InputGroupAddon align={'inline-end'}>
+                                <Tooltip>
+                                  <TooltipTrigger className='leading-1'>
+                                    <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className='text-center'>Nombre y apellidos según <br /> documento de identificación</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </InputGroupAddon>
+                            )}
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    {user.investorType !== InvestorType.INDIVIDUAL && (
+                      <Controller
+                        name='companyName'
+                        control={baseForm.control}
+                        render={({ field, fieldState }) => (
+                          <Field data-invalid={fieldState.invalid}>
+                            <FieldLabel htmlFor={field.name}>Razón social:</FieldLabel>
+                            <InputGroup>
+                              <InputGroupInput {...field} id={field.name} type='text' disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled || user.investorType === InvestorType.INDIVIDUAL} />
+                              <InputGroupAddon>
+                                <UsersIcon />
+                              </InputGroupAddon>
+                            </InputGroup>
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                    )}
+                    <Controller
+                      name='email'
+                      control={baseForm.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Correo electrónico:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} id={field.name} type='email' disabled={isFormDisabled} />
                             <InputGroupAddon>
-                              <UsersIcon />
+                              <MailIcon />
                             </InputGroupAddon>
                           </InputGroup>
                           {fieldState.invalid && (
@@ -293,274 +339,262 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                         </Field>
                       )}
                     />
-                  )}
-                  <Controller
-                    name='email'
-                    control={baseForm.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>Correo electrónico:</FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput {...field} id={field.name} type='email' disabled={isFormDisabled} />
-                          <InputGroupAddon>
-                            <MailIcon />
-                          </InputGroupAddon>
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name='phoneNumber'
-                    control={baseForm.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput {...field} id={field.name} type='tel' disabled={isFormDisabled} />
-                          <InputGroupAddon>
-                            <PhoneIcon />
-                          </InputGroupAddon>
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                </FieldGroup>
-              </FieldSet>
-            </CardContent>
-          </Card>
-          <Button
-            className='w-min self-end justify-self-end'
-            disabled={
-              (name === user.name &&
+                    <Controller
+                      name='phoneNumber'
+                      control={baseForm.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Número de teléfono:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} id={field.name} type='tel' disabled={isFormDisabled} />
+                            <InputGroupAddon>
+                              <PhoneIcon />
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                  </FieldGroup>
+                </FieldSet>
+              </CardContent>
+            </Card>
+            <Button
+              className='w-min self-end justify-self-end'
+              disabled={
+                (name === user.name &&
                         companyName === user.companyName &&
                         email === user.email &&
                         phoneNumber === user.phoneNumber)
                         || isFormDisabled
-            }
-            title='Guardar cambios'
-          >
-            <SaveIcon />
-            Guardar cambios
-          </Button>
-        </form>
-      </Form>
-      <Form {...passwordForm}>
-        <form onSubmit={passwordForm.handleSubmit(onSubmitPassword)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
-          <Card>
-            <CardContent className='flex flex-col gap-4'>
-              <FieldSet>
-                <FieldLegend>Cambiar contraseña</FieldLegend>
-                <FieldGroup>
-                  <Controller
-                    name='password'
-                    control={passwordForm.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>Nueva contraseña:</FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput {...field} id={field.name} type='password' autoComplete='new-password' disabled={isFormDisabled} />
-                          <InputGroupAddon>
-                            <EllipsisIcon />
-                          </InputGroupAddon>
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name='passwordRepeat'
-                    control={passwordForm.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>Repetir nueva contraseña:</FieldLabel>
-                        <InputGroup>
-                          <InputGroupInput {...field} id={field.name} type='password' autoComplete='new-password' disabled={isFormDisabled} />
-                          <InputGroupAddon>
-                            <EllipsisIcon />
-                          </InputGroupAddon>
-                        </InputGroup>
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                </FieldGroup>
-              </FieldSet>
-            </CardContent>
-          </Card>
-          <Button
-            className='w-min self-end justify-self-end'
-            disabled={!(passwordForm.getValues('password')) || !(passwordForm.getValues('passwordRepeat')) || isFormDisabled}
-            title='Actualizar contraseña'
-          >
-            <SaveIcon />
-            Actualizar contraseña
-          </Button>
-        </form>
-      </Form>
-      <Form {...notificationForm}>
-        <form onSubmit={notificationForm.handleSubmit(onSubmitNotification)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
-          <Card>
-            <CardContent className='flex flex-col gap-4'>
-              <FieldSet>
-                <FieldLegend>Notificaciones</FieldLegend>
-                <FieldGroup>
-                  <Controller
-                    name='isOptedInNotificationsEmail'
-                    control={notificationForm.control}
-                    render={({field}) => (
-                      <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
-                        <Checkbox
-                          id='toggle-email-notifications'
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className='data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700'
-                          disabled={isFormDisabled}
-                        />
-                        <div className='grid gap-1.5 font-normal'>
-                          <p className='text-sm leading-none font-medium'>
-                            Recibir notificaciones por correo electrónico
-                          </p>
-                          <p className='text-muted-foreground text-sm'>
-                            Notificaciones...
-                          </p>
-                        </div>
-                      </Label>
-                    )}
-                  />
-                  <Controller
-                    name='isOptedInNotificationsSMS'
-                    control={notificationForm.control}
-                    render={({field}) => (
-                      <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
-                        <Checkbox
-                          id='toggle-sms-notifications'
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className='data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700'
-                          disabled={isFormDisabled}
-                        />
-                        <div className='grid gap-1.5 font-normal'>
-                          <p className='text-sm leading-none font-medium'>
-                            Recibir notificaciones por SMS
-                          </p>
-                          <p className='text-muted-foreground text-sm'>
-                            Notificaciones...
-                          </p>
-                        </div>
-                      </Label>
-                    )}
-                  />
-                </FieldGroup>
-              </FieldSet>
-            </CardContent>
-          </Card>
-        </form>
-      </Form>
+              }
+              title='Guardar cambios'
+            >
+              <SaveIcon />
+              Guardar cambios
+            </Button>
+          </form>
+        </Form>
+      </TabsContent>
+      <TabsContent value='password'>
+        <Form {...passwordForm}>
+          <form onSubmit={passwordForm.handleSubmit(onSubmitPassword)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
+            <Card>
+              <CardContent className='flex flex-col gap-4'>
+                <FieldSet>
+                  <FieldLegend>Cambiar contraseña</FieldLegend>
+                  <FieldGroup>
+                    <Controller
+                      name='password'
+                      control={passwordForm.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Nueva contraseña:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} id={field.name} type='password' autoComplete='new-password' disabled={isFormDisabled} />
+                            <InputGroupAddon>
+                              <EllipsisIcon />
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      name='passwordRepeat'
+                      control={passwordForm.control}
+                      render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Repetir nueva contraseña:</FieldLabel>
+                          <InputGroup>
+                            <InputGroupInput {...field} id={field.name} type='password' autoComplete='new-password' disabled={isFormDisabled} />
+                            <InputGroupAddon>
+                              <EllipsisIcon />
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {fieldState.invalid && (
+                            <FieldError errors={[fieldState.error]} />
+                          )}
+                        </Field>
+                      )}
+                    />
+                  </FieldGroup>
+                </FieldSet>
+              </CardContent>
+            </Card>
+            <Button
+              className='w-min self-end justify-self-end'
+              disabled={!(passwordForm.getValues('password')) || !(passwordForm.getValues('passwordRepeat')) || isFormDisabled}
+              title='Actualizar contraseña'
+            >
+              <SaveIcon />
+              Actualizar contraseña
+            </Button>
+          </form>
+        </Form>
+      </TabsContent>
+      <TabsContent value='notifications'>
+        <Form {...notificationForm}>
+          <form onSubmit={notificationForm.handleSubmit(onSubmitNotification)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
+            <Card>
+              <CardContent className='flex flex-col gap-4'>
+                <FieldSet>
+                  <FieldLegend>Notificaciones</FieldLegend>
+                  <FieldGroup>
+                    <Controller
+                      name='isOptedInNotificationsEmail'
+                      control={notificationForm.control}
+                      render={({field}) => (
+                        <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                          <Checkbox
+                            id='toggle-email-notifications'
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className='data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700'
+                            disabled={isFormDisabled}
+                          />
+                          <div className='grid gap-1.5 font-normal'>
+                            <p className='text-sm leading-none font-medium'>
+                              Recibir notificaciones por correo electrónico
+                            </p>
+                            <p className='text-muted-foreground text-sm'>
+                              Notificaciones...
+                            </p>
+                          </div>
+                        </Label>
+                      )}
+                    />
+                    <Controller
+                      name='isOptedInNotificationsSMS'
+                      control={notificationForm.control}
+                      render={({field}) => (
+                        <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
+                          <Checkbox
+                            id='toggle-sms-notifications'
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className='data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700'
+                            disabled={isFormDisabled}
+                          />
+                          <div className='grid gap-1.5 font-normal'>
+                            <p className='text-sm leading-none font-medium'>
+                              Recibir notificaciones por SMS
+                            </p>
+                            <p className='text-muted-foreground text-sm'>
+                              Notificaciones...
+                            </p>
+                          </div>
+                        </Label>
+                      )}
+                    />
+                  </FieldGroup>
+                </FieldSet>
+              </CardContent>
+            </Card>
+          </form>
+        </Form>
+      </TabsContent>
       {(user.status !== InvestorStatus.VERIFIED && user.status !== InvestorStatus.DENIED) && (
         <>
-          <FieldSeparator className='col-span-full' />
-          <Form {...documentForm}>
-            <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
-              <Card>
-                <CardContent className='flex flex-col gap-4'>
-                  <FieldSet>
-                    <FieldLegend>Documento de identidad</FieldLegend>
-                    <FieldGroup>
-                      <Controller
-                        name='taxId'
-                        control={documentForm.control}
-                        render={({ field, fieldState }) => (
-                          <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor={field.name}>CIF/NIF:</FieldLabel>
-                            <InputGroup>
-                              <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='A12345678' disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled} />
-                              <InputGroupAddon>
-                                <IdCardIcon/>
-                              </InputGroupAddon>
-                              <InputGroupAddon align={'inline-end'}>
-                                <Tooltip>
-                                  <TooltipTrigger className='leading-1'>
-                                    <CircleQuestionMarkIcon className='w-4 h-4'/>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p className='text-center'>Valor del documento CIF/NIF (número + letras)</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </InputGroupAddon>
-                            </InputGroup>
-                            {fieldState.invalid && (
-                              <FieldError errors={[fieldState.error]} />
-                            )}
-                          </Field>
-                        )}
-                      />
-                      <Controller
-                        name='document'
-                        control={documentForm.control}
-                        render={({ field, fieldState }) => (
-                          <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor={field.name}>Documento/Fotocopia CIF/NIF:</FieldLabel>
-                            <InputGroup>
-                              <InputGroupInput
-                                aria-invalid={fieldState.invalid}
-                                id={field.name}
-                                onChange={(e) => field.onChange(e.target.files)}
-                                onBlur={field.onBlur}
-                                ref={field.ref}
-                                type='file'
-                                className='pt-1.5'
-                                accept='image/jpg,image/jpeg,image/png,.pdf'
-                                aria-description='Fotocopia que permita visualizar el documento completo'
-                                disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled}
-                              />
-                              <InputGroupAddon>
-                                <IdCardIcon/>
-                              </InputGroupAddon>
-                              <InputGroupAddon align={'inline-end'}>
-                                <Tooltip>
-                                  <TooltipTrigger className='leading-1'>
-                                    <CircleQuestionMarkIcon className='w-4 h-4'/>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p className='text-center'>Fotocopia que permita visualizar el documento CIF/NIF completo</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </InputGroupAddon>
-                            </InputGroup>
-                            {fieldState.invalid && (
-                              <FieldError errors={[fieldState.error]} />
-                            )}
-                          </Field>
-                        )}
-                      />
-                    </FieldGroup>
-                  </FieldSet>
-                </CardContent>
-              </Card>
-              <Button
-                className='w-min self-end justify-self-end'
-                disabled={(!document || taxId === '' ) || isFormDisabled}
-                title='Subir documento'
-              >
-                <UploadIcon />
-                <span className='lg:hidden'>
+          <TabsContent value='documents'>
+            <Form {...documentForm}>
+              <form onSubmit={documentForm.handleSubmit(onSubmitDocument)} className='flex flex-col gap-4 **:data-[slot=field-group]:grid lg:**:data-[slot=field-group]:grid-cols-2'>
+                <Card>
+                  <CardContent className='flex flex-col gap-4'>
+                    <FieldSet>
+                      <FieldLegend>Documento de identidad</FieldLegend>
+                      <FieldGroup>
+                        <Controller
+                          name='taxId'
+                          control={documentForm.control}
+                          render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                              <FieldLabel htmlFor={field.name}>CIF/NIF:</FieldLabel>
+                              <InputGroup>
+                                <InputGroupInput {...field} aria-invalid={fieldState.invalid} id={field.name} type='text' placeholder='A12345678' disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled} />
+                                <InputGroupAddon>
+                                  <IdCardIcon/>
+                                </InputGroupAddon>
+                                <InputGroupAddon align={'inline-end'}>
+                                  <Tooltip>
+                                    <TooltipTrigger className='leading-1'>
+                                      <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className='text-center'>Valor del documento CIF/NIF (número + letras)</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </InputGroupAddon>
+                              </InputGroup>
+                              {fieldState.invalid && (
+                                <FieldError errors={[fieldState.error]} />
+                              )}
+                            </Field>
+                          )}
+                        />
+                        <Controller
+                          name='document'
+                          control={documentForm.control}
+                          render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                              <FieldLabel htmlFor={field.name}>Documento/Fotocopia CIF/NIF:</FieldLabel>
+                              <InputGroup>
+                                <InputGroupInput
+                                  aria-invalid={fieldState.invalid}
+                                  id={field.name}
+                                  onChange={(e) => field.onChange(e.target.files)}
+                                  onBlur={field.onBlur}
+                                  ref={field.ref}
+                                  type='file'
+                                  className='pt-1.5'
+                                  accept='image/jpg,image/jpeg,image/png,.pdf'
+                                  aria-description='Fotocopia que permita visualizar el documento completo'
+                                  disabled={user.status === InvestorStatus.VERIFIED || isFormDisabled}
+                                />
+                                <InputGroupAddon>
+                                  <IdCardIcon/>
+                                </InputGroupAddon>
+                                <InputGroupAddon align={'inline-end'}>
+                                  <Tooltip>
+                                    <TooltipTrigger className='leading-1'>
+                                      <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className='text-center'>Fotocopia que permita visualizar el documento CIF/NIF completo</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </InputGroupAddon>
+                              </InputGroup>
+                              {fieldState.invalid && (
+                                <FieldError errors={[fieldState.error]} />
+                              )}
+                            </Field>
+                          )}
+                        />
+                      </FieldGroup>
+                    </FieldSet>
+                  </CardContent>
+                </Card>
+                <Button
+                  className='w-min self-end justify-self-end'
+                  disabled={(!document || taxId === '' ) || isFormDisabled}
+                  title='Subir documento'
+                >
+                  <UploadIcon />
                   Subir documento
-                </span>
-              </Button>
-            </form>
-          </Form>
+                </Button>
+              </form>
+            </Form>
+          </TabsContent>
         </>
       )}
+      <TabsContent value='bank-account'>
+        <BankAccountForm user={user} />
+      </TabsContent>
       <div className='col-span-full flex justify-end'>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -596,26 +630,24 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
         </AlertDialog>
       </div>
 
-      {
-        user.status === InvestorStatus.PENDING && (
-          <AlertDialog defaultOpen>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Cuenta en revisión</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Su cuenta se encuentra actualmente en estado de revisión.
-                  Nuestro equipo está evaluando la información proporcionada y se pondrá en contacto con usted si se requiere alguna acción adicional.
-                  Hasta entonces, no podrá actualizar los datos de su cuenta.
-                  Gracias por su paciencia.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogAction>Aceptar</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )
-      }
-    </>
+      {user.status === InvestorStatus.PENDING && (
+        <AlertDialog defaultOpen>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cuenta en revisión</AlertDialogTitle>
+              <AlertDialogDescription>
+                Su cuenta se encuentra actualmente en estado de revisión.
+                Nuestro equipo está evaluando la información proporcionada y se pondrá en contacto con usted si se requiere alguna acción adicional.
+                Hasta entonces, no podrá actualizar los datos de su cuenta.
+                Gracias por su paciencia.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction>Aceptar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+    </Tabs>
   )
 }

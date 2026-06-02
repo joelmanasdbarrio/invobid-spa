@@ -83,10 +83,12 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     })
   }, [auction, baseForm])
 
+  const watchedStartingPrice = useWatch({ control: baseForm.control, name: 'startingPrice' })
   const watchedsvc = useWatch({ control: baseForm.control, name: 'svc' })
   const watchedDateEnd = useWatch({ control: baseForm.control, name: 'auctionDateEnd' })
 
   const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedsvc) ?? auction?.invoice
+  const selectedInvoceSellerFee = selectedInvoice?.transactionFee.sellerPercentage ?? 0
   const invoiceDueDate = selectedInvoice?.dueDate
 
   const auctionEndMaxDate = invoiceDueDate
@@ -147,7 +149,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
         setAuction(res.data)
         setOriginalAuction(res.data)
       })
-      .then(() => navigate(`/user/auctions/${auctionId}`))
+      .then(() => navigate(`/auctions/${auctionId}`))
   }
 
   function onSubmitValidate (data: z.infer<typeof validateFormSchema>) {
@@ -156,7 +158,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       status: data.status
     }))
       .then(res => setAuction(res.data))
-      .then(() => navigate(`/user/auctions/${auctionId}`))
+      .then(() => navigate(`/auctions/${auctionId}`))
   }
 
   return (
@@ -277,7 +279,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                   <Field>
                     <FieldLabel htmlFor='invoiceRating'>Rating:</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput id='invoiceRating' value={selectedInvoice?.rating} type='text' required disabled />
+                      <InputGroupInput id='invoiceRating' value={selectedInvoice?.rating ?? ''} type='text' required disabled />
                       <InputGroupAddon>%</InputGroupAddon>
                     </InputGroup>
                   </Field>
@@ -312,7 +314,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                               step='0.01'
                               placeholder='1000'
                               disabled={isFormDisabled}
-                              value={field.value}
+                              value={field.value ?? ''}
                               onChange={e => field.onChange(e.target.valueAsNumber)}
                               onBlur={() => {
                                 if (field.value !== undefined && !isNaN(field.value)) {
@@ -337,6 +339,12 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                         </Field>
                       )}
                     />
+                    {watchedStartingPrice > 0 && selectedInvoceSellerFee > 0 && (
+                      <div className='text-xs text-muted-foreground flex items-center justify-end gap-4'>
+                        <span>Comisión ({Number(selectedInvoceSellerFee).toFixed(2)}%):</span>
+                        <span>-{(Number(selectedInvoceSellerFee) / 100 * Number(watchedStartingPrice)).toFixed(2)}€</span>
+                      </div>
+                    )}
                     <div className='flex gap-2'>
                       <ButtonGroup>
                         <Button

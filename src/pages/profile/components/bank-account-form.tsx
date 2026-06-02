@@ -51,7 +51,7 @@ export default function BankAccountForm ({ user }: { user: Investor }) {
         <Card>
           <CardContent className='flex flex-col gap-4'>
             <FieldSet>
-              <FieldLegend>Cartera de fondos</FieldLegend>
+              <FieldLegend>Actualiza tus datos bancarios</FieldLegend>
               <FieldGroup>
                 <Controller
                   name='balance'

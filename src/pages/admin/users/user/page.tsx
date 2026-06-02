@@ -18,6 +18,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip.tsx'
+import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { UserChangeHistory } from '@/pages/admin/users/user/components/user-change-history'
 import UserDocuments from '@/pages/admin/users/user/components/user-documents/user-documents'
 import { getInvestorById, updateInvestorById } from '@/services/investor.api.ts'
@@ -159,12 +160,15 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
 
   function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
     e.preventDefault()
-    navigator.clipboard.writeText(String(text))
     const button = e.currentTarget
-    button.setAttribute('data-copied', 'true')
-    setTimeout(() => {
-      button.removeAttribute('data-copied')
-    }, 2000)
+    performCopyToClipboard(text).then(success => {
+      if (success) {
+        button.setAttribute('data-copied', 'true')
+        setTimeout(() => {
+          button.removeAttribute('data-copied')
+        }, 2000)
+      }
+    })
   }
 
   const updateNotesMap: Record<string, string> = {
