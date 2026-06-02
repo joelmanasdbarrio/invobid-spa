@@ -34,7 +34,7 @@ import {
   UserIcon,
   UsersIcon
 } from 'lucide-react'
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { use, useCallback, useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useLocation } from 'react-router'
 import { z } from 'zod'
@@ -49,7 +49,7 @@ const baseFormSchema = z.object({
     .min(2, 'El nombre debe tener al menos 2 caracteres'),
   companyName: z.string()
     .min(1, 'La razón social es obligatoria'),
-  email: z.email('Correo electrónico no válido'),
+  email: z.email({ error: 'Correo electrónico no válido' }),
   phoneNumber: z.coerce.number<number>()
     .min(6, 'El número de teléfono es obligatorio')
 })
@@ -79,7 +79,7 @@ const notificationFormSchema = z.object({
 })
 
 const documentFormSchema = z.object({
-  taxId: z.string('El CIF/NIF es obligatorio')
+  taxId: z.string({ error: 'El CIF/NIF es obligatorio' })
     .min(7, 'El NIF/CIF debe tener al menos 7 caracteres'),
   document: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'El documento es obligatorio')
@@ -88,16 +88,17 @@ const documentFormSchema = z.object({
 
 export default function InvestorProfileForm ({ user }: { user: Investor }) {
   const location = useLocation()
+  const hash = location.hash
   const [activeTab, setActiveTab] = useState('contact')
 
   useEffect(() => {
-    const hash = location.hash.slice(1)
-    if (hash) {
-      setActiveTab(hash)
+    const tab = hash.slice(1)
+    if (tab) {
+      setActiveTab(tab)
     }
-  }, [location.hash])
+  }, [hash])
 
-  const authContext = useContext(AuthContext)
+  const authContext = use(AuthContext)
   if (!authContext) {
     throw new Error('AuthContext must be used within AuthProvider')
   }
@@ -286,7 +287,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                               <InputGroupAddon align={'inline-end'}>
                                 <Tooltip>
                                   <TooltipTrigger className='leading-1'>
-                                    <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                    <CircleQuestionMarkIcon className='size-4'/>
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p className='text-center'>Nombre y apellidos según <br /> documento de identificación</p>
@@ -462,7 +463,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                               Recibir notificaciones por correo electrónico
                             </p>
                             <p className='text-muted-foreground text-sm'>
-                              Notificaciones...
+                              Notificaciones…
                             </p>
                           </div>
                         </Label>
@@ -485,7 +486,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                               Recibir notificaciones por SMS
                             </p>
                             <p className='text-muted-foreground text-sm'>
-                              Notificaciones...
+                              Notificaciones…
                             </p>
                           </div>
                         </Label>
@@ -522,7 +523,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                                 <InputGroupAddon align={'inline-end'}>
                                   <Tooltip>
                                     <TooltipTrigger className='leading-1'>
-                                      <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                      <CircleQuestionMarkIcon className='size-4'/>
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       <p className='text-center'>Valor del documento CIF/NIF (número + letras)</p>
@@ -561,7 +562,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                                 <InputGroupAddon align={'inline-end'}>
                                   <Tooltip>
                                     <TooltipTrigger className='leading-1'>
-                                      <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                      <CircleQuestionMarkIcon className='size-4'/>
                                     </TooltipTrigger>
                                     <TooltipContent>
                                       <p className='text-center'>Fotocopia que permita visualizar el documento CIF/NIF completo</p>

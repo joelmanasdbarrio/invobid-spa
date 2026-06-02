@@ -30,33 +30,24 @@ export function DateTimeRangePicker ({
   placeholder = 'Selecciona rango de fechas y hora'
 }: DateTimeRangePickerProps) {
   const { locale } = useLocale()
-
-  const [from, setFrom] = React.useState<Date | undefined>(
-    fromValue ? parseDateTime(fromValue) : undefined
+  const from = React.useMemo(
+    () => (fromValue ? parseDateTime(fromValue) : undefined),
+    [fromValue]
   )
-  const [to, setTo] = React.useState<Date | undefined>(
-    toValue ? parseDateTime(toValue) : undefined
+  const to = React.useMemo(
+    () => (toValue ? parseDateTime(toValue) : undefined),
+    [toValue]
   )
-
-  React.useEffect(() => {
-    setFrom(fromValue ? parseDateTime(fromValue) : undefined)
-  }, [fromValue])
-
-  React.useEffect(() => {
-    setTo(toValue ? parseDateTime(toValue) : undefined)
-  }, [toValue])
 
   const handleRangeSelect = (range: DateRange | undefined) => {
     if (range?.from) {
       const next = new Date(range.from)
       next.setHours(from?.getHours() ?? 0, from?.getMinutes() ?? 0, 0, 0)
-      setFrom(next)
       onFromChange?.(next.toISOString())
     }
     if (range?.to) {
       const next = new Date(range.to)
       next.setHours(to?.getHours() ?? 0, to?.getMinutes() ?? 0, 0, 0)
-      setTo(next)
       onToChange?.(next.toISOString())
     }
   }
@@ -65,7 +56,6 @@ export function DateTimeRangePicker ({
     const [hours, minutes] = e.target.value.split(':').map(Number)
     const next = from ? new Date(from) : new Date()
     next.setHours(hours, minutes, 0, 0)
-    setFrom(next)
     onFromChange?.(next.toISOString())
   }
 
@@ -73,7 +63,6 @@ export function DateTimeRangePicker ({
     const [hours, minutes] = e.target.value.split(':').map(Number)
     const next = to ? new Date(to) : new Date()
     next.setHours(hours, minutes, 0, 0)
-    setTo(next)
     onToChange?.(next.toISOString())
   }
 
@@ -99,7 +88,7 @@ export function DateTimeRangePicker ({
             !from && !to && 'text-muted-foreground'
           )}
         >
-          <CalendarIcon className={cn('mr-2 h-4 w-4 text-muted-foreground shrink-0', disabled && 'cursor-not-allowed opacity-80')} />
+          <CalendarIcon className={cn('mr-2 size-4 text-muted-foreground shrink-0', disabled && 'cursor-not-allowed opacity-80')} />
           <span className={cn('truncate', disabled && 'cursor-not-allowed opacity-50')}>
             {displayText}
           </span>
@@ -119,20 +108,22 @@ export function DateTimeRangePicker ({
         />
         <div className='border-t p-3 grid grid-cols-2 gap-4'>
           <div className='flex items-center gap-2'>
-            <ClockIcon className='h-4 w-4 text-muted-foreground shrink-0' />
+            <ClockIcon className='size-4 text-muted-foreground shrink-0' />
             <span className='text-xs text-muted-foreground'>Inicio</span>
             <input
               type='time'
+              aria-label='Hora de inicio'
               value={from ? toTimeString(from) : ''}
               onChange={handleFromTimeChange}
               className='flex-1 bg-transparent text-sm outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] rounded px-1'
             />
           </div>
           <div className='flex items-center gap-2'>
-            <ClockIcon className='h-4 w-4 text-muted-foreground shrink-0' />
+            <ClockIcon className='size-4 text-muted-foreground shrink-0' />
             <span className='text-xs text-muted-foreground'>Fin</span>
             <input
               type='time'
+              aria-label='Hora de fin'
               value={to ? toTimeString(to) : ''}
               onChange={handleToTimeChange}
               className='flex-1 bg-transparent text-sm outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] rounded px-1'
@@ -143,8 +134,6 @@ export function DateTimeRangePicker ({
           variant='outline'
           className='w-full rounded-none'
           onClick={() => {
-            setFrom(undefined)
-            setTo(undefined)
             onFromChange?.(undefined)
             onToChange?.(undefined)
           }}

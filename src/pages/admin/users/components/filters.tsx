@@ -167,12 +167,12 @@ export default function UserFilters (
                             field.value === InvestorType.INDIVIDUAL
                               ? (
                                 <span className='flex items-center gap-2'>
-                                  <UserIcon className='w-4 h-4' />
+                                  <UserIcon className='size-4' />
                                   Particular
                                 </span>
                               ) : field.value === InvestorType.COMPANY ? (
                                 <span className='flex items-center gap-2'>
-                                  <BuildingIcon className='w-4 h-4' />
+                                  <BuildingIcon className='size-4' />
                                   Empresa
                                 </span>
                               ) : (
@@ -196,13 +196,13 @@ export default function UserFilters (
                         </SelectItem>
                         <SelectItem value={InvestorType.INDIVIDUAL}>
                           <span className='flex items-center gap-2'>
-                            <UserIcon className='w-4 h-4' />
+                            <UserIcon className='size-4' />
                             Particular
                           </span>
                         </SelectItem>
                         <SelectItem value={InvestorType.COMPANY}>
                           <span className='flex items-center gap-2'>
-                            <BuildingIcon className='w-4 h-4' />
+                            <BuildingIcon className='size-4' />
                             Empresa
                           </span>
                         </SelectItem>

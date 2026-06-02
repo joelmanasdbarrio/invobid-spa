@@ -21,6 +21,25 @@ const validateFormSchema = z.object({
   status: z.enum(DebtorStatus)
 })
 
+const DEBTOR_STATUS_TEXT_MAP: {
+  pending: { title: string; icon: React.JSX.Element };
+  correction: { title: string; icon: React.JSX.Element };
+  denied: { title: string; icon: React.JSX.Element }
+} = {
+  pending: {
+    title: 'Pendiente de verificación',
+    icon: <ClockIcon className='w-full h-full rounded-full text-yellow-600 bg-yellow-300/25 p-2'/>
+  },
+  correction: {
+    title: 'Corrección requerida',
+    icon: <CircleAlertIcon className='w-full h-full rounded-full text-red-600 bg-red-300/25 p-2'/>
+  },
+  denied: {
+    title: 'Deudor denegado',
+    icon: <OctagonXIcon className='w-full h-full rounded-full text-zinc-600 bg-zinc-300/25 p-2'/>
+  }
+}
+
 const baseFormSchema = z.object({
   companyName: z.string().min(2, 'El nombre de la empresa debe tener al menos 2 caracteres'),
   taxId: z.string().min(7, 'El NIF/CIF debe tener al menos 7 caracteres'),
@@ -71,8 +90,10 @@ const baseFormSchema = z.object({
 
 export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {debtorId} = useParams<{ debtorId: string }>()
-  const [debtor, setDebtor] = useState<Debtor | undefined>()
-  const [originalDebtor, setOriginalDebtor] = useState<Debtor | undefined>(debtor)
+  const [debtorState, setDebtorState] = useState<{ debtor: Debtor | undefined; originalDebtor: Debtor | undefined }>({ debtor: undefined, originalDebtor: undefined })
+  const debtor = debtorState.debtor
+  const originalDebtor = debtorState.originalDebtor
+  const setDebtor = (d: Debtor | undefined) => setDebtorState(prev => ({ ...prev, debtor: d }))
 
   const isFormDisabled = !debtor || debtor.status !== DebtorStatus.CORRECTION
 
@@ -125,8 +146,7 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
     getDebtorById(debtorId)
       .then(res => res.data)
       .then(data => {
-        setDebtor(data)
-        setOriginalDebtor(data)
+        setDebtorState({ debtor: data, originalDebtor: data })
         setLastBreadcrumb(data.companyName)
       })
       .catch(() => {
@@ -178,30 +198,11 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
       .then(() => navigate(`/debtors/${debtorId}`))
   }
 
-  const debtorStatusTextMap: {
-    pending: { title: string; icon: React.JSX.Element };
-    correction: { title: string; icon: React.JSX.Element };
-    denied: { title: string; icon: React.JSX.Element }
-  } = {
-    pending: {
-      title: 'Pendiente de verificación',
-      icon: <ClockIcon className='w-full h-full rounded-full text-yellow-600 bg-yellow-300/25 p-2'/>
-    },
-    correction: {
-      title: 'Corrección requerida',
-      icon: <CircleAlertIcon className='w-full h-full rounded-full text-red-600 bg-red-300/25 p-2'/>
-    },
-    denied: {
-      title: 'Deudor denegado',
-      icon: <OctagonXIcon className='w-full h-full rounded-full text-zinc-600 bg-zinc-300/25 p-2'/>
-    }
-  }
-
   return (
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <HandCoinsIcon className='w-6 h-6' />
+          <HandCoinsIcon className='size-6' />
         </span>
         <h2>Gestionar deudor</h2>
         {(debtor?.status === DebtorStatus.CORRECTION || debtor?.status === DebtorStatus.PENDING) && (
@@ -588,11 +589,11 @@ export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (b
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Item variant='muted' className='gap-2'>
-              <ItemMedia className='self-center! w-10 h-10'>
-                {debtorStatusTextMap[debtor?.status].icon}
+              <ItemMedia className='self-center! size-10'>
+                {DEBTOR_STATUS_TEXT_MAP[debtor?.status].icon}
               </ItemMedia>
               <ItemContent>
-                <ItemTitle>{debtorStatusTextMap[debtor?.status].title}</ItemTitle>
+                <ItemTitle>{DEBTOR_STATUS_TEXT_MAP[debtor?.status].title}</ItemTitle>
                 <ItemDescription>
                   {debtor?.lastCommunication}
                 </ItemDescription>

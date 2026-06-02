@@ -63,7 +63,7 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <GavelIcon className='w-6 h-6' />
+          <GavelIcon className='size-6' />
         </span>
         <h2>Consultar subasta</h2>
       </div>

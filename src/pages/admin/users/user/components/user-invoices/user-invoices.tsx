@@ -37,7 +37,7 @@ export default function UserInvoices ({ investorId } : { investorId: string | un
           <Button
             variant='outline'
             size='sm'
-            onClick={() => setCurrentPage(currentPage - 1)}
+            onClick={() => setCurrentPage(prev => prev - 1)}
             disabled={currentPage === 1}
           >
             <ChevronLeftIcon />
@@ -45,7 +45,7 @@ export default function UserInvoices ({ investorId } : { investorId: string | un
           <Button
             variant='outline'
             size='sm'
-            onClick={() => setCurrentPage(currentPage + 1)}
+            onClick={() => setCurrentPage(prev => prev + 1)}
             disabled={currentPage * currentLimit >= totalItems}
           >
             <ChevronRightIcon />

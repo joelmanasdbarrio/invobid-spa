@@ -18,7 +18,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
       enableHiding: false,
       cell: ({row}) => (
         <Link to={`/admin/auctions/${row.original.id}`}>
-          <ExternalLinkIcon className='w-4 h-4' />
+          <ExternalLinkIcon className='size-4' />
         </Link>
       )
     },

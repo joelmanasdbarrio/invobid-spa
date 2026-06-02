@@ -8,7 +8,7 @@ import { updateBankAccountById } from '@/services/bank-account.api'
 import type { Investor } from '@/types/User'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SaveIcon } from 'lucide-react'
-import { useContext } from 'react'
+import { use } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import z from 'zod'
 
@@ -17,7 +17,7 @@ const bankAccountFormSchema = z.object({
 })
 
 export default function BankAccountForm ({ user }: { user: Investor }) {
-  const authContext = useContext(AuthContext)
+  const authContext = use(AuthContext)
   if (!authContext) {
     throw new Error('AuthContext must be used within AuthProvider')
   }

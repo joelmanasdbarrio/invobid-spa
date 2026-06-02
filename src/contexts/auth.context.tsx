@@ -1,65 +1,90 @@
 import { getAdminById } from '@/services/admin.api'
 import { getInvestorById } from '@/services/investor.api'
-import { UserType } from '@/types/User'
+import { UserType, type User } from '@/types/User'
 import Cookies from 'js-cookie'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { AuthContext } from './auth.context'
 
 export function AuthProvider ({children}: {children: React.ReactNode}) {
-  const userCookie = Cookies.get('logged-in-user')
-  const [loggedInUser, setLoggedInUser] = useState(userCookie ? JSON.parse(userCookie) : null)
-  const [loggedInUserId, setLoggedInUserId] = useState(userCookie ? JSON.parse(userCookie).id : null)
-  const [isLoading, setIsLoading] = useState(!!loggedInUserId)
+  const [authState, setAuthState] = useState({ loggedInUser: undefined as User | null | undefined, isLoading: true })
+  const { loggedInUser, isLoading } = authState
+  const setLoggedInUser = (user: User | null | ((prev: User | null) => User | null)) => {
+    setAuthState(prev => ({
+      ...prev,
+      loggedInUser: typeof user === 'function' ? user(prev.loggedInUser ?? null) : user
+    }))
+  }
 
   useEffect(() => {
-    setLoggedInUserId(loggedInUser ? loggedInUser.id : null)
-  }, [loggedInUser])
+    const cookie = Cookies.get('logged-in-user')
+    const parsedUserCookie = cookie ? JSON.parse(cookie) : null
 
-  useEffect(() => {
-    if(loggedInUserId) {
-      setIsLoading(true)
-      switch (loggedInUser?.type) {
-        case UserType.ADMIN:
-          getAdminById(loggedInUserId)
-            .then((res) => {
-              setLoggedInUser(res.data)
-              setLoggedInUserId(res.data.id)
-            })
-            .catch(() => {
-              toast.error('Error al obtener los datos del usuario. Por favor, inicia sesión de nuevo.')
-              setLoggedInUser(null)
-              Cookies.remove('logged-in-user')
-            })
-            .finally(() => {
-              setIsLoading(false)
-            })
-          break
-        case UserType.INVESTOR:
-          getInvestorById(loggedInUserId)
-            .then((res) => {
-              setLoggedInUser(res.data)
-              setLoggedInUserId(res.data.id)
-            })
-            .catch(() => {
-              toast.error('Error al obtener los datos del usuario. Por favor, inicia sesión de nuevo.')
-              setLoggedInUser(null)
-              Cookies.remove('logged-in-user')
-            })
-            .finally(() => {
-              setIsLoading(false)
-            })
-          break
-        default:
-          setIsLoading(false)
-      }
-    } else {
-      setIsLoading(false)
+    if (!parsedUserCookie?.id || !parsedUserCookie?.type) {
+      setAuthState({ loggedInUser: null, isLoading: false })
+      return
     }
-  }, [loggedInUser?.type, loggedInUserId])
+
+    let isCancelled = false
+
+    setAuthState(prev => ({ ...prev, isLoading: true }))
+    switch (parsedUserCookie.type) {
+      case UserType.ADMIN:
+        getAdminById(parsedUserCookie.id)
+          .then((res) => {
+            if (!isCancelled) {
+              setAuthState(prev => ({ ...prev, loggedInUser: res.data }))
+            }
+          })
+          .catch(() => {
+            if (!isCancelled) {
+              toast.error('Error al obtener los datos del usuario. Por favor, inicia sesión de nuevo.')
+              setAuthState(prev => ({ ...prev, loggedInUser: null }))
+              Cookies.remove('logged-in-user')
+            }
+          })
+          .finally(() => {
+            if (!isCancelled) {
+              setAuthState(prev => ({ ...prev, isLoading: false }))
+            }
+          })
+        break
+      case UserType.INVESTOR:
+        getInvestorById(parsedUserCookie.id)
+          .then((res) => {
+            if (!isCancelled) {
+              setAuthState(prev => ({ ...prev, loggedInUser: res.data }))
+            }
+          })
+          .catch(() => {
+            if (!isCancelled) {
+              toast.error('Error al obtener los datos del usuario. Por favor, inicia sesión de nuevo.')
+              setAuthState(prev => ({ ...prev, loggedInUser: null }))
+              Cookies.remove('logged-in-user')
+            }
+          })
+          .finally(() => {
+            if (!isCancelled) {
+              setAuthState(prev => ({ ...prev, isLoading: false }))
+            }
+          })
+        break
+      default:
+        setAuthState(prev => ({ ...prev, isLoading: false }))
+    }
+
+    return () => {
+      isCancelled = true
+    }
+  }, [])
+
+  const contextValue = useMemo(
+    () => ({ loggedInUser, setLoggedInUser, isLoading }),
+    [loggedInUser, isLoading]
+  )
 
   return (
-    <AuthContext.Provider value={{ loggedInUser, setLoggedInUser, isLoading }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   )

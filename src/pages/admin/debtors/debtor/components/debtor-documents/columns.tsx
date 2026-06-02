@@ -22,7 +22,7 @@ export function useDocumentColumns (): ColumnDef<Document>[] {
           <div className='flex items-center gap-1'>
             <DocumentPreview document={row.original} triggerOnly protectedDocument />
             <Button variant='ghost' onClick={() => downloadDocument(row.original.id, filename)}>
-              <DownloadIcon className='w-4 h-4' />
+              <DownloadIcon className='size-4' />
             </Button>
           </div>
         )

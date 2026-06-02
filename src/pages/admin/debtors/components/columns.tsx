@@ -11,7 +11,7 @@ export const debtorColumns: ColumnDef<Debtor>[] = [
     enableHiding: false,
     cell: ({row}) => (
       <Link to={`/admin/debtors/${row.original.id}`}>
-        <ExternalLinkIcon className='w-4 h-4' />
+        <ExternalLinkIcon className='size-4' />
       </Link>
     )
   },

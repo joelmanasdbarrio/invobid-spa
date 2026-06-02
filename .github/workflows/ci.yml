@@ -82,6 +82,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: millionco/react-doctor@main
+        with:
+          fail_if_score_below: 90
 
   publish:
     name: Publish Docker Image

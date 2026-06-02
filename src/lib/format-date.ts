@@ -1,3 +1,6 @@
+const dateFormatters = new Map<string, Intl.DateTimeFormat>()
+const dateTimeFormatters = new Map<string, Intl.DateTimeFormat>()
+
 /**
  * Format a date-only value for display using the user's locale.
  * Uses `timeZone: 'UTC'` to prevent off-by-one day shifts for users west of UTC.
@@ -8,12 +11,15 @@
  */
 export function formatDate (date: string | Date, locale: string): string {
   const d = typeof date === 'string' ? parseDateOnly(date) : date
-  return new Intl.DateTimeFormat(locale, {
-    timeZone: 'UTC',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).format(d)
+  if (!dateFormatters.has(locale)) {
+    dateFormatters.set(locale, new Intl.DateTimeFormat(locale, {
+      timeZone: 'UTC',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }))
+  }
+  return dateFormatters.get(locale)!.format(d)
 }
 
 /**
@@ -27,13 +33,16 @@ export function formatDate (date: string | Date, locale: string): string {
  */
 export function formatDateTime (date: string | Date, locale: string): string {
   const d = typeof date === 'string' ? new Date(date) : date
-  return new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(d)
+  if (!dateTimeFormatters.has(locale)) {
+    dateTimeFormatters.set(locale, new Intl.DateTimeFormat(locale, {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }))
+  }
+  return dateTimeFormatters.get(locale)!.format(d)
 }
 
 /**

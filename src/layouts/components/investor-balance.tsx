@@ -15,12 +15,12 @@ import { formatCurrency } from '@/lib/format-currency'
 import { connectBalanceSocket } from '@/services/bid.api'
 import type { Investor } from '@/types/User'
 import { EllipsisVerticalIcon, WalletIcon } from 'lucide-react'
-import { useContext, useEffect } from 'react'
+import { use, useEffect } from 'react'
 import { Link } from 'react-router'
 
 export default function InvestorBalance () {
   const { isMobile } = useSidebar()
-  const { loggedInUser, setLoggedInUser } = useContext(AuthContext)!
+  const { loggedInUser, setLoggedInUser } = use(AuthContext)!
   const investor = loggedInUser as Investor
 
   useEffect(() => {

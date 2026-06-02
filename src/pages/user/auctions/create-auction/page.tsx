@@ -19,7 +19,7 @@ import { getInvoices } from '@/services/invoice.api'
 import { type Invoice, InvoiceStatus } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckIcon, CircleQuestionMarkIcon, CopyIcon, GavelIcon, SaveIcon, SearchIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import z from 'zod'
@@ -27,7 +27,7 @@ import z from 'zod'
 const formSchema = z.object({
   svc: z.string().min(1, 'La factura es obligatoria'),
   startingPrice: z.number().positive('El precio inicial debe ser mayor que 0'),
-  auctionDateEnd: z.date('La fecha de fin no es válida').refine((date) => {
+  auctionDateEnd: z.date({ error: 'La fecha de fin no es válida' }).refine((date) => {
     const minDate = new Date()
     minDate.setDate(minDate.getDate() + 2)
     minDate.setHours(0, 0, 0, 0)
@@ -39,11 +39,29 @@ const formSchema = z.object({
   })
 })
 
+function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
+  e.preventDefault()
+  const button = e.currentTarget
+  performCopyToClipboard(text).then(success => {
+    if (success) {
+      button.setAttribute('data-copied', 'true')
+      setTimeout(() => {
+        button.removeAttribute('data-copied')
+      }, 2000)
+    }
+  })
+}
+
 export default function CreateAuctionPage () {
-  const [verifiedInvoices, setVerifiedInvoices] = useState<Invoice[]>()
+  const [invoiceState, setInvoiceState] = useState<{ invoices: Invoice[] | undefined; isLoading: boolean }>({ invoices: undefined, isLoading: false })
+  const verifiedInvoices = invoiceState.invoices
+  const isLoadingInvoices = invoiceState.isLoading
   const [invoiceSearch, setInvoiceSearch] = useState('')
-  const [isLoadingInvoices, setIsLoadingInvoices] = useState(false)
   const { locale } = useLocale()
+  const percentFormatter = useMemo(
+    () => new Intl.NumberFormat(locale, { maximumFractionDigits: 2, signDisplay: 'always' }),
+    [locale]
+  )
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,15 +94,14 @@ export default function CreateAuctionPage () {
     if (!loggedInUser) return
 
     const timer = setTimeout(() => {
-      setIsLoadingInvoices(true)
       getInvoices({
         sellerInvestorId: loggedInUser.id,
         ...(invoiceSearch ? { svc: invoiceSearch } : {}),
         status: InvoiceStatus.VERIFIED
       })
         .then(res => res.data)
-        .then(invoices => setVerifiedInvoices(invoices))
-        .finally(() => setIsLoadingInvoices(false))
+        .then(invoices => setInvoiceState({ invoices, isLoading: false }))
+        .catch(() => setInvoiceState(prev => ({ ...prev, isLoading: false })))
     }, 300)
 
     return () => clearTimeout(timer)
@@ -105,24 +122,11 @@ export default function CreateAuctionPage () {
     form.setValue('startingPrice', discountedPrice, { shouldDirty: true, shouldTouch: true })
   }
 
-  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
-    e.preventDefault()
-    const button = e.currentTarget
-    performCopyToClipboard(text).then(success => {
-      if (success) {
-        button.setAttribute('data-copied', 'true')
-        setTimeout(() => {
-          button.removeAttribute('data-copied')
-        }, 2000)
-      }
-    })
-  }
-
   return (
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <GavelIcon className='w-6 h-6' />
+          <GavelIcon className='size-6' />
         </span>
         <h2>Crear subasta</h2>
       </div>
@@ -167,7 +171,7 @@ export default function CreateAuctionPage () {
                               <InputGroupAddon align={'inline-end'}>
                                 <Tooltip>
                                   <TooltipTrigger className='leading-1'>
-                                    <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                    <CircleQuestionMarkIcon className='size-4'/>
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p className='text-center'>Solo facturas verificadas</p>
@@ -213,13 +217,13 @@ export default function CreateAuctionPage () {
                       </InputGroupAddon>
                       {selectedInvoice?.amount && (
                         <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, selectedInvoice?.amount ?? '')} className='group'>
-                            <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                          <button type='button' onClick={(e) => copyToClipboard(e, selectedInvoice?.amount ?? '')} className='group'>
+                            <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span>
-                                  <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                  <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent className='relative -top-2 right-3'>
@@ -269,7 +273,7 @@ export default function CreateAuctionPage () {
                             <InputGroupAddon align='inline-end'>
                               {selectedInvoice?.amount && field.value !== undefined && !isNaN(field.value) && field.value > 0 &&(
                                 <span className='text-sm text-muted-foreground'>
-                                  {`${new Intl.NumberFormat(locale, { maximumFractionDigits: 2, signDisplay: 'always' }).format((field.value / selectedInvoice.amount - 1) * 100)}%`}
+                                  {`${percentFormatter.format((field.value / selectedInvoice.amount - 1) * 100)}%`}
                                 </span>
                               )}
                             </InputGroupAddon>

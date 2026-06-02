@@ -20,7 +20,7 @@ import { AuctionStatus, type Auction } from '@/types/Auction'
 import { InvoiceStatus, type Invoice } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CircleSlashIcon, GavelIcon, SaveIcon, SearchIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import z from 'zod'
@@ -34,7 +34,7 @@ const validateFormSchema = z.object({
 const baseFormSchema = z.object({
   svc: z.string(),
   startingPrice: z.number().positive(),
-  auctionDateEnd: z.date('La fecha de vencimiento no es válida').refine((date) => {
+  auctionDateEnd: z.date({ error: 'La fecha de vencimiento no es válida' }).refine((date) => {
     const minDate = new Date()
     minDate.setDate(minDate.getDate() + 2)
     minDate.setHours(0, 0, 0, 0)
@@ -48,12 +48,19 @@ const baseFormSchema = z.object({
 
 export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const { auctionId } = useParams<{ auctionId: string }>()
-  const [auction, setAuction] = useState<Auction | undefined>()
-  const [originalAuction, setOriginalAuction] = useState<Auction | undefined>()
-  const [verifiedInvoices, setVerifiedInvoices] = useState<Invoice[]>()
+  const [auctionState, setAuctionState] = useState<{ auction: Auction | undefined; originalAuction: Auction | undefined }>({ auction: undefined, originalAuction: undefined })
+  const auction = auctionState.auction
+  const originalAuction = auctionState.originalAuction
+  const setAuction = (a: Auction | undefined) => setAuctionState(prev => ({ ...prev, auction: a }))
+  const [invoiceState, setInvoiceState] = useState<{ invoices: Invoice[] | undefined; isLoading: boolean }>({ invoices: undefined, isLoading: false })
+  const verifiedInvoices = invoiceState.invoices
+  const isLoadingInvoices = invoiceState.isLoading
   const [invoiceSearch, setInvoiceSearch] = useState('')
-  const [isLoadingInvoices, setIsLoadingInvoices] = useState(false)
   const { locale } = useLocale()
+  const percentFormatter = useMemo(
+    () => new Intl.NumberFormat(locale, { maximumFractionDigits: 2, signDisplay: 'always' }),
+    [locale]
+  )
 
   const isFormDisabled = !auction || auction.status !== AuctionStatus.DRAFT
 
@@ -105,8 +112,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     getAuctionById(auctionId)
       .then(res => res.data)
       .then(auction => {
-        setAuction(auction)
-        setOriginalAuction(auction)
+        setAuctionState({ auction, originalAuction: auction })
         setLastBreadcrumb(`Subasta de factura ${auction.invoice.svc}`)
       })
       .catch(() => {
@@ -118,15 +124,14 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     if (!loggedInUser) return
 
     const timer = setTimeout(() => {
-      setIsLoadingInvoices(true)
       getInvoices({
         sellerInvestorId: loggedInUser.id,
         ...(invoiceSearch ? { svc: invoiceSearch } : {}),
         status: InvoiceStatus.VERIFIED
       })
         .then(res => res.data)
-        .then(invoices => setVerifiedInvoices(invoices))
-        .finally(() => setIsLoadingInvoices(false))
+        .then(invoices => setInvoiceState({ invoices, isLoading: false }))
+        .catch(() => setInvoiceState(prev => ({ ...prev, isLoading: false })))
     }, 300)
 
     return () => clearTimeout(timer)
@@ -146,8 +151,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       auctionDateEnd: data.auctionDateEnd.toISOString()
     }))
       .then(res => {
-        setAuction(res.data)
-        setOriginalAuction(res.data)
+        setAuctionState({ auction: res.data, originalAuction: res.data })
       })
       .then(() => navigate(`/auctions/${auctionId}`))
   }
@@ -165,7 +169,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <GavelIcon className='w-6 h-6' />
+          <GavelIcon className='size-6' />
         </span>
         <h2>Gestionar subasta</h2>
         {auction?.status === AuctionStatus.DRAFT && (
@@ -328,7 +332,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                             <InputGroupAddon align='inline-end'>
                               {field.value !== undefined && selectedInvoice?.amount && (
                                 <span className='text-sm text-muted-foreground'>
-                                  {`${new Intl.NumberFormat(locale, { maximumFractionDigits: 2, signDisplay: 'always' }).format((field.value / selectedInvoice.amount - 1) * 100)}%`}
+                                  {`${percentFormatter.format((field.value / selectedInvoice.amount - 1) * 100)}%`}
                                 </span>
                               )}
                             </InputGroupAddon>

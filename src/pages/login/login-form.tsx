@@ -10,7 +10,7 @@ import { login } from '@/services/auth.api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Cookies from 'js-cookie'
 import { EllipsisIcon, MailIcon } from 'lucide-react'
-import { useContext, useState } from 'react'
+import { use, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router'
 import { z } from 'zod'
@@ -34,7 +34,7 @@ export default function LoginForm () {
     }
   })
 
-  const authContext = useContext(AuthContext)
+  const authContext = use(AuthContext)
   if (!authContext) {
     throw new Error('AuthContext must be used within AuthProvider')
   }
@@ -123,12 +123,11 @@ export default function LoginForm () {
                     </Field>
                   )}
                 />
-                <a
-                  href='#'
-                  className='ml-auto text-sm underline-offset-4 hover:underline'
+                <span
+                  className='ml-auto text-sm underline-offset-4 cursor-not-allowed text-muted-foreground'
                 >
                   ¿Has olvidado tu contraseña?
-                </a>
+                </span>
               </FieldGroup>
               <FieldGroup>
                 <Field>

@@ -18,7 +18,7 @@ import { type Admin, type Investor, InvestorType, UserType } from '@/types/User'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertDialogCancel, AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import { CircleQuestionMarkIcon, EllipsisIcon, MailIcon, UserIcon, UsersIcon } from 'lucide-react'
-import { useContext } from 'react'
+import { use } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -56,7 +56,7 @@ export default function AdminProfileForm ({ user }: { user: Admin }) {
     }
   })
 
-  const authContext = useContext(AuthContext)
+  const authContext = use(AuthContext)
   if (!authContext) {
     throw new Error('AuthContext must be used within AuthProvider')
   }
@@ -123,7 +123,7 @@ export default function AdminProfileForm ({ user }: { user: Admin }) {
                       <InputGroupAddon align={'inline-end'}>
                         <Tooltip>
                           <TooltipTrigger className='leading-1'>
-                            <CircleQuestionMarkIcon className='w-4 h-4'/>
+                            <CircleQuestionMarkIcon className='size-4'/>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className='text-center'>Nombre y apellidos según <br /> documento de identificación</p>

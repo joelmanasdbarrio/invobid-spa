@@ -50,10 +50,29 @@ const validateFormSchema = z.object({
   status: z.enum(InvoiceStatus)
 })
 
+const INVOICE_STATUS_TEXT_MAP: {
+  pending: { title: string; icon: React.JSX.Element };
+  correction: { title: string; icon: React.JSX.Element };
+  denied: { title: string; icon: React.JSX.Element }
+} = {
+  pending: {
+    title: 'Pendiente de verificación',
+    icon: <ClockIcon className='w-full h-full rounded-full text-yellow-600 bg-yellow-300/25 p-2'/>
+  },
+  correction: {
+    title: 'Corrección requerida',
+    icon: <CircleAlertIcon className='w-full h-full rounded-full text-red-600 bg-red-300/25 p-2'/>
+  },
+  denied: {
+    title: 'Factura denegada',
+    icon: <OctagonXIcon className='w-full h-full rounded-full text-zinc-600 bg-zinc-300/25 p-2'/>
+  }
+}
+
 const baseFormSchema = z.object({
-  debtorId: z.uuid('El deudor no es válido'),
+  debtorId: z.uuid({ error: 'El deudor no es válido' }),
   amount: z.coerce.number<number>(),
-  dueDate: z.date('La fecha de vencimiento no es válida').refine((date) => {
+  dueDate: z.date({ error: 'La fecha de vencimiento no es válida' }).refine((date) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const selectedDate = new Date(date)
@@ -83,11 +102,15 @@ const documentFormSchema = z.object({
 
 export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {invoiceId} = useParams<{ invoiceId: string }>()
-  const [invoice, setInvoice] = useState<Invoice | undefined>()
-  const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
-  const [verifiedDebtors, setVerifiedDebtors] = useState<Debtor[]>()
-  const [debtorSearch, setDebtorSearch] = useState('')
-  const [isLoadingDebtors, setIsLoadingDebtors] = useState(false)
+  const [invoiceState, setInvoiceState] = useState<{ invoice: Invoice | undefined; originalInvoice: Invoice | undefined }>({ invoice: undefined, originalInvoice: undefined })
+  const invoice = invoiceState.invoice
+  const originalInvoice = invoiceState.originalInvoice
+  const setInvoice = (i: Invoice | undefined) => setInvoiceState(prev => ({ ...prev, invoice: i }))
+  const [debtorState, setDebtorState] = useState<{ debtors: Debtor[] | undefined; search: string; isLoading: boolean }>({ debtors: undefined, search: '', isLoading: false })
+  const verifiedDebtors = debtorState.debtors
+  const debtorSearch = debtorState.search
+  const isLoadingDebtors = debtorState.isLoading
+  const setDebtorSearch = (s: string) => setDebtorState(prev => ({ ...prev, search: s }))
 
   const isFormDisabled = !invoice || invoice.status !== InvoiceStatus.CORRECTION
 
@@ -134,8 +157,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     getInvoiceById(invoiceId)
       .then(res => res.data)
       .then(invoice => {
-        setInvoice(invoice)
-        setOriginalInvoice(invoice)
+        setInvoiceState({ invoice, originalInvoice: invoice })
         setLastBreadcrumb(`Factura ${invoice.svc}`)
       })
       .catch(() => {
@@ -146,15 +168,14 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
   useEffect(() => {
     if (!loggedInUser) return
     const timer = setTimeout(() => {
-      setIsLoadingDebtors(true)
       getDebtors({
         investorId: loggedInUser.id,
         companyName: debtorSearch ?? undefined,
         status: DebtorStatus.VERIFIED
       })
         .then(res => res.data)
-        .then(debtors => setVerifiedDebtors(debtors))
-        .finally(() => setIsLoadingDebtors(false))
+        .then(debtors => setDebtorState(prev => ({ ...prev, debtors, isLoading: false })))
+        .catch(() => setDebtorState(prev => ({ ...prev, isLoading: false })))
     }, 300)
 
     return () => clearTimeout(timer)
@@ -191,30 +212,11 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       .then(() => navigate(`/invoices/${invoiceId}`))
   }
 
-  const invoiceStatusTextMap: {
-    pending: { title: string; icon: React.JSX.Element };
-    correction: { title: string; icon: React.JSX.Element };
-    denied: { title: string; icon: React.JSX.Element }
-  } = {
-    pending: {
-      title: 'Pendiente de verificación',
-      icon: <ClockIcon className='w-full h-full rounded-full text-yellow-600 bg-yellow-300/25 p-2'/>
-    },
-    correction: {
-      title: 'Corrección requerida',
-      icon: <CircleAlertIcon className='w-full h-full rounded-full text-red-600 bg-red-300/25 p-2'/>
-    },
-    denied: {
-      title: 'Factura denegada',
-      icon: <OctagonXIcon className='w-full h-full rounded-full text-zinc-600 bg-zinc-300/25 p-2'/>
-    }
-  }
-
   return (
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <FileTextIcon className='w-6 h-6' />
+          <FileTextIcon className='size-6' />
         </span>
         <h2>Gestionar factura</h2>
         {(invoice?.status === InvoiceStatus.CORRECTION || invoice?.status === InvoiceStatus.PENDING) && (
@@ -414,7 +416,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                           <InputGroupAddon align={'inline-end'}>
                             <Tooltip>
                               <TooltipTrigger className='leading-1'>
-                                <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                <CircleQuestionMarkIcon className='size-4'/>
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p className='text-center'>Identificador del Registro de Facturación:<br />NIF/CIF/DNI del emisor + Serie + Número factura<br />+ Fecha + Código de verificación</p>
@@ -494,11 +496,11 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Item variant='muted' className='gap-2'>
-              <ItemMedia className='self-center! w-10 h-10'>
-                {invoiceStatusTextMap[invoice?.status].icon}
+              <ItemMedia className='self-center! size-10'>
+                {INVOICE_STATUS_TEXT_MAP[invoice?.status].icon}
               </ItemMedia>
               <ItemContent>
-                <ItemTitle>{invoiceStatusTextMap[invoice?.status].title}</ItemTitle>
+                <ItemTitle>{INVOICE_STATUS_TEXT_MAP[invoice?.status].title}</ItemTitle>
                 <ItemDescription>
                   {invoice?.lastCommunication}
                 </ItemDescription>

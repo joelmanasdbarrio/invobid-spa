@@ -108,7 +108,7 @@ export function InvestorSidebarContent () {
                     <SidebarMenuButton>
                       <HandCoinsIcon /> Deudores
                       {correctionDebtorsCount > 0 && (
-                        <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
+                        <Badge variant={'destructive'} className={'relative -top-1 right-1 size-2 p-0 group-data-[state=open]/collapsible:hidden'} />
                       )}
                       <ChevronRightIcon className='ms-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                     </SidebarMenuButton>
@@ -146,7 +146,7 @@ export function InvestorSidebarContent () {
                   <SidebarMenuButton>
                     <FileText /> Facturas
                     {(loggedInUser && loggedInUser.investorType === InvestorType.COMPANY) && correctionInvoicesCount > 0 && (
-                      <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
+                      <Badge variant={'destructive'} className={'relative -top-1 right-1 size-2 p-0 group-data-[state=open]/collapsible:hidden'} />
                     )}
                     <ChevronRight className='ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                   </SidebarMenuButton>

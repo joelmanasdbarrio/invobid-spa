@@ -27,19 +27,19 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
   const isAuctionActive = auction?.status === AuctionStatus.PUBLISHED
   const isDisabled = !isAuctionActive || !auction || auction.invoice.sellerInvestor.id === loggedInUser?.id
 
-  const [bidInput, setBidInput] = useState('')
-  const [bidInputInvalid, setBidInputInvalid] = useState(false)
-  const [profitabilityInput, setProfitabilityInput] = useState('')
-  const [profitabilityInputInvalid, setProfitabilityInputInvalid] = useState(false)
+  const [bidForm, setBidForm] = useState({ bidInput: '', bidInputInvalid: false, profitabilityInput: '', profitabilityInputInvalid: false })
+  const { bidInput, bidInputInvalid, profitabilityInput, profitabilityInputInvalid } = bidForm
+  const setBidInput = (v: string) => setBidForm(prev => ({ ...prev, bidInput: v }))
+  const setBidInputInvalid = (v: boolean) => setBidForm(prev => ({ ...prev, bidInputInvalid: v }))
+  const setProfitabilityInput = (v: string) => setBidForm(prev => ({ ...prev, profitabilityInput: v }))
+  const setProfitabilityInputInvalid = (v: boolean) => setBidForm(prev => ({ ...prev, profitabilityInputInvalid: v }))
 
-  const [bids, setBids] = useState<Bid[]>([])
-  const [totalItems, setTotalItems] = useState(0)
-  const [viewerCount, setViewerCount] = useState(0)
+  const [bidsData, setBidsData] = useState({ bids: [] as Bid[], totalItems: 0, viewerCount: 0, currentPage: 1 })
+  const { bids, totalItems, viewerCount, currentPage } = bidsData
+  const setViewerCount = (v: number) => setBidsData(prev => ({ ...prev, viewerCount: v }))
   const socketRef = useRef<Socket | null>(null)
 
   const columns = useBidColumns()
-
-  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     if (!auction?.id) return
@@ -49,8 +49,7 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
       page: String(currentPage),
       limit: String(PAGE_LIMIT)
     }).then((res) => {
-      setBids((prev) => [...prev, ...res.data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
-      setTotalItems(res._metadata.total)
+      setBidsData(prev => ({ ...prev, bids: [...prev.bids, ...res.data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), totalItems: res._metadata.total }))
     })
   }, [auction?.id, currentPage])
 
@@ -69,8 +68,7 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
         }
 
         const newBid = await getBid(bidId).then(res => res.data)
-        setBids((prev) => [newBid, ...prev])
-        setTotalItems((prev) => prev + 1)
+        setBidsData(prev => ({ ...prev, bids: [newBid, ...prev.bids], totalItems: prev.totalItems + 1 }))
       }
     })
     socketRef.current = socket
@@ -131,17 +129,14 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
   }
 
   function clearInputs () {
-    setBidInput('')
-    setBidInputInvalid(false)
-    setProfitabilityInput('')
-    setProfitabilityInputInvalid(false)
+    setBidForm({ bidInput: '', bidInputInvalid: false, profitabilityInput: '', profitabilityInputInvalid: false })
   }
 
   function handlePlaceBid () {
     if (!socketRef.current || !auction?.id) return
     placeBid(socketRef.current, auction.id, Number(bidInput))
       .then(() => clearInputs())
-      .catch(() => { setBidInputInvalid(true); setProfitabilityInputInvalid(true) })
+      .catch(() => { setBidForm(prev => ({ ...prev, bidInputInvalid: true, profitabilityInputInvalid: true })) })
   }
 
   function calcPreview (amount: number) {
@@ -172,7 +167,7 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
           </div>
         </CardHeader>
         <div className='flex flex-col'>
-          <DataTable columns={columns} data={bids} totalItems={totalItems} onLoadMore={() => setCurrentPage(currentPage + 1)} />
+          <DataTable columns={columns} data={bids} totalItems={totalItems} onLoadMore={() => setBidsData(prev => ({ ...prev, currentPage: prev.currentPage + 1 }))} />
         </div>
       </div>
 
@@ -223,7 +218,7 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
         <div className='grid grid-cols-2 grid-rows-1 divide-x'>
           <div className='flex flex-col items-center text-sm py-4'>
             <span className='text-muted-foreground flex items-center gap-2'>
-              <PercentIcon className='w-4 h-4 inline-block' />
+              <PercentIcon className='size-4 inline-block' />
               Descuento
             </span>
             <span className='ps-6 text-xl font-bold' title={`Descuento ${displayDiscount.toFixed(2)}%`}>
@@ -232,7 +227,7 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
           </div>
           <div className='flex flex-col items-center text-sm py-4'>
             <span className='text-muted-foreground flex items-center gap-2'>
-              <TrendingUpIcon className='w-4 h-4 inline-block' />
+              <TrendingUpIcon className='size-4 inline-block' />
               Rentabilidad
             </span>
             <span className='ps-6 text-xl font-bold text-green-500 text-shadow-md' title={`Rentabilidad ${displayProfitability.toFixed(2)}%`}>
@@ -249,7 +244,7 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
               </InputGroupAddon>
               <InputGroupAddon align='inline-end'>
                 <Button variant='ghost' size='icon' disabled={!bidInput} onClick={clearInputs}>
-                  <XIcon className='w-4 h-4 cursor-pointer' />
+                  <XIcon className='size-4 cursor-pointer' />
                 </Button>
               </InputGroupAddon>
             </InputGroup>
@@ -263,7 +258,7 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
               </InputGroupAddon>
               <InputGroupAddon align='inline-end'>
                 <Button variant='ghost' size='icon' disabled={!profitabilityInput} onClick={clearInputs}>
-                  <XIcon className='w-4 h-4 cursor-pointer' />
+                  <XIcon className='size-4 cursor-pointer' />
                 </Button>
               </InputGroupAddon>
             </InputGroup>

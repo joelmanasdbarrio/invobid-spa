@@ -11,7 +11,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 const PdfPreview = lazy(() => import('@/components/ui/pdf-preview').then(m => ({ default: m.PdfPreview })))
 
 export function DocumentPreview ({
-  document,
+  document: doc,
   triggerOnly = false,
   protectedDocument = false
 }: {
@@ -23,14 +23,14 @@ export function DocumentPreview ({
   const [loading, setLoading] = useState(!triggerOnly)
   const [open, setOpen] = useState(false)
 
-  const extension = document.filename.split('.').pop()?.toLowerCase() ?? ''
+  const extension = doc.filename.split('.').pop()?.toLowerCase() ?? ''
   const isImage = ['jpg', 'jpeg', 'png'].includes(extension)
   const isPdf = extension === 'pdf'
 
   useEffect(() => {
     if (triggerOnly && !open) return
     let url: string
-    previewDocument(document.id)
+    previewDocument(doc.id)
       .then((objectUrl) => {
         url = objectUrl
         setBlobUrl(objectUrl)
@@ -40,7 +40,7 @@ export function DocumentPreview ({
     return () => {
       if (url) URL.revokeObjectURL(url)
     }
-  }, [document.id, open, triggerOnly])
+  }, [doc.id, open, triggerOnly])
 
   function handleOpenChange (v: boolean) {
     if (v) setLoading(true)
@@ -53,10 +53,10 @@ export function DocumentPreview ({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button variant='ghost' size='icon'>
-            <EyeIcon className='w-4 h-4' />
+            <EyeIcon className='size-4' />
           </Button>
         </DialogTrigger>
-        <PreviewDialogInner document={document} loading={loading} blobUrl={blobUrl} isImage={isImage} isPdf={isPdf} protectedDocument={protectedDocument} />
+        <PreviewDialogInner doc={doc} loading={loading} blobUrl={blobUrl} isImage={isImage} isPdf={isPdf} protectedDocument={protectedDocument} />
       </Dialog>
     )
   }
@@ -65,7 +65,7 @@ export function DocumentPreview ({
     <Card>
       <CardHeader className='flex items-center gap-2'>
         <span className='rounded-md p-1 bg-primary/20 text-primary'>
-          <FileIcon className='w-4 h-4' />
+          <FileIcon className='size-4' />
         </span>
         <h4>Previsualización</h4>
       </CardHeader>
@@ -95,7 +95,7 @@ export function DocumentPreview ({
               )}
           </div>
 
-          <PreviewDialogInner document={document} loading={loading} blobUrl={blobUrl} isImage={isImage} isPdf={isPdf} protectedDocument={protectedDocument} />
+          <PreviewDialogInner doc={doc} loading={loading} blobUrl={blobUrl} isImage={isImage} isPdf={isPdf} protectedDocument={protectedDocument} />
         </Dialog>
       </CardContent>
     </Card>
@@ -103,14 +103,14 @@ export function DocumentPreview ({
 }
 
 function PreviewDialogInner ({
-  document,
+  doc,
   loading,
   blobUrl,
   isImage,
   isPdf,
   protectedDocument
 }: {
-  document: Document
+  doc: Document
   loading: boolean
   blobUrl: string | undefined
   isImage: boolean
@@ -122,12 +122,12 @@ function PreviewDialogInner ({
       <DialogHeader>
         <DialogTitle className='flex items-center gap-2'>
           <span className='rounded-md p-1 bg-primary/20 text-primary'>
-            <FileIcon className='w-4 h-4' />
+            <FileIcon className='size-4' />
           </span>
           <span>Previsualización</span>
         </DialogTitle>
         <DialogDescription>
-          {document.title}
+          {doc.title}
         </DialogDescription>
       </DialogHeader>
       <div className='overflow-hidden flex items-center justify-center'>

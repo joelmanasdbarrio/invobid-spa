@@ -17,7 +17,7 @@ import { getAuctionById, updateAuctionById } from '@/services/auction.api'
 import { AuctionStatus, type Auction } from '@/types/Auction'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { BuildingIcon, CheckIcon, CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CircleSlashIcon, CopyIcon, ExternalLinkIcon, GavelIcon, IdCardIcon, RotateCcwIcon, SaveIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
 import z from 'zod'
@@ -29,12 +29,33 @@ const formSchema = z.object({
   lastCommunication: z.string().optional()
 })
 
+function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
+  e.preventDefault()
+  const button = e.currentTarget
+  performCopyToClipboard(text).then(success => {
+    if (success) {
+      button.setAttribute('data-copied', 'true')
+      setTimeout(() => {
+        button.removeAttribute('data-copied')
+      }, 2000)
+    }
+  })
+}
+
+const UPDATE_NOTES_MAP: Record<string, string> = {}
+
 export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {auctionId} = useParams()
-  const [auction, setAuction] = useState<Auction | undefined>()
-  const [originalAuction, setOriginalAuction] = useState<Auction | undefined>()
+  const [auctionState, setAuctionState] = useState<{ auction: Auction | undefined; originalAuction: Auction | undefined }>({ auction: undefined, originalAuction: undefined })
+  const auction = auctionState.auction
+  const originalAuction = auctionState.originalAuction
+  const setAuction = (a: Auction | undefined) => setAuctionState(prev => ({ ...prev, auction: a }))
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { locale } = useLocale()
+  const percentFormatter = useMemo(
+    () => new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }),
+    [locale]
+  )
 
   const navigate = useNavigate()
   useEffect(() => {
@@ -42,8 +63,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
       getAuctionById(auctionId)
         .then(res => res.data)
         .then(auction => {
-          setAuction(auction)
-          setOriginalAuction(auction)
+          setAuctionState({ auction, originalAuction: auction })
           setLastBreadcrumb(`Subasta de factura ${auction.invoice.svc}`)
         })
         .catch(() => {
@@ -81,8 +101,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
     updateAuctionById(auction.id, JSON.stringify(updateData))
       .then(res => res.data)
       .then(updatedAuction => {
-        setAuction(updatedAuction)
-        setOriginalAuction(updatedAuction)
+        setAuctionState({ auction: updatedAuction, originalAuction: updatedAuction })
         form.reset({
           status: updatedAuction.status ?? undefined,
           lastCommunication: ''
@@ -97,23 +116,12 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
     setAuction(originalAuction)
   }
 
-  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
-    e.preventDefault()
-    const button = e.currentTarget
-    performCopyToClipboard(text).then(success => {
-      if (success) {
-        button.setAttribute('data-copied', 'true')
-        setTimeout(() => {
-          button.removeAttribute('data-copied')
-        }, 2000)
-      }
-    })
-  }
-
   // Helper: Get the latest bid
   const getLatestBid = () => {
     if (!auction || !auction.bids || auction.bids.length === 0) return null
-    return auction.bids.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+    return auction.bids.reduce((latest, bid) =>
+      new Date(bid.createdAt).getTime() > new Date(latest.createdAt).getTime() ? bid : latest
+    )
   }
 
   // Helper: Get display ending price based on auction status
@@ -170,13 +178,11 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
     return 'Rentabilidad de oferta más reciente'
   }
 
-  const updateNotesMap: Record<string, string> = { }
-
   return (
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <GavelIcon className='w-6 h-6' />
+          <GavelIcon className='size-6' />
         </span>
         <h2>Gestionar subasta</h2>
       </div>
@@ -190,23 +196,23 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                   <ButtonGroup className='xl:ms-auto flex-row-reverse xl:flex-row'>
                     <ButtonGroup>
                       <Button type='button' title='Borrador' disabled variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25'>
-                        <CircleDashedIcon className='w-5 h-5 rounded-full text-yellow-600'/>
+                        <CircleDashedIcon className='size-5 rounded-full text-yellow-600'/>
                         {watchedStatus === AuctionStatus.DRAFT && 'Borrador'}
                       </Button>
                       <Button type='button' title='Publicada' disabled variant='outline' className='bg-green-300/25 dark:bg-green-300/25'>
-                        <CircleCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
+                        <CircleCheckIcon className='size-5 rounded-full text-green-600'/>
                         {watchedStatus === AuctionStatus.PUBLISHED && 'Publicada'}
                       </Button>
                       <Button type='button' title='En transición' disabled variant='outline' className='bg-blue-300/25 dark:bg-blue-300/25'>
-                        <CircleGaugeIcon className='w-5 h-5 rounded-full text-blue-600'/>
+                        <CircleGaugeIcon className='size-5 rounded-full text-blue-600'/>
                         {watchedStatus === AuctionStatus.TRANSITIONING && 'En transición'}
                       </Button>
                       <Button type='button' title='Cancelada' disabled={auction.status !== AuctionStatus.TRANSITIONING} variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', AuctionStatus.CANCELLED, { shouldDirty: true })}>
-                        <CircleSlashIcon className='w-5 h-5 rounded-full text-red-600'/>
+                        <CircleSlashIcon className='size-5 rounded-full text-red-600'/>
                         {watchedStatus === AuctionStatus.CANCELLED && 'Cancelada'}
                       </Button>
                       <Button type='button' disabled={auction.status !== AuctionStatus.TRANSITIONING} title='Finalizada' variant='outline' className='bg-violet-300/25 dark:bg-violet-300/25' onClick={() => form.setValue('status', AuctionStatus.FINISHED, { shouldDirty: true })}>
-                        <GavelIcon className='w-5 h-5 rounded-full text-violet-600'/>
+                        <GavelIcon className='size-5 rounded-full text-violet-600'/>
                         {watchedStatus === AuctionStatus.FINISHED && 'Finalizada'}
                       </Button>
                     </ButtonGroup>
@@ -258,7 +264,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         <FieldLabel>Descuento de salida</FieldLabel>
                         <InputGroup>
                           <InputGroupInput
-                            value={auction.discount.start != null ? new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(Number(auction.discount.start)) : ''}
+                            value={auction.discount.start != null ? percentFormatter.format(Number(auction.discount.start)) : ''}
                             disabled
                           />
                           <InputGroupAddon>
@@ -270,7 +276,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         <FieldLabel>{getEndingDiscountLabel()}</FieldLabel>
                         <InputGroup>
                           <InputGroupInput
-                            value={getDisplayEndingDiscount() != null ? new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(Number(getDisplayEndingDiscount())) : ''}
+                            value={getDisplayEndingDiscount() != null ? percentFormatter.format(Number(getDisplayEndingDiscount())) : ''}
                             disabled
                           />
                           <InputGroupAddon>
@@ -282,7 +288,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         <FieldLabel>Rentabilidad de salida</FieldLabel>
                         <InputGroup>
                           <InputGroupInput
-                            value={auction.profitability.start != null ? new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(Number(auction.profitability.start)) : ''}
+                            value={auction.profitability.start != null ? percentFormatter.format(Number(auction.profitability.start)) : ''}
                             disabled
                           />
                           <InputGroupAddon>
@@ -294,7 +300,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                         <FieldLabel>{getEndingProfitabilityLabel()}</FieldLabel>
                         <InputGroup>
                           <InputGroupInput
-                            value={getDisplayEndingProfitability() != null ? new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(Number(getDisplayEndingProfitability())) : ''}
+                            value={getDisplayEndingProfitability() != null ? percentFormatter.format(Number(getDisplayEndingProfitability())) : ''}
                             disabled
                           />
                           <InputGroupAddon>
@@ -324,13 +330,13 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                                   <IdCardIcon />
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, auction.invoice.sellerInvestor.taxId ?? '')} className='group'>
-                                    <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                  <button type='button' onClick={(e) => copyToClipboard(e, auction.invoice.sellerInvestor.taxId ?? '')} className='group'>
+                                    <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <span>
-                                          <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                          <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                         </span>
                                       </TooltipTrigger>
                                       <TooltipContent className='relative -top-2 right-3'>
@@ -349,13 +355,13 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                                   <BuildingIcon />
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, auction.invoice.sellerInvestor.companyName ?? '')} className='group'>
-                                    <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                  <button type='button' onClick={(e) => copyToClipboard(e, auction.invoice.sellerInvestor.companyName ?? '')} className='group'>
+                                    <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <span>
-                                          <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                          <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                         </span>
                                       </TooltipTrigger>
                                       <TooltipContent className='relative -top-2 right-3'>
@@ -369,7 +375,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                             <FieldDescription>
                               <Link to={`/admin/users/${auction.invoice.sellerInvestor?.id}`} className='text-xs'>
                                 Consultar cedente
-                                <ExternalLinkIcon className='w-3 h-3 inline-block ml-1' />
+                                <ExternalLinkIcon className='size-3 inline-block ml-1' />
                               </Link>
                             </FieldDescription>
                           </FieldGroup>
@@ -394,13 +400,13 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                                   <IdCardIcon />
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, auction.invoice.debtor.taxId ?? '')} className='group'>
-                                    <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                  <button type='button' onClick={(e) => copyToClipboard(e, auction.invoice.debtor.taxId ?? '')} className='group'>
+                                    <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <span>
-                                          <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                          <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                         </span>
                                       </TooltipTrigger>
                                       <TooltipContent className='relative -top-2 right-3'>
@@ -419,13 +425,13 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                                   <BuildingIcon />
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, auction.invoice.debtor.companyName ?? '')} className='group'>
-                                    <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                  <button type='button' onClick={(e) => copyToClipboard(e, auction.invoice.debtor.companyName ?? '')} className='group'>
+                                    <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <span>
-                                          <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                          <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                         </span>
                                       </TooltipTrigger>
                                       <TooltipContent className='relative -top-2 right-3'>
@@ -439,7 +445,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                             <FieldDescription>
                               <Link to={`/admin/debtors/${auction.invoice.debtor?.id}`} className='text-xs'>
                                 Consultar deudor
-                                <ExternalLinkIcon className='w-3 h-3 inline-block ml-1' />
+                                <ExternalLinkIcon className='size-3 inline-block ml-1' />
                               </Link>
                             </FieldDescription>
                           </FieldGroup>
@@ -464,13 +470,13 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                                   #
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, auction.invoice.svc ?? '')} className='group'>
-                                    <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                  <button type='button' onClick={(e) => copyToClipboard(e, auction.invoice.svc ?? '')} className='group'>
+                                    <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <span>
-                                          <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                          <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                         </span>
                                       </TooltipTrigger>
                                       <TooltipContent className='relative -top-2 right-3'>
@@ -489,13 +495,13 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                                   %
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, auction.invoice?.rating ?? '')} className='group'>
-                                    <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                  <button type='button' onClick={(e) => copyToClipboard(e, auction.invoice?.rating ?? '')} className='group'>
+                                    <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <span>
-                                          <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                          <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                         </span>
                                       </TooltipTrigger>
                                       <TooltipContent className='relative -top-2 right-3'>
@@ -518,13 +524,13 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                                   €
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, auction.invoice?.amount ?? '')} className='group'>
-                                    <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                  <button type='button' onClick={(e) => copyToClipboard(e, auction.invoice?.amount ?? '')} className='group'>
+                                    <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <span>
-                                          <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                          <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                         </span>
                                       </TooltipTrigger>
                                       <TooltipContent className='relative -top-2 right-3'>
@@ -538,7 +544,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                             <FieldDescription>
                               <Link to={`/admin/invoices/${auction.invoice?.id}`} className='text-xs'>
                                 Consultar factura
-                                <ExternalLinkIcon className='w-3 h-3 inline-block ml-1' />
+                                <ExternalLinkIcon className='size-3 inline-block ml-1' />
                               </Link>
                             </FieldDescription>
                           </FieldGroup>
@@ -564,13 +570,13 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                                     <IdCardIcon />
                                   </InputGroupAddon>
                                   <InputGroupAddon align='inline-end'>
-                                    <button onClick={(e) => copyToClipboard(e, auction.invoice.buyerInvestor?.taxId ?? '')} className='group'>
-                                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                    <button type='button' onClick={(e) => copyToClipboard(e, auction.invoice.buyerInvestor?.taxId ?? '')} className='group'>
+                                      <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                       <Tooltip>
                                         <TooltipTrigger asChild>
                                           <span>
-                                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                            <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                           </span>
                                         </TooltipTrigger>
                                         <TooltipContent className='relative -top-2 right-3'>
@@ -589,13 +595,13 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                                     <BuildingIcon />
                                   </InputGroupAddon>
                                   <InputGroupAddon align='inline-end'>
-                                    <button onClick={(e) => copyToClipboard(e, auction.invoice.buyerInvestor?.companyName ?? '')} className='group'>
-                                      <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                    <button type='button' onClick={(e) => copyToClipboard(e, auction.invoice.buyerInvestor?.companyName ?? '')} className='group'>
+                                      <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                       <Tooltip>
                                         <TooltipTrigger asChild>
                                           <span>
-                                            <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                            <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                           </span>
                                         </TooltipTrigger>
                                         <TooltipContent className='relative -top-2 right-3'>
@@ -609,7 +615,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                               <FieldDescription>
                                 <Link to={`/admin/users/${auction.invoice.buyerInvestor?.id}`} className='text-xs'>
                                   Consultar inversor
-                                  <ExternalLinkIcon className='w-3 h-3 inline-block ml-1' />
+                                  <ExternalLinkIcon className='size-3 inline-block ml-1' />
                                 </Link>
                               </FieldDescription>
                             </FieldGroup>
@@ -648,7 +654,7 @@ export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadc
                                     <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
                                   </InputGroup>
                                   <div className='flex flex-wrap gap-1'>
-                                    {Object.entries(updateNotesMap).map(([key, note]) => (
+                                    {Object.entries(UPDATE_NOTES_MAP).map(([key, note]) => (
                                       <Badge
                                         key={key}
                                         variant='outline'

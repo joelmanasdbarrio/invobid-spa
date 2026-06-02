@@ -31,17 +31,12 @@ export function DatePicker ({
   maxDate
 }: DatePickerProps) {
   const { locale } = useLocale()
-
-  const [date, setDate] = React.useState<Date | undefined>(
-    value ? parseLocalDate(value) : undefined
+  const date = React.useMemo(
+    () => (value ? parseLocalDate(value) : undefined),
+    [value]
   )
 
-  React.useEffect(() => {
-    setDate(value ? parseLocalDate(value) : undefined)
-  }, [value])
-
   const handleSelect = (day: Date | undefined) => {
-    setDate(day)
     onChange?.(day ? toDateOnlyString(day) : undefined)
   }
 
@@ -72,7 +67,7 @@ export function DatePicker ({
             <CalendarIcon
               className={
                 cn(
-                  'mr-2 h-4 w-4 text-muted-foreground',
+                  'mr-2 size-4 text-muted-foreground',
                   disabled && 'cursor-not-allowed opacity-80'
                 )
               }
