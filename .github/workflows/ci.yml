@@ -81,9 +81,35 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v5
-      - uses: millionco/react-doctor@main
+      - name: Run React Doctor
+        id: react_doctor
+        uses: millionco/react-doctor@v1
         with:
-          fail_if_score_below: 90
+          project: ''
+
+      - name: Enforce React Doctor minimum score
+        shell: bash
+        env:
+          REACT_DOCTOR_SCORE: ${{ steps.react_doctor.outputs.score }}
+        run: |
+          SCORE="${REACT_DOCTOR_SCORE}"
+
+          if [[ -z "$SCORE" ]]; then
+            echo "React Doctor did not provide a score output." >&2
+            exit 1
+          fi
+
+          if [[ ! "$SCORE" =~ ^[0-9]+$ ]]; then
+            echo "React Doctor score is not an integer: '$SCORE'" >&2
+            exit 1
+          fi
+
+          if (( SCORE < 90 )); then
+            echo "React Doctor score $SCORE is below required minimum 90." >&2
+            exit 1
+          fi
+
+          echo "React Doctor score $SCORE meets minimum 90."
 
   publish:
     name: Publish Docker Image
