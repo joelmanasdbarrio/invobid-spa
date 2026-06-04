@@ -19,6 +19,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLocale } from '@/hooks/use-locale'
+import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { formatCurrency } from '@/lib/format-currency'
 import { getInvoiceById, updateInvoiceById } from '@/services/invoice.api'
 import { type Invoice, InvoiceStatus } from '@/types/Invoice'
@@ -52,10 +53,31 @@ const formSchema = z.object({
   lastCommunication: z.string().optional()
 })
 
+function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
+  e.preventDefault()
+  const button = e.currentTarget
+  performCopyToClipboard(text).then(success => {
+    if (success) {
+      button.setAttribute('data-copied', 'true')
+      setTimeout(() => {
+        button.removeAttribute('data-copied')
+      }, 2000)
+    }
+  })
+}
+
+const UPDATE_NOTES_MAP: Record<string, string> = {
+  correctVerification: 'Factura verificada correctamente',
+  updatedCompanyName: 'Se ha actualizado el rating de la factura',
+  incorrectDocument: 'El documento es incorrecto o no es legible'
+}
+
 export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const {svc} = useParams()
-  const [invoice, setInvoice] = useState<Invoice | undefined>()
-  const [originalInvoice, setOriginalInvoice] = useState<Invoice | undefined>(invoice)
+  const [invoiceState, setInvoiceState] = useState<{ invoice: Invoice | undefined; originalInvoice: Invoice | undefined }>({ invoice: undefined, originalInvoice: undefined })
+  const invoice = invoiceState.invoice
+  const originalInvoice = invoiceState.originalInvoice
+  const setInvoice = (i: Invoice | undefined) => setInvoiceState(prev => ({ ...prev, invoice: i }))
   const [isFormDisabled, setIsFormDisabled] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { locale } = useLocale()
@@ -66,8 +88,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
       getInvoiceById(svc)
         .then(res => res.data)
         .then(invoice => {
-          setInvoice(invoice)
-          setOriginalInvoice(invoice)
+          setInvoiceState({ invoice, originalInvoice: invoice })
           setLastBreadcrumb(`Factura ${invoice.svc}`)
         })
         .catch(() => {
@@ -109,8 +130,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
     updateInvoiceById(invoice.id, JSON.stringify(updateData))
       .then(res => res.data)
       .then(updatedInvoice => {
-        setInvoice(updatedInvoice)
-        setOriginalInvoice(updatedInvoice)
+        setInvoiceState({ invoice: updatedInvoice, originalInvoice: updatedInvoice })
         form.reset({
           status: updatedInvoice.status ?? undefined,
           rating: updatedInvoice.rating ?? undefined,
@@ -126,27 +146,11 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
     setInvoice(originalInvoice)
   }
 
-  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
-    e.preventDefault()
-    navigator.clipboard.writeText(String(text))
-    const button = e.currentTarget
-    button.setAttribute('data-copied', 'true')
-    setTimeout(() => {
-      button.removeAttribute('data-copied')
-    }, 2000)
-  }
-
-  const updateNotesMap: Record<string, string> = {
-    correctVerification: 'Factura verificada correctamente',
-    updatedCompanyName: 'Se ha actualizado el rating de la factura',
-    incorrectDocument: 'El documento es incorrecto o no es legible'
-  }
-
   return (
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <FileTextIcon className='w-6 h-6' />
+          <FileTextIcon className='size-6' />
         </span>
         <h2>Gestionar factura</h2>
       </div>
@@ -176,15 +180,15 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                       {watchedStatus === InvoiceStatus.DENIED && 'Denegado'}
                     </Button>
                     <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', InvoiceStatus.CORRECTION, { shouldDirty: true })}>
-                      <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
+                      <CircleAlertIcon className='size-5 rounded-full text-red-600'/>
                       {watchedStatus === InvoiceStatus.CORRECTION && 'Corrección'}
                     </Button>
                     <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', InvoiceStatus.PENDING, { shouldDirty: true })}>
-                      <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
+                      <ClockIcon className='size-5 rounded-full text-yellow-600'/>
                       {watchedStatus === InvoiceStatus.PENDING && 'Por verificar'}
                     </Button>
                     <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', InvoiceStatus.VERIFIED, { shouldDirty: true })}>
-                      <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
+                      <CheckCheckIcon className='size-5 rounded-full text-green-600'/>
                       {watchedStatus === InvoiceStatus.VERIFIED && 'Verificado'}
                     </Button>
                   </ButtonGroup>
@@ -206,13 +210,13 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                               %
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, invoice?.rating ?? 0)} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, invoice?.rating ?? 0)} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -231,18 +235,18 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                     <Field>
                       <FieldLabel htmlFor='svc'>UID de factura:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput id='svc' value={invoice?.svc} type='text' placeholder='0' required disabled />
+                        <InputGroupInput id='svc' value={invoice?.svc ?? ''} type='text' placeholder='0' required disabled />
                         <InputGroupAddon>
                           #
                         </InputGroupAddon>
                         <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, invoice?.svc ?? '')} className='group'>
-                            <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                          <button type='button' onClick={(e) => copyToClipboard(e, invoice?.svc ?? '')} className='group'>
+                            <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span>
-                                  <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                  <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent className='relative -top-2 right-3'>
@@ -265,13 +269,13 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           €
                         </InputGroupAddon>
                         <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, invoice?.amount ?? '')} className='group'>
-                            <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                          <button type='button' onClick={(e) => copyToClipboard(e, invoice?.amount ?? '')} className='group'>
+                            <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span>
-                                  <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                  <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent className='relative -top-2 right-3'>
@@ -285,18 +289,18 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                     <Field>
                       <FieldLabel htmlFor='buyerPercentage'>Comisión del inversor:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput id='buyerPercentage' value={invoice?.transactionFee?.buyerPercentage} type='number' placeholder='0' required disabled />
+                        <InputGroupInput id='buyerPercentage' value={invoice?.transactionFee?.buyerPercentage ?? ''} type='number' placeholder='0' required disabled />
                         <InputGroupAddon>
                           %
                         </InputGroupAddon>
                         <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.buyerPercentage ?? 0)} className='group'>
-                            <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                          <button type='button' onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.buyerPercentage ?? 0)} className='group'>
+                            <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span>
-                                  <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                  <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent className='relative -top-2 right-3'>
@@ -310,18 +314,18 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                     <Field>
                       <FieldLabel htmlFor='sellerPercentage'>Comisión del cedente:</FieldLabel>
                       <InputGroup>
-                        <InputGroupInput id='sellerPercentage' value={invoice?.transactionFee?.sellerPercentage} type='number' placeholder='0' required disabled />
+                        <InputGroupInput id='sellerPercentage' value={invoice?.transactionFee?.sellerPercentage ?? ''} type='number' placeholder='0' required disabled />
                         <InputGroupAddon>
                           %
                         </InputGroupAddon>
                         <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.sellerPercentage ?? 0)} className='group'>
-                            <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                          <button type='button' onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.sellerPercentage ?? 0)} className='group'>
+                            <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span>
-                                  <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                  <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent className='relative -top-2 right-3'>
@@ -348,18 +352,18 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           <Field>
                             <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='investorTaxId' value={invoice?.sellerInvestor?.taxId} type='text' placeholder='12345678A' required disabled />
+                              <InputGroupInput id='investorTaxId' value={invoice?.sellerInvestor?.taxId ?? ''} type='text' placeholder='12345678A' required disabled />
                               <InputGroupAddon>
                                 <IdCardIcon />
                               </InputGroupAddon>
                               <InputGroupAddon align='inline-end'>
-                                <button onClick={(e) => copyToClipboard(e, invoice?.sellerInvestor?.taxId ?? '')} className='group'>
-                                  <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                <button type='button' onClick={(e) => copyToClipboard(e, invoice?.sellerInvestor?.taxId ?? '')} className='group'>
+                                  <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <span>
-                                        <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                        <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                       </span>
                                     </TooltipTrigger>
                                     <TooltipContent className='relative -top-2 right-3'>
@@ -373,18 +377,18 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           <Field>
                             <FieldLabel htmlFor='investorCompanyName'>Razón social:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='investorCompanyName' value={invoice?.sellerInvestor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                              <InputGroupInput id='investorCompanyName' value={invoice?.sellerInvestor?.companyName ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                               <InputGroupAddon>
                                 <BuildingIcon />
                               </InputGroupAddon>
                               <InputGroupAddon align='inline-end'>
-                                <button onClick={(e) => copyToClipboard(e, invoice?.sellerInvestor?.companyName ?? '')} className='group'>
-                                  <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                <button type='button' onClick={(e) => copyToClipboard(e, invoice?.sellerInvestor?.companyName ?? '')} className='group'>
+                                  <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <span>
-                                        <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                        <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                       </span>
                                     </TooltipTrigger>
                                     <TooltipContent className='relative -top-2 right-3'>
@@ -398,7 +402,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           <FieldDescription>
                             <Link to={`/admin/users/${invoice?.sellerInvestor?.id}`} className='text-xs'>
                               Consultar cedente
-                              <ExternalLinkIcon className='w-3 h-3 inline-block ml-1' />
+                              <ExternalLinkIcon className='size-3 inline-block ml-1' />
                             </Link>
                           </FieldDescription>
                         </FieldGroup>
@@ -418,18 +422,18 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           <Field>
                             <FieldLabel htmlFor='debtorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='debtorTaxId' value={invoice?.debtor?.taxId} type='text' placeholder='12345678A' required disabled />
+                              <InputGroupInput id='debtorTaxId' value={invoice?.debtor?.taxId ?? ''} type='text' placeholder='12345678A' required disabled />
                               <InputGroupAddon>
                                 <IdCardIcon />
                               </InputGroupAddon>
                               <InputGroupAddon align='inline-end'>
-                                <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.taxId ?? '')} className='group'>
-                                  <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                <button type='button' onClick={(e) => copyToClipboard(e, invoice?.debtor?.taxId ?? '')} className='group'>
+                                  <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <span>
-                                        <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                        <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                       </span>
                                     </TooltipTrigger>
                                     <TooltipContent className='relative -top-2 right-3'>
@@ -443,18 +447,18 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           <Field>
                             <FieldLabel htmlFor='debtorCompanyName'>Razón social:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='debtorCompanyName' value={invoice?.debtor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                              <InputGroupInput id='debtorCompanyName' value={invoice?.debtor?.companyName ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                               <InputGroupAddon>
                                 <BuildingIcon />
                               </InputGroupAddon>
                               <InputGroupAddon align='inline-end'>
-                                <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.companyName ?? '')} className='group'>
-                                  <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                <button type='button' onClick={(e) => copyToClipboard(e, invoice?.debtor?.companyName ?? '')} className='group'>
+                                  <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <span>
-                                        <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                        <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                       </span>
                                     </TooltipTrigger>
                                     <TooltipContent className='relative -top-2 right-3'>
@@ -468,7 +472,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                           <FieldDescription>
                             <Link to={`/admin/debtors/${invoice?.debtor?.id}`} className='text-xs'>
                               Consultar deudor
-                              <ExternalLinkIcon className='w-3 h-3 inline-block ml-1' />
+                              <ExternalLinkIcon className='size-3 inline-block ml-1' />
                             </Link>
                           </FieldDescription>
                         </FieldGroup>
@@ -489,18 +493,18 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                             <Field>
                               <FieldLabel htmlFor='investorTaxId'>CIF/NIF del inversor:</FieldLabel>
                               <InputGroup>
-                                <InputGroupInput id='investorTaxId' value={invoice?.buyerInvestor?.taxId} type='text' placeholder='12345678A' required disabled />
+                                <InputGroupInput id='investorTaxId' value={invoice?.buyerInvestor?.taxId ?? ''} type='text' placeholder='12345678A' required disabled />
                                 <InputGroupAddon>
                                   <IdCardIcon />
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, invoice?.buyerInvestor?.taxId ?? '')} className='group'>
-                                    <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                  <button type='button' onClick={(e) => copyToClipboard(e, invoice?.buyerInvestor?.taxId ?? '')} className='group'>
+                                    <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <span>
-                                          <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                          <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                         </span>
                                       </TooltipTrigger>
                                       <TooltipContent className='relative -top-2 right-3'>
@@ -514,18 +518,18 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                             <Field>
                               <FieldLabel htmlFor='investorCompanyName'>Razón social del inversor:</FieldLabel>
                               <InputGroup>
-                                <InputGroupInput id='investorCompanyName' value={invoice?.buyerInvestor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                                <InputGroupInput id='investorCompanyName' value={invoice?.buyerInvestor?.companyName ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                                 <InputGroupAddon>
                                   <BuildingIcon />
                                 </InputGroupAddon>
                                 <InputGroupAddon align='inline-end'>
-                                  <button onClick={(e) => copyToClipboard(e, invoice?.buyerInvestor?.companyName ?? '')} className='group'>
-                                    <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                  <button type='button' onClick={(e) => copyToClipboard(e, invoice?.buyerInvestor?.companyName ?? '')} className='group'>
+                                    <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <span>
-                                          <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                          <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                         </span>
                                       </TooltipTrigger>
                                       <TooltipContent className='relative -top-2 right-3'>
@@ -539,7 +543,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                             <FieldDescription>
                               <Link to={`/admin/users/${invoice?.buyerInvestor?.id}`} className='text-xs'>
                                 Consultar inversor
-                                <ExternalLinkIcon className='w-3 h-3 inline-block ml-1' />
+                                <ExternalLinkIcon className='size-3 inline-block ml-1' />
                               </Link>
                             </FieldDescription>
                           </FieldGroup>
@@ -577,7 +581,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
                                 <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
                               </InputGroup>
                               <div className='flex flex-wrap gap-1'>
-                                {Object.entries(updateNotesMap).map(([key, note]) => (
+                                {Object.entries(UPDATE_NOTES_MAP).map(([key, note]) => (
                                   <Badge
                                     key={key}
                                     variant='outline'

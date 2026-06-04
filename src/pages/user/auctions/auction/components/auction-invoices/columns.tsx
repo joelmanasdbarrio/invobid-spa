@@ -17,8 +17,8 @@ export function useInvoiceColumns (): ColumnDef<Invoice>[] {
       header: '',
       enableHiding: false,
       cell: ({row}) => (
-        <Link to={`/user/invoices/${row.original.id}`}>
-          <ExternalLinkIcon className='w-4 h-4' />
+        <Link to={`/invoices/${row.original.id}`}>
+          <ExternalLinkIcon className='size-4' />
         </Link>
       )
     },

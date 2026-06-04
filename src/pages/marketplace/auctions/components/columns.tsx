@@ -119,7 +119,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
             //   <>
             //     <span className='flex gap-2 items-center'>
             //       <CalendarIcon className='size-4 inline-block' />
-            //       {formatDateTime(row.original.date.start, locale)} <MoveRightIcon className='w-2 h-2' /> {formatDateTime(row.original.date.end, locale)}
+            //       {formatDateTime(row.original.date.start, locale)} <MoveRightIcon className='size-2' /> {formatDateTime(row.original.date.end, locale)}
             //     </span>
             //     <span className='text-xs text-muted-foreground flex items-center gap-2 justify-end'>
             //       <CalendarXIcon className='size-4 inline-block' />

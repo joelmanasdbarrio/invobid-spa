@@ -1,4 +1,3 @@
-import { AppSidebar } from '@/components/sidebar/app-sidebar.tsx'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -7,51 +6,70 @@ import {
   AlertDialogFooter,
   AlertDialogHeader
 } from '@/components/ui/alert-dialog'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator
+} from '@/components/ui/breadcrumb'
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
+import { AppSidebar } from '@/layouts/components/app-sidebar'
 import { type Investor, InvestorStatus, UserType } from '@/types/User'
 import { AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import { CircleAlertIcon, ClockIcon, OctagonXIcon } from 'lucide-react'
 import { Fragment } from 'react'
 import { Link } from 'react-router'
 
+const INVESTOR_STATUS_TEXT_MAP = {
+  pending: {
+    title: 'Pendiente de verificacion',
+    icon: <ClockIcon className='w-full h-full rounded-full text-yellow-600 bg-yellow-300/25 p-2' />
+  },
+  correction: {
+    title: 'Correccion requerida',
+    icon: <CircleAlertIcon className='w-full h-full rounded-full text-red-600 bg-red-300/25 p-2' />
+  },
+  denied: {
+    title: 'Cuenta denegada',
+    icon: <OctagonXIcon className='w-full h-full rounded-full text-zinc-600 bg-zinc-300/25 p-2' />
+  }
+} as const
+
+type MainLayoutProps = Readonly<{
+  breadcrumbs?: Array<{ label: string; href: string }>
+  children: React.ReactNode
+}>
+
 export default function MainLayout ({
   breadcrumbs,
   children
-}: Readonly<{
-  breadcrumbs?: { label: string; href: string }[],
-  children: React.ReactNode;
-}>) {
+}: MainLayoutProps) {
   const loggedInUser = useLoggedInUser()
 
-  const investorStatusTextMap: {
-    pending: { title: string; icon: React.JSX.Element };
-    correction: { title: string; icon: React.JSX.Element };
-    denied: { title: string; icon: React.JSX.Element }
-  } = {
-    pending: {
-      title: 'Pendiente de verificación',
-      icon: <ClockIcon className='w-full h-full rounded-full text-yellow-600 bg-yellow-300/25 p-2'/>
-    },
-    correction: {
-      title: 'Corrección requerida',
-      icon: <CircleAlertIcon className='w-full h-full rounded-full text-red-600 bg-red-300/25 p-2'/>
-    },
-    denied: {
-      title: 'Cuenta denegada',
-      icon: <OctagonXIcon className='w-full h-full rounded-full text-zinc-600 bg-zinc-300/25 p-2'/>
-    }
-  }
+  const investorStatus =
+    loggedInUser?.type === UserType.INVESTOR
+      ? (loggedInUser as Investor).status
+      : undefined
+
+  const investorStatusText =
+    investorStatus && investorStatus in INVESTOR_STATUS_TEXT_MAP
+      ? INVESTOR_STATUS_TEXT_MAP[investorStatus as keyof typeof INVESTOR_STATUS_TEXT_MAP]
+      : undefined
 
   return (
-    <SidebarProvider className='w-dvw h-dvh'>
+    <SidebarProvider>
       <AppSidebar />
-      <div className='grow flex flex-col bg-background text-foreground md:m-2 md:rounded-lg md:shadow-md'>
+      <div className='w-full h-screen flex flex-col'>
         <div className='flex items-center gap-2 border-b p-2'>
           <SidebarTrigger className='p-2' />
-          <span className='h-8 border-s'/>
+          {investorStatusText && (
+            <span className='size-7'>
+              {investorStatusText.icon}
+            </span>
+          )}
           {breadcrumbs && (
             <Breadcrumb>
               <BreadcrumbList>
@@ -72,29 +90,30 @@ export default function MainLayout ({
             </Breadcrumb>
           )}
         </div>
-        <section className='grow p-4 overflow-scroll max-w-dvw'>
+        <section className='grow p-4 h-full max-w-dvw overflow-scroll'>
           {children}
         </section>
       </div>
       {(
-        (loggedInUser?.type === UserType.INVESTOR && (loggedInUser as Investor)?.status !== InvestorStatus.VERIFIED)
+        loggedInUser?.type === UserType.INVESTOR &&
+        (loggedInUser as Investor).status !== InvestorStatus.VERIFIED
       ) && (
         <AlertDialog defaultOpen>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Actualización de la cuenta</AlertDialogTitle>
+              <AlertDialogTitle>Actualizacion de la cuenta</AlertDialogTitle>
               <AlertDialogDescription>
-                Compruebe el estado de su cuenta y ejecute las acciones necesarias. Una vez corregida la incidencia, solicite nuevamente la verificación.
+                Compruebe el estado de su cuenta y ejecute las acciones necesarias. Una vez corregida la incidencia, solicite nuevamente la verificacion.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Item variant='muted' className='gap-2'>
-              <ItemMedia className='self-center! w-10 h-10'>
-                {investorStatusTextMap[(loggedInUser as Investor)?.status as keyof typeof investorStatusTextMap].icon}
+              <ItemMedia className='self-center! size-10'>
+                {investorStatusText?.icon}
               </ItemMedia>
               <ItemContent>
-                <ItemTitle>{investorStatusTextMap[(loggedInUser as Investor)?.status as keyof typeof investorStatusTextMap].title}</ItemTitle>
+                <ItemTitle>{investorStatusText?.title}</ItemTitle>
                 <ItemDescription>
-                  {(loggedInUser as Investor)?.lastCommunication}
+                  {(loggedInUser as Investor).lastCommunication}
                 </ItemDescription>
               </ItemContent>
             </Item>

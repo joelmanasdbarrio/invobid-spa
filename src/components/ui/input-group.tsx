@@ -6,11 +6,18 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 
+function focusInputFromAddon (currentTarget: HTMLElement, target: HTMLElement | null) {
+  if (target?.closest('button')) {
+    return
+  }
+
+  currentTarget.parentElement?.querySelector('input')?.focus()
+}
+
 function InputGroup ({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot='input-group'
-      role='group'
       className={cn(
         'group/input-group border-input dark:bg-input/30 relative flex w-full items-center rounded-md border shadow-xs transition-[color,box-shadow] outline-none',
         'h-9 min-w-0 has-[>textarea]:h-auto',
@@ -58,19 +65,29 @@ const inputGroupAddonVariants = cva(
 function InputGroupAddon ({
   className,
   align = 'inline-start',
+  onClick,
+  onKeyDown,
+  tabIndex,
   ...props
 }: React.ComponentProps<'div'> & VariantProps<typeof inputGroupAddonVariants>) {
   return (
     <div
-      role='group'
       data-slot='input-group-addon'
       data-align={align}
+      role='presentation'
       className={cn(inputGroupAddonVariants({ align }), className)}
+      tabIndex={tabIndex ?? 0}
       onClick={(e) => {
-        if ((e.target as HTMLElement).closest('button')) {
-          return
+        focusInputFromAddon(e.currentTarget, e.target as HTMLElement)
+        onClick?.(e)
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          focusInputFromAddon(e.currentTarget, e.target as HTMLElement)
         }
-        e.currentTarget.parentElement?.querySelector('input')?.focus()
+
+        onKeyDown?.(e)
       }}
       {...props}
     />

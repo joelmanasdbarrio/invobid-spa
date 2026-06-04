@@ -19,7 +19,7 @@ export const investorColumns: ColumnDef<Investor>[] = [
     enableHiding: false,
     cell: ({row}) => (
       <Link to={`/admin/users/${row.original.id}`}>
-        <ExternalLinkIcon className='w-4 h-4' />
+        <ExternalLinkIcon className='size-4' />
       </Link>
     )
   },
@@ -53,14 +53,14 @@ export const investorColumns: ColumnDef<Investor>[] = [
         case InvestorType.INDIVIDUAL:
           return (
             <span className='flex items-center gap-2'>
-              <UserIcon className='w-4 h-4' />
+              <UserIcon className='size-4' />
               Particular
             </span>
           )
         case InvestorType.COMPANY:
           return (
             <span className='flex items-center gap-2'>
-              <BuildingIcon className='w-4 h-4' />
+              <BuildingIcon className='size-4' />
               Empresa
             </span>
           )

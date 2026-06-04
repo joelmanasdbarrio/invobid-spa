@@ -19,7 +19,7 @@ import {
   UserIcon,
   UsersIcon
 } from 'lucide-react'
-import { useContext, useEffect } from 'react'
+import { use, useEffect } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router'
 import { z } from 'zod'
@@ -76,7 +76,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
     }
   }, [watchedName, investorType, form])
 
-  const authContext = useContext(AuthContext)
+  const authContext = use(AuthContext)
   if (!authContext) {
     throw new Error('AuthContext must be used within AuthProvider')
   }
@@ -127,7 +127,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
                   <Field className='hidden'>
                     <FieldLabel htmlFor={field.name}>Tipo de empresa</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput {...field} id={field.name} required value={investorType} />
+                      <InputGroupInput {...field} id={field.name} required value={investorType ?? ''} />
                     </InputGroup>
                   </Field>
                 )}
@@ -153,7 +153,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
                         <InputGroupAddon align={'inline-end'}>
                           <Tooltip>
                             <TooltipTrigger className='leading-1'>
-                              <CircleQuestionMarkIcon className='w-4 h-4'/>
+                              <CircleQuestionMarkIcon className='size-4'/>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p className='text-center'>Nombre y apellidos según <br /> documento de identificación</p>
@@ -183,7 +183,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
                         <InputGroupAddon align={'inline-end'}>
                           <Tooltip>
                             <TooltipTrigger className='leading-1'>
-                              <CircleQuestionMarkIcon className='w-4 h-4'/>
+                              <CircleQuestionMarkIcon className='size-4'/>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p className='text-center'>Nombre legal de tu empresa <br /> tal como figura en el registro</p>
@@ -290,7 +290,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
                       <InputGroupAddon align={'inline-end'}>
                         <Tooltip>
                           <TooltipTrigger className='leading-1'>
-                            <CircleQuestionMarkIcon className='w-4 h-4'/>
+                            <CircleQuestionMarkIcon className='size-4'/>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className='text-center'>Valor del documento CIF/NIF (número + letras)</p>
@@ -329,7 +329,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
                       <InputGroupAddon align={'inline-end'}>
                         <Tooltip>
                           <TooltipTrigger className='leading-1'>
-                            <CircleQuestionMarkIcon className='w-4 h-4'/>
+                            <CircleQuestionMarkIcon className='size-4'/>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className='text-center'>Fotocopia que permita visualizar el documento CIF/NIF completo</p>

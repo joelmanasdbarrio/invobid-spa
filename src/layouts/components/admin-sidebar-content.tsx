@@ -65,7 +65,7 @@ export function AdminSidebarContent () {
                 <SidebarMenuButton isActive={location.pathname.startsWith('/admin/users')}>
                   <UserIcon /> Usuarios
                   {pendingInvestorsCount > 0 && (
-                    <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
+                    <Badge variant={'destructive'} className={'relative -top-1 right-1 size-2 p-0 group-data-[state=open]/collapsible:hidden'} />
                   )}
                   <ChevronRightIcon className='ms-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                 </SidebarMenuButton>
@@ -102,7 +102,7 @@ export function AdminSidebarContent () {
                 <SidebarMenuButton isActive={location.pathname.startsWith('/admin/debtors')}>
                   <HandCoinsIcon /> Deudores
                   {pendingDebtorsCount > 0 && (
-                    <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
+                    <Badge variant={'destructive'} className={'relative -top-1 right-1 size-2 p-0 group-data-[state=open]/collapsible:hidden'} />
                   )}
                   <ChevronRightIcon className='ms-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                 </SidebarMenuButton>
@@ -139,7 +139,7 @@ export function AdminSidebarContent () {
                 <SidebarMenuButton isActive={location.pathname.startsWith('/admin/invoices')}>
                   <FileTextIcon /> Facturas
                   {pendingInvoicesCount > 0 && (
-                    <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
+                    <Badge variant={'destructive'} className={'relative -top-1 right-1 size-2 p-0 group-data-[state=open]/collapsible:hidden'} />
                   )}
                   <ChevronRightIcon className='ms-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                 </SidebarMenuButton>
@@ -176,7 +176,7 @@ export function AdminSidebarContent () {
                 <SidebarMenuButton isActive={location.pathname.startsWith('/admin/auctions')}>
                   <GavelIcon /> Subastas
                   {transitioningAuctionsCount > 0 && (
-                    <Badge variant={'destructive'} className={'relative -top-1 right-1 w-2 h-2 p-0 group-data-[state=open]/collapsible:hidden'} />
+                    <Badge variant={'destructive'} className={'relative -top-1 right-1 size-2 p-0 group-data-[state=open]/collapsible:hidden'} />
                   )}
                   <ChevronRightIcon className='ms-auto transition-transform group-data-[state=open]/collapsible:rotate-90' />
                 </SidebarMenuButton>

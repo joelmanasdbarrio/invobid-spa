@@ -1,12 +1,12 @@
 import { AuthContext } from '@/contexts/auth.context'
 import Cookies from 'js-cookie'
-import { useContext, useEffect } from 'react'
+import { use, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
 export default function Logout () {
   const navigate = useNavigate()
 
-  const authContext = useContext(AuthContext)
+  const authContext = use(AuthContext)
   if (!authContext) {
     throw new Error('AuthContext must be used within AuthProvider')
   }

@@ -125,7 +125,7 @@ export default function DebtorsPage () {
     <div className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <HandCoinsIcon className='w-6 h-6' />
+          <HandCoinsIcon className='size-6' />
         </span>
         <h2>Consultar deudores</h2>
       </div>

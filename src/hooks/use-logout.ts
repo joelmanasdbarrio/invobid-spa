@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie'
-import { useContext } from 'react'
+import { use } from 'react'
 import { useNavigate } from 'react-router'
 
 import { AuthContext } from '@/contexts/auth.context'
@@ -7,7 +7,7 @@ import { AuthContext } from '@/contexts/auth.context'
 export function useLogout () {
   const navigate = useNavigate()
 
-  const authContext = useContext(AuthContext)
+  const authContext = use(AuthContext)
   if (!authContext) {
     throw new Error('useLogout must be used within AuthProvider')
   }

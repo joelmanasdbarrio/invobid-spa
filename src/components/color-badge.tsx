@@ -65,7 +65,7 @@ export function ColorBadge ({ color, icon, children, className }: ColorBadgeProp
 function BaseBadge ({ icon, children, className, iconClass }: { icon?: Icon, children?: React.ReactNode, className?: string, iconClass?: string }) {
   return (
     <span className={cn('flex items-center gap-2 w-max border rounded-lg px-2 py-0.5 text-xs', className)}>
-      {icon && React.cloneElement(icon, { className: cn('w-4 h-4 rounded-full p-0.5', icon.props.className, iconClass) })}
+      {icon && React.cloneElement(icon, { className: cn('size-4 rounded-full p-0.5', icon.props.className, iconClass) })}
       {children}
     </span>
   )

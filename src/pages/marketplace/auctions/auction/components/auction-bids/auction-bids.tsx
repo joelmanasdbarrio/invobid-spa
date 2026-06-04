@@ -8,7 +8,7 @@ import { useLocale } from '@/hooks/use-locale'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { calcDiscount, calcProfitability, invertProfitability } from '@/lib/auction-metrics'
 import { formatCurrency } from '@/lib/format-currency'
-import { connectBidSocket, getBids, placeBid } from '@/services/bid.api'
+import { connectBidSocket, getBid, getBids, placeBid } from '@/services/bid.api'
 import { AuctionStatus, type Auction } from '@/types/Auction'
 import type { Bid } from '@/types/Bid'
 import { EyeIcon, HistoryIcon, PercentIcon, ShieldCheckIcon, TrendingUpIcon, XIcon } from 'lucide-react'
@@ -17,6 +17,9 @@ import type { Socket } from 'socket.io-client'
 import { useBidColumns } from './columns'
 import { DataTable } from './data-table'
 
+const PROFITABILITY_REDUCTIONS = [-0.1, -0.25, -0.5, -1]
+const PAGE_LIMIT = 10
+
 export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auction: Auction | undefined; onAuctionExtended?: (newEndDate: string) => void }) {
   const { locale } = useLocale()
   const loggedInUser = useLoggedInUser()
@@ -24,20 +27,19 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
   const isAuctionActive = auction?.status === AuctionStatus.PUBLISHED
   const isDisabled = !isAuctionActive || !auction || auction.invoice.sellerInvestor.id === loggedInUser?.id
 
-  const [bidInput, setBidInput] = useState('')
-  const [bidInputInvalid, setBidInputInvalid] = useState(false)
-  const [profitabilityInput, setProfitabilityInput] = useState('')
-  const [profitabilityInputInvalid, setProfitabilityInputInvalid] = useState(false)
+  const [bidForm, setBidForm] = useState({ bidInput: '', bidInputInvalid: false, profitabilityInput: '', profitabilityInputInvalid: false })
+  const { bidInput, bidInputInvalid, profitabilityInput, profitabilityInputInvalid } = bidForm
+  const setBidInput = (v: string) => setBidForm(prev => ({ ...prev, bidInput: v }))
+  const setBidInputInvalid = (v: boolean) => setBidForm(prev => ({ ...prev, bidInputInvalid: v }))
+  const setProfitabilityInput = (v: string) => setBidForm(prev => ({ ...prev, profitabilityInput: v }))
+  const setProfitabilityInputInvalid = (v: boolean) => setBidForm(prev => ({ ...prev, profitabilityInputInvalid: v }))
 
-  const [bids, setBids] = useState<Bid[]>([])
-  const [totalItems, setTotalItems] = useState(0)
-  const [viewerCount, setViewerCount] = useState(0)
+  const [bidsData, setBidsData] = useState({ bids: [] as Bid[], totalItems: 0, viewerCount: 0, currentPage: 1 })
+  const { bids, totalItems, viewerCount, currentPage } = bidsData
+  const setViewerCount = (v: number) => setBidsData(prev => ({ ...prev, viewerCount: v }))
   const socketRef = useRef<Socket | null>(null)
 
   const columns = useBidColumns()
-
-  const [currentPage, setCurrentPage] = useState(1)
-  const [currentLimit] = useState(10)
 
   useEffect(() => {
     if (!auction?.id) return
@@ -45,21 +47,28 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
     getBids({
       auctionId: auction.id,
       page: String(currentPage),
-      limit: String(currentLimit)
+      limit: String(PAGE_LIMIT)
     }).then((res) => {
-      setBids((prev) => [...prev, ...res.data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
-      setTotalItems(res._metadata.total)
+      setBidsData(prev => ({ ...prev, bids: [...prev.bids, ...res.data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), totalItems: res._metadata.total }))
     })
-  }, [auction?.id, currentPage, currentLimit])
+  }, [auction?.id, currentPage])
 
   useEffect(() => {
     if (!auction?.id) return
 
     const socket = connectBidSocket(auction.id, {
       onViewerCount: (count) => setViewerCount(count),
-      onNewBid: (newBid) => {
-        setBids((prev) => [newBid, ...prev])
-        setTotalItems((prev) => prev + 1)
+      onNewBid: async (bidId) => {
+        if (onAuctionExtended && auction.date.end) {
+          const extensionMs = Number(import.meta.env.VITE_AUCTION_EXTENSION_MINUTES) * 60 * 1000
+          const endTime = new Date(auction.date.end).getTime()
+          if (endTime - Date.now() <= extensionMs) {
+            onAuctionExtended(new Date(Date.now() + extensionMs).toISOString())
+          }
+        }
+
+        const newBid = await getBid(bidId).then(res => res.data)
+        setBidsData(prev => ({ ...prev, bids: [newBid, ...prev.bids], totalItems: prev.totalItems + 1 }))
       }
     })
     socketRef.current = socket
@@ -68,39 +77,37 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
       socket.disconnect()
       socketRef.current = null
     }
-  }, [auction?.id])
+  }, [auction, onAuctionExtended])
 
   const latestBidAmount = bids[0]?.amount ?? auction?.price?.start ?? 0
   const faceValue = auction?.invoice.amount ?? 0
-  const buyerPercentage = auction?.invoice.transactionFee.buyerPercentage ?? 0
-  const currentDiscount = calcDiscount(faceValue, latestBidAmount)
-  const currentProfitability = calcProfitability(faceValue, buyerPercentage, latestBidAmount)
+  const buyerFeePercentage = auction?.invoice.transactionFee.buyerPercentage ?? 0
+  const buyerFeeValue = bidInput ? Number(bidInput) * buyerFeePercentage / 100 : 0
+  const currentProfitability = calcProfitability(faceValue, buyerFeePercentage, latestBidAmount)
 
   const minimumNextBid = latestBidAmount * (1 + Number(import.meta.env.VITE_SMALLEST_BID_INCREMENT_PERCENTAGE) / 100)
+  const minimumNextRawBid = minimumNextBid / (1 + buyerFeePercentage / 100)
 
-  const profitabilityReductions = [-0.1, -0.25, -0.5, -1]
-  const profitabilityReductionAmounts = profitabilityReductions.map(delta => {
+  const profitabilityReductionAmounts = PROFITABILITY_REDUCTIONS.map(delta => {
     if (faceValue <= 0) return 0
     const targetProfitability = currentProfitability + delta
-    return Math.max(Math.ceil(invertProfitability(faceValue, buyerPercentage, targetProfitability) * 100) / 100, minimumNextBid)
+    const rawBid = invertProfitability(faceValue, buyerFeePercentage, targetProfitability) / (1 + buyerFeePercentage / 100)
+    return Math.max(Math.ceil(rawBid * 100) / 100, minimumNextRawBid)
   })
 
-  const [previewDiscount, setPreviewDiscount] = useState<number | null>(null)
-  const [previewProfitability, setPreviewProfitability] = useState<number | null>(null)
+  const [hoverTotalPrice, setHoverTotalPrice] = useState<number | null>(null)
 
-  const previewAmount = bidInput ? Number(bidInput) : null
-  const previewInputDiscount = previewAmount !== null && faceValue > 0 ? calcDiscount(faceValue, previewAmount) : null
-  const previewInputProfitability = previewAmount !== null && faceValue > 0 && previewAmount > 0 ? calcProfitability(faceValue, buyerPercentage, previewAmount) : null
-
-  const displayDiscount = previewDiscount ?? previewInputDiscount ?? currentDiscount
-  const displayProfitability = previewProfitability ?? previewInputProfitability ?? currentProfitability
+  const typedTotalPrice = bidInput && Number(bidInput) > 0 ? Number(bidInput) * (1 + buyerFeePercentage / 100) : null
+  const displayDiscount = calcDiscount(faceValue, hoverTotalPrice ?? typedTotalPrice ?? latestBidAmount)
+  const displayProfitability = calcProfitability(faceValue, buyerFeePercentage, hoverTotalPrice ?? typedTotalPrice ?? latestBidAmount)
 
   function handleBidInputChange (v: string) {
     const rounded = v && Number(v) > 0 ? String(Math.ceil(Number(v) * 100) / 100) : v
     setBidInput(rounded)
     setBidInputInvalid(false)
     if (rounded && faceValue > 0 && Number(rounded) > 0) {
-      const delta = currentProfitability - calcProfitability(faceValue, buyerPercentage, Number(rounded))
+      const totalPrice = Number(rounded) * (1 + buyerFeePercentage / 100)
+      const delta = currentProfitability - calcProfitability(faceValue, buyerFeePercentage, totalPrice)
       setProfitabilityInput(delta > 0 ? delta.toFixed(2) : '')
     } else {
       setProfitabilityInput('')
@@ -112,7 +119,8 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
     setProfitabilityInputInvalid(false)
     if (v && faceValue > 0) {
       const targetProfitability = currentProfitability - Number(v)
-      const amount = Math.max(Math.ceil(invertProfitability(faceValue, buyerPercentage, targetProfitability) * 100) / 100, minimumNextBid)
+      const rawBid = invertProfitability(faceValue, buyerFeePercentage, targetProfitability) / (1 + buyerFeePercentage / 100)
+      const amount = Math.max(Math.ceil(rawBid * 100) / 100, minimumNextRawBid)
       setBidInput(String(amount))
       setBidInputInvalid(false)
     } else {
@@ -121,36 +129,22 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
   }
 
   function clearInputs () {
-    setBidInput('')
-    setBidInputInvalid(false)
-    setProfitabilityInput('')
-    setProfitabilityInputInvalid(false)
+    setBidForm({ bidInput: '', bidInputInvalid: false, profitabilityInput: '', profitabilityInputInvalid: false })
   }
 
   function handlePlaceBid () {
     if (!socketRef.current || !auction?.id) return
     placeBid(socketRef.current, auction.id, Number(bidInput))
-      .then(() => {
-        clearInputs()
-        if (onAuctionExtended && auction.date.end) {
-          const extensionMs = Number(import.meta.env.VITE_AUCTION_EXTENSION_MINUTES) * 60 * 1000
-          const endTime = new Date(auction.date.end).getTime()
-          if (endTime - Date.now() <= extensionMs) {
-            onAuctionExtended(new Date(Date.now() + extensionMs).toISOString())
-          }
-        }
-      })
-      .catch(() => { setBidInputInvalid(true); setProfitabilityInputInvalid(true) })
+      .then(() => clearInputs())
+      .catch(() => { setBidForm(prev => ({ ...prev, bidInputInvalid: true, profitabilityInputInvalid: true })) })
   }
 
   function calcPreview (amount: number) {
-    setPreviewDiscount(calcDiscount(faceValue, amount))
-    setPreviewProfitability(calcProfitability(faceValue, buyerPercentage, amount))
+    setHoverTotalPrice(amount * (1 + buyerFeePercentage / 100))
   }
 
   function clearPreview () {
-    setPreviewDiscount(null)
-    setPreviewProfitability(null)
+    setHoverTotalPrice(null)
   }
 
   return (
@@ -173,7 +167,7 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
           </div>
         </CardHeader>
         <div className='flex flex-col'>
-          <DataTable columns={columns} data={bids} totalItems={totalItems} onLoadMore={() => setCurrentPage(currentPage + 1)} />
+          <DataTable columns={columns} data={bids} totalItems={totalItems} onLoadMore={() => setBidsData(prev => ({ ...prev, currentPage: prev.currentPage + 1 }))} />
         </div>
       </div>
 
@@ -224,7 +218,7 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
         <div className='grid grid-cols-2 grid-rows-1 divide-x'>
           <div className='flex flex-col items-center text-sm py-4'>
             <span className='text-muted-foreground flex items-center gap-2'>
-              <PercentIcon className='w-4 h-4 inline-block' />
+              <PercentIcon className='size-4 inline-block' />
               Descuento
             </span>
             <span className='ps-6 text-xl font-bold' title={`Descuento ${displayDiscount.toFixed(2)}%`}>
@@ -233,7 +227,7 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
           </div>
           <div className='flex flex-col items-center text-sm py-4'>
             <span className='text-muted-foreground flex items-center gap-2'>
-              <TrendingUpIcon className='w-4 h-4 inline-block' />
+              <TrendingUpIcon className='size-4 inline-block' />
               Rentabilidad
             </span>
             <span className='ps-6 text-xl font-bold text-green-500 text-shadow-md' title={`Rentabilidad ${displayProfitability.toFixed(2)}%`}>
@@ -244,18 +238,18 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
         <div className='grow flex flex-col gap-2 p-4 pb-0'>
           <div className='grid lg:grid-cols-2 lg:grid-rows-1 gap-2'>
             <InputGroup>
-              <InputGroupInput placeholder='Valor final' type='number' min={minimumNextBid} step={100} disabled={isDisabled} value={bidInput} aria-invalid={bidInputInvalid} onChange={e => handleBidInputChange(e.target.value)} />
+              <InputGroupInput placeholder='Valor final' type='number' min={minimumNextRawBid} step={100} disabled={isDisabled} value={bidInput} aria-invalid={bidInputInvalid} onChange={e => handleBidInputChange(e.target.value)} />
               <InputGroupAddon align='inline-end'>
                 €
               </InputGroupAddon>
               <InputGroupAddon align='inline-end'>
                 <Button variant='ghost' size='icon' disabled={!bidInput} onClick={clearInputs}>
-                  <XIcon className='w-4 h-4 cursor-pointer' />
+                  <XIcon className='size-4 cursor-pointer' />
                 </Button>
               </InputGroupAddon>
             </InputGroup>
             <InputGroup>
-              <InputGroupInput placeholder='Rentabilidad' type='number' min={profitabilityReductions[0]} step={0.01} disabled={isDisabled} value={profitabilityInput} aria-invalid={profitabilityInputInvalid} onChange={e => handleProfitabilityInputChange(e.target.value)} />
+              <InputGroupInput placeholder='Rentabilidad' type='number' min={PROFITABILITY_REDUCTIONS[0]} step={0.01} disabled={isDisabled} value={profitabilityInput} aria-invalid={profitabilityInputInvalid} onChange={e => handleProfitabilityInputChange(e.target.value)} />
               <InputGroupAddon>
                 -
               </InputGroupAddon>
@@ -264,15 +258,19 @@ export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auctio
               </InputGroupAddon>
               <InputGroupAddon align='inline-end'>
                 <Button variant='ghost' size='icon' disabled={!profitabilityInput} onClick={clearInputs}>
-                  <XIcon className='w-4 h-4 cursor-pointer' />
+                  <XIcon className='size-4 cursor-pointer' />
                 </Button>
               </InputGroupAddon>
             </InputGroup>
           </div>
+          <div className='text-xs text-muted-foreground flex items-center justify-end gap-4'>
+            <span>Comisión ({buyerFeePercentage}%):</span>
+            <span>+{buyerFeeValue.toFixed(2)}€</span>
+          </div>
           <div className='flex flex-col gap-1'>
             <span className='text-xs text-muted-foreground'>Rentabilidad rápida:</span>
             <div className='flex gap-2 *:flex-1'>
-              {profitabilityReductions.map((delta, i) => (
+              {PROFITABILITY_REDUCTIONS.map((delta, i) => (
                 <Button
                   key={delta}
                   variant='outline'

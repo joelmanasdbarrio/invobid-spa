@@ -8,13 +8,10 @@ import { useBidColumns } from './columns'
 import { DataTable } from './data-table'
 
 export function AuctionBidHistory ({ auction }: { auction: Auction | undefined }) {
-  const [bids, setBids] = useState<Bid[]>([])
-  const [totalItems, setTotalItems] = useState(0)
-
+  const [bidsState, setBidsState] = useState({ bids: [] as Bid[], totalItems: 0, currentPage: 1 })
+  const { bids, totalItems, currentPage } = bidsState
+  const currentLimit = 10
   const columns = useBidColumns()
-
-  const [currentPage, setCurrentPage] = useState(1)
-  const [currentLimit] = useState(10)
 
   useEffect(() => {
     if (!auction?.id) return
@@ -24,17 +21,16 @@ export function AuctionBidHistory ({ auction }: { auction: Auction | undefined }
       page: String(currentPage),
       limit: String(currentLimit)
     }).then((res) => {
-      setBids((prev) => [...prev, ...res.data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
-      setTotalItems(res._metadata.total)
+      setBidsState(prev => ({ ...prev, bids: [...prev.bids, ...res.data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), totalItems: res._metadata.total }))
     })
-  }, [auction?.id, currentPage, currentLimit])
+  }, [auction?.id, currentPage])
 
   return (
     <Card className='flex flex-col gap-0 overflow-hidden p-0'>
       <CardHeader className='flex flex-row items-center justify-between py-6'>
         <div className='flex items-center gap-2'>
           <span className='rounded-md p-1 bg-primary/20 text-primary'>
-            <HistoryIcon className='w-4 h-4' />
+            <HistoryIcon className='size-4' />
           </span>
           <h3>Historial de pujas</h3>
         </div>
@@ -47,7 +43,7 @@ export function AuctionBidHistory ({ auction }: { auction: Auction | undefined }
           columns={columns}
           data={bids}
           totalItems={totalItems}
-          onLoadMore={() => setCurrentPage((p) => p + 1)}
+          onLoadMore={() => setBidsState(prev => ({ ...prev, currentPage: prev.currentPage + 1 }))}
         />
       </div>
     </Card>

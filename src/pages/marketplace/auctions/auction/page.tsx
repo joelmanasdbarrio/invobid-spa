@@ -63,7 +63,7 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <GavelIcon className='w-6 h-6' />
+          <GavelIcon className='size-6' />
         </span>
         <h2>Consultar subasta</h2>
       </div>
@@ -190,7 +190,7 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
                           <Field>
                             <FieldLabel htmlFor='invoiceRating'>Rating {import.meta.env.VITE_APP_NAME}:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='invoiceRating' value={auction.invoice?.rating} type='text' required disabled />
+                              <InputGroupInput id='invoiceRating' value={auction.invoice?.rating ?? ''} type='text' required disabled />
                               <InputGroupAddon>
                                 %
                               </InputGroupAddon>
@@ -199,7 +199,7 @@ export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLast
                           <Field>
                             <FieldLabel htmlFor='invoiceExtRating'>Rating {import.meta.env.VITE_EXT_RATING_PROVIDER}:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='invoiceExtRating' value={auction.invoice?.extRating} type='text' required disabled />
+                              <InputGroupInput id='invoiceExtRating' value={auction.invoice?.extRating ?? ''} type='text' required disabled />
                               <InputGroupAddon>
                                 %
                               </InputGroupAddon>

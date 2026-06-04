@@ -5,6 +5,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSet 
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLocale } from '@/hooks/use-locale'
+import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { formatCurrency } from '@/lib/format-currency'
 import { getInvoiceById } from '@/services/invoice.api'
 import type { Invoice } from '@/types/Invoice'
@@ -21,6 +22,19 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { DocumentPreview } from '../../../../components/document-preview'
 import { ProgressBar } from '../../auctions/components/progress-bar'
+
+function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
+  e.preventDefault()
+  const button = e.currentTarget
+  performCopyToClipboard(text).then(success => {
+    if (success) {
+      button.setAttribute('data-copied', 'true')
+      setTimeout(() => {
+        button.removeAttribute('data-copied')
+      }, 2000)
+    }
+  })
+}
 
 export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const { invoiceId } = useParams()
@@ -43,21 +57,11 @@ export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLast
     }
   }, [invoiceId, navigate, setLastBreadcrumb])
 
-  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
-    e.preventDefault()
-    navigator.clipboard.writeText(String(text))
-    const button = e.currentTarget
-    button.setAttribute('data-copied', 'true')
-    setTimeout(() => {
-      button.removeAttribute('data-copied')
-    }, 2000)
-  }
-
   return (
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <FileTextIcon className='w-6 h-6' />
+          <FileTextIcon className='size-6' />
         </span>
         <h2>Detalle de factura</h2>
       </div>
@@ -79,13 +83,13 @@ export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLast
                         %
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, invoice?.rating ?? 0)} className='group'>
-                          <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                        <button type='button' onClick={(e) => copyToClipboard(e, invoice?.rating ?? 0)} className='group'>
+                          <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span>
-                                <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className='relative -top-2 right-3'>
@@ -104,13 +108,13 @@ export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLast
                         #
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, invoice?.svc ?? '')} className='group'>
-                          <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                        <button type='button' onClick={(e) => copyToClipboard(e, invoice?.svc ?? '')} className='group'>
+                          <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span>
-                                <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className='relative -top-2 right-3'>
@@ -133,13 +137,13 @@ export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLast
                         €
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, invoice?.amount ?? '')} className='group'>
-                          <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                        <button type='button' onClick={(e) => copyToClipboard(e, invoice?.amount ?? '')} className='group'>
+                          <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span>
-                                <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className='relative -top-2 right-3'>
@@ -158,13 +162,13 @@ export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLast
                         %
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.buyerPercentage ?? 0)} className='group'>
-                          <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                        <button type='button' onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.buyerPercentage ?? 0)} className='group'>
+                          <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span>
-                                <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className='relative -top-2 right-3'>
@@ -183,13 +187,13 @@ export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLast
                         %
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
-                        <button onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.sellerPercentage ?? 0)} className='group'>
-                          <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                        <button type='button' onClick={(e) => copyToClipboard(e, invoice?.transactionFee?.sellerPercentage ?? 0)} className='group'>
+                          <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span>
-                                <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className='relative -top-2 right-3'>
@@ -221,13 +225,13 @@ export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLast
                               <IdCardIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.taxId ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, invoice?.debtor?.taxId ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -246,13 +250,13 @@ export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLast
                               <BuildingIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.companyName ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, invoice?.debtor?.companyName ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -271,13 +275,13 @@ export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLast
                               <MailIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.email ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, invoice?.debtor?.email ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -296,13 +300,13 @@ export default function MarketplaceInvoicePage ({ setLastBreadcrumb }: { setLast
                               <PhoneIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, invoice?.debtor?.phoneNumber ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, invoice?.debtor?.phoneNumber ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>

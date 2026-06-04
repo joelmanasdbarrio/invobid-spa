@@ -31,19 +31,14 @@ export function DateTimePicker ({
   maxDate
 }: DateTimePickerProps) {
   const { locale } = useLocale()
-
-  const [date, setDate] = React.useState<Date | undefined>(
-    value ? parseDateTime(value) : undefined
+  const date = React.useMemo(
+    () => (value ? parseDateTime(value) : undefined),
+    [value]
   )
-
-  React.useEffect(() => {
-    setDate(value ? parseDateTime(value) : undefined)
-  }, [value])
 
   /** When the user picks a calendar day, keep the existing time (or default to 00:00). */
   const handleDaySelect = (day: Date | undefined) => {
     if (!day) {
-      setDate(undefined)
       onChange?.(undefined)
       return
     }
@@ -53,7 +48,6 @@ export function DateTimePicker ({
     } else {
       next.setHours(0, 0, 0, 0)
     }
-    setDate(next)
     onChange?.(next.toISOString())
   }
 
@@ -62,7 +56,6 @@ export function DateTimePicker ({
     const [hours, minutes] = e.target.value.split(':').map(Number)
     const next = date ? new Date(date) : new Date()
     next.setHours(hours, minutes, 0, 0)
-    setDate(next)
     onChange?.(next.toISOString())
   }
 
@@ -90,7 +83,7 @@ export function DateTimePicker ({
           >
             <CalendarIcon
               className={cn(
-                'mr-2 h-4 w-4 text-muted-foreground',
+                'mr-2 size-4 text-muted-foreground',
                 disabled && 'cursor-not-allowed opacity-80'
               )}
             />
@@ -111,9 +104,10 @@ export function DateTimePicker ({
             ]}
           />
           <div className='border-t p-3 flex items-center gap-2'>
-            <ClockIcon className='h-4 w-4 text-muted-foreground shrink-0' />
+            <ClockIcon className='size-4 text-muted-foreground shrink-0' />
             <input
               type='time'
+              aria-label='Hora'
               value={date ? toTimeString(date) : ''}
               onChange={handleTimeChange}
               className='flex-1 bg-transparent text-sm outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] rounded px-1'
@@ -123,7 +117,6 @@ export function DateTimePicker ({
             variant='outline'
             className='w-full rounded-none'
             onClick={() => {
-              setDate(undefined)
               onChange?.(undefined)
             }}
           >

@@ -8,7 +8,7 @@ import { createAdmin } from '@/services/admin.api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Cookies from 'js-cookie'
 import { EllipsisIcon, MailIcon, UserIcon } from 'lucide-react'
-import { useContext } from 'react'
+import { use } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router'
 import { z } from 'zod'
@@ -16,8 +16,7 @@ import { z } from 'zod'
 const formSchema = z.object({
   name: z.string()
     .min(2, 'El nombre debe tener al menos 2 caracteres'),
-  email: z.string()
-    .email('Correo electrónico no válido'),
+  email: z.email('Correo electrónico no válido'),
   password: z.string()
     .min(6, 'La contraseña debe tener al menos 6 caracteres'),
   passwordRepeat: z.string()
@@ -40,7 +39,7 @@ export default function AdminForm () {
     }
   })
 
-  const authContext = useContext(AuthContext)
+  const authContext = use(AuthContext)
   if (!authContext) {
     throw new Error('AuthContext must be used within AuthProvider')
   }
