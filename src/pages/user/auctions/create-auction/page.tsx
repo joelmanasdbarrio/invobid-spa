@@ -11,6 +11,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLocale } from '@/hooks/use-locale'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
+import { calculateMaxAllowedPrice } from '@/lib/calculate-max-price'
 import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { formatCurrency } from '@/lib/format-currency'
 import { parseLocalDate } from '@/lib/format-date'
@@ -81,6 +82,15 @@ export default function CreateAuctionPage () {
   const selectedInvoceSellerFee = selectedInvoice?.transactionFee.sellerPercentage ?? 0
   const invoiceDueDate = selectedInvoice?.dueDate
 
+  const maxAllowedPrice = selectedInvoice
+    ? calculateMaxAllowedPrice(
+      selectedInvoice.amount,
+      selectedInvoice.transactionFee.buyerPercentage,
+      selectedInvoice.transactionFee.sellerPercentage,
+      Number(import.meta.env.VITE_MINIMUM_INVOICE_DISCOUNT)
+    )
+    : null
+
   const auctionEndMaxDate = invoiceDueDate
     ? (() => { const d = parseLocalDate(invoiceDueDate); d.setMonth(d.getMonth() - 1); return d.toISOString() })()
     : undefined
@@ -107,6 +117,18 @@ export default function CreateAuctionPage () {
     return () => clearTimeout(timer)
   }, [loggedInUser, invoiceSearch])
 
+  useEffect(() => {
+    if (!maxAllowedPrice || !watchedStartingPrice || watchedStartingPrice <= 0) return
+    if (watchedStartingPrice > maxAllowedPrice) {
+      form.setError('startingPrice', {
+        type: 'max',
+        message: 'El precio inicial supera el máximo permitido para esta factura'
+      })
+    } else if (form.formState.errors.startingPrice?.type === 'max') {
+      form.clearErrors('startingPrice')
+    }
+  }, [watchedStartingPrice, maxAllowedPrice, form])
+
   function onSubmit (data: z.infer<typeof formSchema>) {
     createAuction(JSON.stringify({
       svc: data.svc,
@@ -119,7 +141,8 @@ export default function CreateAuctionPage () {
   function applyDiscount (discountPercent: number) {
     if (!selectedInvoice?.amount) return
     const discountedPrice = Math.round(selectedInvoice.amount * (1 - discountPercent / 100) * 100) / 100
-    form.setValue('startingPrice', discountedPrice, { shouldDirty: true, shouldTouch: true })
+    const cappedPrice = maxAllowedPrice !== null ? Math.min(discountedPrice, maxAllowedPrice) : discountedPrice
+    form.setValue('startingPrice', cappedPrice, { shouldDirty: true, shouldTouch: true })
   }
 
   return (
@@ -278,6 +301,11 @@ export default function CreateAuctionPage () {
                               )}
                             </InputGroupAddon>
                           </InputGroup>
+                          {maxAllowedPrice !== null && (
+                            <p className='text-xs text-muted-foreground text-right'>
+                              Máximo: {formatCurrency(maxAllowedPrice, locale, selectedInvoice?.currency)}
+                            </p>
+                          )}
                           {fieldState.invalid && (
                             <FieldError errors={[fieldState.error]} />
                           )}
