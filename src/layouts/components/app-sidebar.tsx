@@ -26,7 +26,7 @@ export function AppSidebar () {
   const loggedInUser = useLoggedInUser()
 
   return (
-    <Sidebar variant='floating' className='divide-y'>
+    <Sidebar variant='inset' className='divide-y'>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
