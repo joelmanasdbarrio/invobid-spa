@@ -50,7 +50,7 @@ export default function AdminForm () {
       Cookies.set('logged-in-user', JSON.stringify(res.data), { expires: 1 })
       setLoggedInUser(res.data)
 
-      navigate('/')
+      navigate('/dashboard')
     })
   }
 

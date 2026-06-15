@@ -101,7 +101,7 @@ const documentFormSchema = z.object({
 })
 
 export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {invoiceId} = useParams<{ invoiceId: string }>()
+  const { invoiceId } = useParams<{ invoiceId: string }>()
   const [invoiceState, setInvoiceState] = useState<{ invoice: Invoice | undefined; originalInvoice: Invoice | undefined }>({ invoice: undefined, originalInvoice: undefined })
   const invoice = invoiceState.invoice
   const originalInvoice = invoiceState.originalInvoice

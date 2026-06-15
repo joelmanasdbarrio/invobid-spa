@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { AuthContext } from './auth.context'
 
-export function AuthProvider ({children}: {children: React.ReactNode}) {
+export function AuthProvider ({ children }: {children: React.ReactNode}) {
   const [authState, setAuthState] = useState({ loggedInUser: undefined as User | null | undefined, isLoading: true })
   const { loggedInUser, isLoading } = authState
   const setLoggedInUser = (user: User | null | ((prev: User | null) => User | null)) => {

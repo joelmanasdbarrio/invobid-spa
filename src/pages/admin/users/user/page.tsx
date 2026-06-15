@@ -85,7 +85,7 @@ const UPDATE_NOTES_MAP: Record<string, string> = {
 }
 
 export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {investorId} = useParams()
+  const { investorId } = useParams()
   const [investorState, setInvestorState] = useState<{ investor: Investor | undefined; originalInvestor: Investor | undefined }>({ investor: undefined, originalInvestor: undefined })
   const investor = investorState.investor
   const originalInvestor = investorState.originalInvestor

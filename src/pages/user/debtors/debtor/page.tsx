@@ -88,8 +88,8 @@ const baseFormSchema = z.object({
 //   }
 // })
 
-export default function DebtorPage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {debtorId} = useParams<{ debtorId: string }>()
+export default function DebtorPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
+  const { debtorId } = useParams<{ debtorId: string }>()
   const [debtorState, setDebtorState] = useState<{ debtor: Debtor | undefined; originalDebtor: Debtor | undefined }>({ debtor: undefined, originalDebtor: undefined })
   const debtor = debtorState.debtor
   const originalDebtor = debtorState.originalDebtor

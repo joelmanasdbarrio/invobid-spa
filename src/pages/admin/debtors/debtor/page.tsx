@@ -74,7 +74,7 @@ const UPDATE_NOTES_MAP: Record<string, string> = {
 }
 
 export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {debtorId} = useParams()
+  const { debtorId } = useParams()
   const [debtorState, setDebtorState] = useState<{ debtor: Debtor | undefined; originalDebtor: Debtor | undefined }>({ debtor: undefined, originalDebtor: undefined })
   const debtor = debtorState.debtor
   const originalDebtor = debtorState.originalDebtor

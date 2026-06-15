@@ -3,7 +3,7 @@ import { FieldSeparator } from '@/components/ui/field.tsx'
 import type { Invoice } from '@/types/Invoice'
 import { HistoryIcon } from 'lucide-react'
 
-export function InvoiceChangeHistory ({invoice}: {invoice: Invoice | undefined}) {
+export function InvoiceChangeHistory ({ invoice }: {invoice: Invoice | undefined}) {
   const createdAt = invoice
     ? invoice.createdAt
       ? new Date(invoice.createdAt).toLocaleString('es-ES')

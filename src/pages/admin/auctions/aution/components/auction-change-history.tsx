@@ -3,7 +3,7 @@ import { FieldSeparator } from '@/components/ui/field.tsx'
 import type { Auction } from '@/types/Auction'
 import { HistoryIcon } from 'lucide-react'
 
-export function AuctionChangeHistory ({auction}: {auction: Auction | undefined}) {
+export function AuctionChangeHistory ({ auction }: {auction: Auction | undefined}) {
   const createdAt = auction
     ? auction.createdAt
       ? new Date(auction.createdAt).toLocaleString('es-ES')
