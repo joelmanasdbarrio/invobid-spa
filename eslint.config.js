@@ -40,6 +40,7 @@ export default defineConfig([
       'quotes': ['error', 'single', { avoidEscape: true }],
       'comma-dangle': ['error', 'never'],
       'space-before-function-paren': ['error', 'always'],
+      'object-curly-spacing': ['error', 'always'],
       // Indentation rules
       'indent': ['error', 2, { SwitchCase: 1 }],
       // React rules

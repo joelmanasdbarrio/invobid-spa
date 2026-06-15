@@ -16,6 +16,6 @@ export function useLogout () {
   return () => {
     setLoggedInUser(null)
     Cookies.remove('logged-in-user')
-    navigate('/login', {replace: true})
+    navigate('/login', { replace: true })
   }
 }

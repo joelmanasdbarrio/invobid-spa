@@ -3,7 +3,7 @@ import { FieldSeparator } from '@/components/ui/field.tsx'
 import type { Debtor } from '@/types/Debtor'
 import { HistoryIcon } from 'lucide-react'
 
-export function DebtorChangeHistory ({debtor}: {debtor: Debtor | undefined}) {
+export function DebtorChangeHistory ({ debtor }: {debtor: Debtor | undefined}) {
   const createdAt = debtor
     ? debtor.createdAt
       ? new Date(debtor.createdAt).toLocaleString('es-ES')

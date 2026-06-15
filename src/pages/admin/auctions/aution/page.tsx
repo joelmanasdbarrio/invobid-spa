@@ -45,7 +45,7 @@ function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string |
 const UPDATE_NOTES_MAP: Record<string, string> = {}
 
 export default function AdminAuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {auctionId} = useParams()
+  const { auctionId } = useParams()
   const [auctionState, setAuctionState] = useState<{ auction: Auction | undefined; originalAuction: Auction | undefined }>({ auction: undefined, originalAuction: undefined })
   const auction = auctionState.auction
   const originalAuction = auctionState.originalAuction

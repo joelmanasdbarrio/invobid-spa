@@ -72,8 +72,8 @@ const UPDATE_NOTES_MAP: Record<string, string> = {
   incorrectDocument: 'El documento es incorrecto o no es legible'
 }
 
-export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {svc} = useParams()
+export default function AdminInvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
+  const { svc } = useParams()
   const [invoiceState, setInvoiceState] = useState<{ invoice: Invoice | undefined; originalInvoice: Invoice | undefined }>({ invoice: undefined, originalInvoice: undefined })
   const invoice = invoiceState.invoice
   const originalInvoice = invoiceState.originalInvoice
@@ -134,7 +134,7 @@ export default function AdminInvoicePage ({setLastBreadcrumb}: { setLastBreadcru
         form.reset({
           status: updatedInvoice.status ?? undefined,
           rating: updatedInvoice.rating ?? undefined,
-          lastCommunication: updatedInvoice.lastCommunication ?? ''})
+          lastCommunication: updatedInvoice.lastCommunication ?? '' })
         setIsFormDisabled(true)
         setIsDialogOpen(false)
       })

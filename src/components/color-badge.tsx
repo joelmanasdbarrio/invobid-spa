@@ -71,30 +71,30 @@ function BaseBadge ({ icon, children, className, iconClass }: { icon?: Icon, chi
   )
 }
 
-function yellowBadge ({icon, children, className}: {icon?: Icon, children?: React.ReactNode, className?: string}) {
+function yellowBadge ({ icon, children, className }: {icon?: Icon, children?: React.ReactNode, className?: string}) {
   return <BaseBadge icon={icon} className={cn(BADGE_STYLES.yellow.spanClass, className)} iconClass={BADGE_STYLES.yellow.iconClass}>{children}</BaseBadge>
 }
 
-function greenBadge ({icon, children, className}: {icon?: Icon, children?: React.ReactNode, className?: string}) {
+function greenBadge ({ icon, children, className }: {icon?: Icon, children?: React.ReactNode, className?: string}) {
   return <BaseBadge icon={icon} className={cn(BADGE_STYLES.green.spanClass, className)} iconClass={BADGE_STYLES.green.iconClass}>{children}</BaseBadge>
 }
 
-function redBadge ({icon, children, className}: {icon?: Icon, children?: React.ReactNode, className?: string}) {
+function redBadge ({ icon, children, className }: {icon?: Icon, children?: React.ReactNode, className?: string}) {
   return <BaseBadge icon={icon} className={cn(BADGE_STYLES.red.spanClass, className)} iconClass={BADGE_STYLES.red.iconClass}>{children}</BaseBadge>
 }
 
-function grayBadge ({icon, children, className}: {icon?: Icon, children?: React.ReactNode, className?: string}) {
+function grayBadge ({ icon, children, className }: {icon?: Icon, children?: React.ReactNode, className?: string}) {
   return <BaseBadge icon={icon} className={cn(BADGE_STYLES.gray.spanClass, className)} iconClass={BADGE_STYLES.gray.iconClass}>{children}</BaseBadge>
 }
 
-function blueBadge ({icon, children, className}: {icon?: Icon, children?: React.ReactNode, className?: string}) {
+function blueBadge ({ icon, children, className }: {icon?: Icon, children?: React.ReactNode, className?: string}) {
   return <BaseBadge icon={icon} className={cn(BADGE_STYLES.blue.spanClass, className)} iconClass={BADGE_STYLES.blue.iconClass}>{children}</BaseBadge>
 }
 
-function slateBadge ({icon, children, className}: {icon?: Icon, children?: React.ReactNode, className?: string}) {
+function slateBadge ({ icon, children, className }: {icon?: Icon, children?: React.ReactNode, className?: string}) {
   return <BaseBadge icon={icon} className={cn(BADGE_STYLES.slate.spanClass, className)} iconClass={BADGE_STYLES.slate.iconClass}>{children}</BaseBadge>
 }
 
-function purpleBadge ({icon, children, className}: {icon?: Icon, children?: React.ReactNode, className?: string}) {
+function purpleBadge ({ icon, children, className }: {icon?: Icon, children?: React.ReactNode, className?: string}) {
   return <BaseBadge icon={icon} className={cn(BADGE_STYLES.purple.spanClass, className)} iconClass={BADGE_STYLES.purple.iconClass}>{children}</BaseBadge>
 }

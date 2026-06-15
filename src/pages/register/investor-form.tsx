@@ -6,7 +6,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { AuthContext } from '@/contexts/auth.context.ts'
 import { createInvestor } from '@/services/investor.api.ts'
-import { InvestorType, type Investor } from '@/types/User'
+import { type Investor, InvestorType } from '@/types/User'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Cookies from 'js-cookie'
 import {
@@ -98,7 +98,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
       Cookies.set('logged-in-user', JSON.stringify(res.data), { expires: 1 })
       setLoggedInUser(res.data as Investor)
 
-      navigate('/')
+      navigate('/dashboard')
     })
   }
 

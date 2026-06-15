@@ -16,7 +16,7 @@ export function useInvoiceColumns (): ColumnDef<Invoice>[] {
       accessorKey: 'id',
       header: '',
       enableHiding: false,
-      cell: ({row}) => (
+      cell: ({ row }) => (
         <Link to={`/invoices/${row.original.id}`}>
           <ExternalLinkIcon className='size-4' />
         </Link>
@@ -25,22 +25,22 @@ export function useInvoiceColumns (): ColumnDef<Invoice>[] {
     {
       accessorKey: 'svc',
       header: 'CSV',
-      cell: ({row}) => row.original.svc
+      cell: ({ row }) => row.original.svc
     },
     {
       accessorKey: 'amount',
       header: 'Importe',
-      cell: ({row}) => formatCurrency(row.original.amount, locale, row.original.currency)
+      cell: ({ row }) => formatCurrency(row.original.amount, locale, row.original.currency)
     },
     {
       accessorKey: 'dueDate',
       header: 'Fecha de vencimiento',
-      cell: ({row}) => formatDate(row.original.dueDate, locale)
+      cell: ({ row }) => formatDate(row.original.dueDate, locale)
     },
     {
       accessorKey: 'status',
       header: 'Estado',
-      cell: ({row}) => {
+      cell: ({ row }) => {
         const status = row.original.status
         switch (status) {
           case InvoiceStatus.PENDING:
