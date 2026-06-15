@@ -20,10 +20,11 @@ import { getInvoices } from '@/services/invoice.api'
 import { type Invoice, InvoiceStatus } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckIcon, CircleQuestionMarkIcon, CopyIcon, GavelIcon, SaveIcon, SearchIcon } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import z from 'zod'
+import { formatPercentage } from '@/lib/format-percentage.ts'
 
 const formSchema = z.object({
   svc: z.string().min(1, 'La factura es obligatoria'),
@@ -59,10 +60,6 @@ export default function CreateAuctionPage () {
   const isLoadingInvoices = invoiceState.isLoading
   const [invoiceSearch, setInvoiceSearch] = useState('')
   const { locale } = useLocale()
-  const percentFormatter = useMemo(
-    () => new Intl.NumberFormat(locale, { maximumFractionDigits: 2, signDisplay: 'always' }),
-    [locale]
-  )
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -296,38 +293,32 @@ export default function CreateAuctionPage () {
                             <InputGroupAddon align='inline-end'>
                               {selectedInvoice?.amount && field.value !== undefined && !isNaN(field.value) && field.value > 0 &&(
                                 <span className='text-sm text-muted-foreground'>
-                                  {`${percentFormatter.format((field.value / selectedInvoice.amount - 1) * 100)}%`}
+                                  {`${formatPercentage((field.value / selectedInvoice.amount - 1) * 100)}`}
                                 </span>
                               )}
                             </InputGroupAddon>
                           </InputGroup>
-                          {maxAllowedPrice !== null && (
-                            <p className='text-xs text-muted-foreground text-right'>
-                              Máximo: {formatCurrency(maxAllowedPrice, locale, selectedInvoice?.currency)}
-                            </p>
-                          )}
                           {fieldState.invalid && (
                             <FieldError errors={[fieldState.error]} />
                           )}
                         </Field>
                       )}
                     />
-                    {watchedStartingPrice > 0 && selectedInvoceSellerFee > 0 && (
-                      <div className='text-xs text-muted-foreground flex items-center justify-end gap-4'>
-                        <span>Comisión ({Number(selectedInvoceSellerFee).toFixed(2)}%):</span>
-                        <span>-{(Number(selectedInvoceSellerFee) / 100 * Number(watchedStartingPrice)).toFixed(2)}€</span>
-                      </div>
-                    )}
-                    <div className='flex gap-2'>
-                      <ButtonGroup>
-                        <Button
-                          variant='outline'
-                          type='button'
-                          onClick={() => applyDiscount(3)}
-                          disabled={!watchedsvc}
-                        >
-                          -3%
-                        </Button>
+                    <div className='flex items-center justify-between flex-wrap'>
+                      {maxAllowedPrice !== null && (
+                        <p className='text-xs text-muted-foreground text-right'>
+                          Máximo: {formatCurrency(maxAllowedPrice, locale, selectedInvoice?.currency)}
+                        </p>
+                      )}
+                      {watchedStartingPrice > 0 && selectedInvoceSellerFee > 0 && (
+                        <div className='text-xs text-muted-foreground flex items-center justify-end gap-4'>
+                          <span>Comisión ({Number(selectedInvoceSellerFee).toFixed(2)}%):</span>
+                          <span>-{(Number(selectedInvoceSellerFee) / 100 * Number(watchedStartingPrice)).toFixed(2)}€</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className='flex flex-col sm:flex-row gap-2'>
+                      <ButtonGroup className='w-full sm:w-auto [&_button]:flex-1 sm:[&_button]:flex-0'>
                         <Button
                           variant='outline'
                           type='button'
@@ -335,6 +326,14 @@ export default function CreateAuctionPage () {
                           disabled={!watchedsvc}
                         >
                           -5%
+                        </Button>
+                        <Button
+                          variant='outline'
+                          type='button'
+                          onClick={() => applyDiscount(7.5)}
+                          disabled={!watchedsvc}
+                        >
+                          -7.5%
                         </Button>
                         <Button
                           variant='outline'
@@ -353,7 +352,7 @@ export default function CreateAuctionPage () {
                           -20%
                         </Button>
                       </ButtonGroup>
-                      <InputGroup className='w-40'>
+                      <InputGroup className='w-40 sm:w-full'>
                         <InputGroupInput
                           type='number'
                           placeholder='Descuento...'
