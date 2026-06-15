@@ -5,7 +5,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar.tsx'
-import {CircleQuestionMark, MessageSquareDot} from 'lucide-react'
+import { CircleQuestionMark, MessageSquareDot } from 'lucide-react'
 
 export default function CommonSidebarContent () {
   return (

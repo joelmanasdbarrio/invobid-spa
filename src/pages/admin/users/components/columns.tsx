@@ -17,7 +17,7 @@ export const investorColumns: ColumnDef<Investor>[] = [
     accessorKey: 'id',
     header: '',
     enableHiding: false,
-    cell: ({row}) => (
+    cell: ({ row }) => (
       <Link to={`/admin/users/${row.original.id}`}>
         <ExternalLinkIcon className='size-4' />
       </Link>
@@ -30,7 +30,7 @@ export const investorColumns: ColumnDef<Investor>[] = [
   {
     accessorKey: 'documents',
     header: 'CIF/NIF',
-    cell: ({row}) => row.original.documents[0].value || 'N/A'
+    cell: ({ row }) => row.original.documents[0].value || 'N/A'
   },
   {
     accessorKey: 'name',
@@ -47,7 +47,7 @@ export const investorColumns: ColumnDef<Investor>[] = [
   {
     accessorKey: 'investorType',
     header: 'Tipo de inversor',
-    cell: ({row}) => {
+    cell: ({ row }) => {
       const type = row.original.investorType
       switch (type) {
         case InvestorType.INDIVIDUAL:
@@ -72,7 +72,7 @@ export const investorColumns: ColumnDef<Investor>[] = [
   {
     accessorKey: 'status',
     header: 'Estado',
-    cell: ({row}) => {
+    cell: ({ row }) => {
       const status = row.original.status
       switch (status) {
         case InvestorStatus.PENDING:

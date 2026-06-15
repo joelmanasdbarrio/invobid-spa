@@ -26,7 +26,7 @@ export function AppSidebar () {
   const loggedInUser = useLoggedInUser()
 
   return (
-    <Sidebar variant='inset' className='divide-y'>
+    <Sidebar variant='floating' className='divide-y'>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -43,8 +43,8 @@ export function AppSidebar () {
             <SidebarGroupLabel>General</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
-                <Link to='/'>
-                  <SidebarMenuButton isActive={location.pathname === '/'} className='hover:cursor-pointer'>
+                <Link to='/dashboard'>
+                  <SidebarMenuButton isActive={location.pathname === '/dashboard'} className='hover:cursor-pointer'>
                     Dashboard
                   </SidebarMenuButton>
                 </Link>

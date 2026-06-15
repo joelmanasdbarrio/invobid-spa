@@ -449,7 +449,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                     <Controller
                       name='isOptedInNotificationsEmail'
                       control={notificationForm.control}
-                      render={({field}) => (
+                      render={({ field }) => (
                         <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                           <Checkbox
                             id='toggle-email-notifications'
@@ -472,7 +472,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
                     <Controller
                       name='isOptedInNotificationsSMS'
                       control={notificationForm.control}
-                      render={({field}) => (
+                      render={({ field }) => (
                         <Label className='hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-aria-checked:border-primary/75 has-aria-checked:bg-primary/10 dark:has-aria-checked:border-primary/50 dark:has-aria-checked:bg-primary/20'>
                           <Checkbox
                             id='toggle-sms-notifications'

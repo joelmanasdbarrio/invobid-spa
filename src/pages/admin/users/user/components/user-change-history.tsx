@@ -3,7 +3,7 @@ import { FieldSeparator } from '@/components/ui/field.tsx'
 import type { Investor } from '@/types/User'
 import { HistoryIcon } from 'lucide-react'
 
-export function UserChangeHistory ({investor}: {investor: Investor | undefined}) {
+export function UserChangeHistory ({ investor }: {investor: Investor | undefined}) {
   const createdAt = investor
     ? investor.createdAt
       ? new Date(investor.createdAt).toLocaleString('es-ES')

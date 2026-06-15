@@ -1,4 +1,13 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
@@ -50,7 +59,7 @@ export default function LoginForm () {
         Cookies.set('logged-in-user', JSON.stringify(res.data), { expires: formData.rememberMe ? 30 : 1 })
         setLoggedInUser(res.data)
 
-        return navigate('/')
+        return navigate('/dashboard')
       },
       () => {},
       formData.activateAccount).catch(err => {
@@ -73,7 +82,7 @@ export default function LoginForm () {
                 <Controller
                   name='email'
                   control={form.control}
-                  render={({ field, fieldState}) => (
+                  render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor={field.name}>Correo</FieldLabel>
                       <InputGroup>
@@ -91,7 +100,7 @@ export default function LoginForm () {
                 <Controller
                   name='password'
                   control={form.control}
-                  render={({field, fieldState})=> (
+                  render={({ field, fieldState })=> (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor={field.name}>Contraseña</FieldLabel>
                       <InputGroup>
@@ -156,7 +165,7 @@ export default function LoginForm () {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => onSubmit({...form.getValues(), activateAccount: true})}>Aceptar</AlertDialogAction>
+            <AlertDialogAction onClick={() => onSubmit({ ...form.getValues(), activateAccount: true })}>Aceptar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

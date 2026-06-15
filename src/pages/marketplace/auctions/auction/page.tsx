@@ -25,7 +25,7 @@ const formSchema = z.object({
 })
 
 export default function MarketplaceAuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {auctionId} = useParams()
+  const { auctionId } = useParams()
   const [auction, setAuction] = useState<Auction | undefined>()
   const { locale } = useLocale()
 

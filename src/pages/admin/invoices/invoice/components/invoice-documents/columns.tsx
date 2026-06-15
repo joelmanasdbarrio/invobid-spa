@@ -15,7 +15,7 @@ export function useDocumentColumns (): ColumnDef<Document>[] {
     {
       accessorKey: 'id',
       header: '',
-      cell: ({row}) => {
+      cell: ({ row }) => {
         const extension = row.original.filename.split('.').pop()
         const filename = `${row.original.title}.${extension}`
         return (
@@ -40,7 +40,7 @@ export function useDocumentColumns (): ColumnDef<Document>[] {
     {
       accessorKey: 'createdAt',
       header: 'Fecha de subida',
-      cell: ({row}) => formatDateTime(row.original.createdAt, locale)
+      cell: ({ row }) => formatDateTime(row.original.createdAt, locale)
     }
   ], [locale])
 }
