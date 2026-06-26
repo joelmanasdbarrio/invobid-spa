@@ -4,8 +4,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { cn } from '@/lib/utils'
 import type { Auction } from '@/types/Auction'
-import { InvestorType, type Investor } from '@/types/User'
-import { flexRender, getCoreRowModel, useReactTable, type ColumnDef, type VisibilityState } from '@tanstack/react-table'
+import { type Investor, InvestorType } from '@/types/User'
+import { type ColumnDef, flexRender, getCoreRowModel, useReactTable, type VisibilityState } from '@tanstack/react-table'
 import { ListFilterIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -35,7 +35,7 @@ export function DataTable<TData extends Auction, TValue> ({
     }
   })
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   return (
     <div className='rounded-xl border shadow-sm'>

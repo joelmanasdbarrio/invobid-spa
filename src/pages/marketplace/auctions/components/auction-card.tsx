@@ -8,7 +8,7 @@ import { Fragment } from 'react'
 import { Link } from 'react-router'
 
 export default function AuctionCard ({ row } : { row: Row<Auction>}) {
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   const isWinning = row.original.bids.some(bid => bid.investor && bid.investor.id === loggedInUser?.id) && row.original.bids.length === 1
   const isLosing = row.original.bids.some(bid => bid.investor && bid.investor.id === loggedInUser?.id) && row.original.bids.length > 1

@@ -1,17 +1,11 @@
 import Cookies from 'js-cookie'
-import { use } from 'react'
 import { useNavigate } from 'react-router'
-
-import { AuthContext } from '@/contexts/auth.context'
+import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 
 export function useLogout () {
   const navigate = useNavigate()
 
-  const authContext = use(AuthContext)
-  if (!authContext) {
-    throw new Error('useLogout must be used within AuthProvider')
-  }
-  const { setLoggedInUser } = authContext
+  const { setLoggedInUser } = useLoggedInUser()
 
   return () => {
     setLoggedInUser(null)

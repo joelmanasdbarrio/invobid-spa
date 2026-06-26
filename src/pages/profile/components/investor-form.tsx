@@ -16,7 +16,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { AuthContext } from '@/contexts/auth.context'
 import { useLogout } from '@/hooks/use-logout'
 import { deleteInvestorById, updateInvestorById } from '@/services/investor.api'
 import { type Investor, InvestorStatus, InvestorType, UserType } from '@/types/User'
@@ -34,11 +33,12 @@ import {
   UserIcon,
   UsersIcon
 } from 'lucide-react'
-import { use, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useLocation } from 'react-router'
 import { z } from 'zod'
 import BankAccountForm from './bank-account-form'
+import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 
 const validateFormSchema = z.object({
   status: z.enum(InvestorStatus)
@@ -98,11 +98,7 @@ export default function InvestorProfileForm ({ user }: { user: Investor }) {
     }
   }, [hash])
 
-  const authContext = use(AuthContext)
-  if (!authContext) {
-    throw new Error('AuthContext must be used within AuthProvider')
-  }
-  const { setLoggedInUser } = authContext
+  const { setLoggedInUser } = useLoggedInUser()
 
   const isFormDisabled = user.status === InvestorStatus.PENDING || user.status === InvestorStatus.DENIED
 

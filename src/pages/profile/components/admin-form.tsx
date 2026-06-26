@@ -11,16 +11,15 @@ import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { AuthContext } from '@/contexts/auth.context'
 import { useLogout } from '@/hooks/use-logout'
 import { deleteAdminById, updateAdminById } from '@/services/admin.api'
 import { type Admin, type Investor, InvestorType, UserType } from '@/types/User'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertDialogCancel, AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import { CircleQuestionMarkIcon, EllipsisIcon, MailIcon, UserIcon, UsersIcon } from 'lucide-react'
-import { use } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
+import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 
 const formSchema = z.object({
   email: z.email('Correo electrónico no válido'),
@@ -56,11 +55,7 @@ export default function AdminProfileForm ({ user }: { user: Admin }) {
     }
   })
 
-  const authContext = use(AuthContext)
-  if (!authContext) {
-    throw new Error('AuthContext must be used within AuthProvider')
-  }
-  const { setLoggedInUser } = authContext
+  const { setLoggedInUser } = useLoggedInUser()
 
   function onSubmit (data: z.infer<typeof formSchema>) {
     updateAdminById(user!.id, JSON.stringify({

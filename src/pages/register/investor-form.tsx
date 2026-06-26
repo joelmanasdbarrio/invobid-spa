@@ -4,7 +4,6 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSepar
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { AuthContext } from '@/contexts/auth.context.ts'
 import { createInvestor } from '@/services/investor.api.ts'
 import { type Investor, InvestorType } from '@/types/User'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,10 +18,11 @@ import {
   UserIcon,
   UsersIcon
 } from 'lucide-react'
-import { use, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router'
 import { z } from 'zod'
+import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 
 const formSchema = z.object({
   name: z.string()
@@ -76,11 +76,7 @@ export default function InvestorForm ({ investorType }: { investorType: Investor
     }
   }, [watchedName, investorType, form])
 
-  const authContext = use(AuthContext)
-  if (!authContext) {
-    throw new Error('AuthContext must be used within AuthProvider')
-  }
-  const { setLoggedInUser } = authContext
+  const { setLoggedInUser } = useLoggedInUser()
   function onSubmit (data: z.infer<typeof formSchema>) {
     const formData = new FormData()
 

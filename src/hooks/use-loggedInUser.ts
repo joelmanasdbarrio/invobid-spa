@@ -6,7 +6,7 @@ export default function useLoggedInUser () {
   if (!authContext) {
     throw new Error('AuthContext must be used within AuthProvider')
   }
-  const { loggedInUser } = authContext
+  const { loggedInUser, setLoggedInUser } = authContext
 
-  return loggedInUser
+  return { loggedInUser, setLoggedInUser }
 }

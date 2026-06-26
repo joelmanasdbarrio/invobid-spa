@@ -30,7 +30,7 @@ export default function MainLayout ({
   breadcrumbs?: { label: string; href: string }[],
   children: React.ReactNode;
 }>) {
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   const investorStatusTextMap: {
     pending: { title: string; icon: React.JSX.Element };
