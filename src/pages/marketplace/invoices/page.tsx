@@ -86,7 +86,7 @@ export default function MarketplaceInvoicesPage () {
     setSearchParams(newParams)
   }
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   useEffect(() => {
     if (!loggedInUser) return

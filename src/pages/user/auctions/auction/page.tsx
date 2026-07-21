@@ -120,7 +120,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
 
   const auctionEndMinDate = (() => { const d = new Date(); d.setDate(d.getDate() + 2); d.setHours(0, 0, 0, 0); return d.toISOString() })()
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
   const navigate = useNavigate()
 
   useEffect(() => {

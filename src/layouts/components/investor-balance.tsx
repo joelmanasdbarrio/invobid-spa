@@ -10,17 +10,17 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
-import { AuthContext } from '@/contexts/auth.context'
 import { formatCurrency } from '@/lib/format-currency'
 import { connectBalanceSocket } from '@/services/bid.api'
 import type { Investor } from '@/types/User'
 import { EllipsisVerticalIcon, WalletIcon } from 'lucide-react'
-import { use, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Link } from 'react-router'
+import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 
 export default function InvestorBalance () {
   const { isMobile } = useSidebar()
-  const { loggedInUser, setLoggedInUser } = use(AuthContext)!
+  const { loggedInUser, setLoggedInUser } = useLoggedInUser()
   const investor = loggedInUser as Investor
 
   useEffect(() => {

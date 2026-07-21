@@ -14,15 +14,15 @@ import { Checkbox } from '@/components/ui/checkbox.tsx'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { AuthContext } from '@/contexts/auth.context'
 import { login } from '@/services/auth.api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Cookies from 'js-cookie'
 import { EllipsisIcon, MailIcon } from 'lucide-react'
-import { use, useState } from 'react'
+import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router'
 import { z } from 'zod'
+import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 
 const formSchema = z.object({
   email: z.email(),
@@ -43,13 +43,8 @@ export default function LoginForm () {
     }
   })
 
-  const authContext = use(AuthContext)
-  if (!authContext) {
-    throw new Error('AuthContext must be used within AuthProvider')
-  }
-
   const [isAccountDisabledDialogOpen, setIsAccountDisabledDialogOpen] = useState(false)
-  const { setLoggedInUser } = authContext
+  const { setLoggedInUser } = useLoggedInUser()
   const navigate = useNavigate()
   function onSubmit (formData: z.infer<typeof formSchema>) {
     const body = JSON.stringify(formData)

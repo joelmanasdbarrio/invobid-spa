@@ -3,25 +3,20 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Field, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { AuthContext } from '@/contexts/auth.context'
 import { updateBankAccountById } from '@/services/bank-account.api'
 import type { Investor } from '@/types/User'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SaveIcon } from 'lucide-react'
-import { use } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import z from 'zod'
+import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 
 const bankAccountFormSchema = z.object({
   balance: z.coerce.number<number>().min(0, 'El saldo no puede ser negativo')
 })
 
 export default function BankAccountForm ({ user }: { user: Investor }) {
-  const authContext = use(AuthContext)
-  if (!authContext) {
-    throw new Error('AuthContext must be used within AuthProvider')
-  }
-  const { setLoggedInUser } = authContext
+  const { setLoggedInUser } = useLoggedInUser()
 
   const bankAccountForm = useForm<z.infer<typeof bankAccountFormSchema>>({
     resolver: zodResolver(bankAccountFormSchema),

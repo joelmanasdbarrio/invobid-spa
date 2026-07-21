@@ -13,14 +13,7 @@ import { getDebtors } from '@/services/debtor.api.ts'
 import { createInvoice } from '@/services/invoice.api'
 import { type Debtor, DebtorStatus } from '@/types/Debtor.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  CircleQuestionMarkIcon,
-  FileIcon,
-  FileTextIcon,
-  KeyRoundIcon,
-  SaveIcon,
-  SearchIcon
-} from 'lucide-react'
+import { CircleQuestionMarkIcon, FileIcon, FileTextIcon, KeyRoundIcon, SaveIcon, SearchIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
@@ -82,7 +75,7 @@ export default function CreateInvoicePage () {
     }
   })
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
   useEffect(() => {
     if (!loggedInUser) return
 
