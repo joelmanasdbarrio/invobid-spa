@@ -8,7 +8,7 @@ export const createAdmin = (body: string, onSuccess?: (response: AccessTokenResp
   return fetchApi<AccessTokenResponse<Admin>>(`${base_url}/auth/register/admin`, {
     method: 'POST',
     body,
-    headers: { 'Content-Type': 'application/json'}
+    headers: { 'Content-Type': 'application/json' }
   }, {
     promise: 'Creando cuenta...',
     resolve: 'Cuenta creada con éxito',
@@ -39,7 +39,7 @@ export const updateAdminById = async (adminId: string, body: string) => {
   return fetchApi<ResponseOK<Admin>>(`${base_url}/admins/${adminId}`, {
     method: 'PATCH',
     body,
-    headers: { 'Content-Type': 'application/json'}
+    headers: { 'Content-Type': 'application/json' }
   }, {
     promise: 'Actualizando administrador...',
     resolve: 'Administrador actualizado con éxito',

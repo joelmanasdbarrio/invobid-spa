@@ -1,5 +1,3 @@
-import CommonSidebarContent from '@/components/sidebar/common-sidebar-content.tsx'
-import UserSidebarDropdown from '@/components/sidebar/user-sidebar-dropdown.tsx'
 import {
   Sidebar,
   SidebarContent,
@@ -13,19 +11,22 @@ import {
   SidebarMenuItem
 } from '@/components/ui/sidebar.tsx'
 import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
+import { AdminSidebarContent } from '@/layouts/components/admin-sidebar-content'
+import CommonSidebarContent from '@/layouts/components/common-sidebar-content.tsx'
+import InvestorBalance from '@/layouts/components/investor-balance'
+import { InvestorSidebarContent } from '@/layouts/components/investor-sidebar-content'
+import UserSidebarDropdown from '@/layouts/components/user-sidebar-dropdown.tsx'
 import { UserType } from '@/types/User.ts'
 import { Link, useLocation } from 'react-router'
-import { AdminSidebarContent } from './admin-sidebar-content'
-import { InvestorSidebarContent } from './investor-sidebar-content'
 
 export function AppSidebar () {
   const appName = import.meta.env.VITE_APP_NAME
   const location = useLocation()
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   return (
-    <Sidebar variant='inset'>
+    <Sidebar variant='inset' className='divide-y'>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -42,8 +43,8 @@ export function AppSidebar () {
             <SidebarGroupLabel>General</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
-                <Link to='/'>
-                  <SidebarMenuButton isActive={location.pathname === '/'} className='hover:cursor-pointer'>
+                <Link to='/dashboard'>
+                  <SidebarMenuButton isActive={location.pathname === '/dashboard'} className='hover:cursor-pointer'>
                     Dashboard
                   </SidebarMenuButton>
                 </Link>
@@ -63,6 +64,11 @@ export function AppSidebar () {
       </SidebarContent>
       {loggedInUser && (
         <SidebarFooter>
+          <SidebarMenuButton asChild>
+            {loggedInUser?.type === UserType.INVESTOR && (
+              <InvestorBalance />
+            )}
+          </SidebarMenuButton>
           <UserSidebarDropdown
             name={loggedInUser?.name}
             email={loggedInUser?.email}

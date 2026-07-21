@@ -3,21 +3,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { AuthContext } from '@/contexts/auth.context.ts'
 import { createAdmin } from '@/services/admin.api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Cookies from 'js-cookie'
 import { EllipsisIcon, MailIcon, UserIcon } from 'lucide-react'
-import { useContext } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router'
 import { z } from 'zod'
+import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 
 const formSchema = z.object({
   name: z.string()
     .min(2, 'El nombre debe tener al menos 2 caracteres'),
-  email: z.string()
-    .email('Correo electrónico no válido'),
+  email: z.email('Correo electrónico no válido'),
   password: z.string()
     .min(6, 'La contraseña debe tener al menos 6 caracteres'),
   passwordRepeat: z.string()
@@ -40,18 +38,14 @@ export default function AdminForm () {
     }
   })
 
-  const authContext = useContext(AuthContext)
-  if (!authContext) {
-    throw new Error('AuthContext must be used within AuthProvider')
-  }
-  const { setLoggedInUser } = authContext
+  const { setLoggedInUser } = useLoggedInUser()
   function onSubmit (formData: z.infer<typeof formSchema>) {
     const body = JSON.stringify(formData)
     createAdmin(body, (res) => {
       Cookies.set('logged-in-user', JSON.stringify(res.data), { expires: 1 })
       setLoggedInUser(res.data)
 
-      navigate('/')
+      navigate('/dashboard')
     })
   }
 

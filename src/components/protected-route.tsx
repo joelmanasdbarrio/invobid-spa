@@ -1,11 +1,11 @@
 import { AuthContext } from '@/contexts/auth.context'
-import { UserType, type Investor, type InvestorType } from '@/types/User'
-import { useContext } from 'react'
+import { type Investor, type InvestorType, UserType } from '@/types/User'
+import { use } from 'react'
 import { Navigate } from 'react-router'
 import { Spinner } from './ui/spinner'
 
 export function ProtectedRoute ({ userType, children }: { userType?: UserType | InvestorType, children: React.ReactNode }) {
-  const authContext = useContext(AuthContext)
+  const authContext = use(AuthContext)
   if (!authContext) {
     throw new Error('ProtectedRoute must be used within AuthProvider')
   }
@@ -24,7 +24,7 @@ export function ProtectedRoute ({ userType, children }: { userType?: UserType | 
   }
 
   if (userType && (userType !== loggedInUser.type && !(loggedInUser.type === UserType.INVESTOR && userType === (loggedInUser as Investor).investorType))) {
-    return <Navigate to='/' replace />
+    return <Navigate to='/dashboard' replace />
   }
 
   return <>{children}</>

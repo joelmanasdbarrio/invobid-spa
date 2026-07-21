@@ -27,26 +27,17 @@ export function DateRangePicker ({
 }: DateRangePickerProps) {
   const { locale } = useLocale()
 
-  const [range, setRange] = React.useState<DateRange>({
+  const range = React.useMemo<DateRange>(() => ({
     from: fromDate ? parseLocalDate(fromDate) : undefined,
     to: toDate ? parseLocalDate(toDate) : undefined
-  })
-
-  React.useEffect(() => {
-    setRange({
-      from: fromDate ? parseLocalDate(fromDate) : undefined,
-      to: toDate ? parseLocalDate(toDate) : undefined
-    })
-  }, [fromDate, toDate])
+  }), [fromDate, toDate])
 
   const handleSelect = (day: Date | undefined, type: 'from' | 'to') => {
     if (type === 'from') {
       const newFrom = day
-      setRange(prev => ({ ...prev, from: newFrom }))
       onFromChange(newFrom ? toDateOnlyString(newFrom) : undefined)
     } else {
       const newTo = day
-      setRange(prev => ({ ...prev, to: newTo }))
       onToChange(newTo ? toDateOnlyString(newTo) : undefined)
     }
   }
@@ -74,7 +65,7 @@ export function DateRangePicker ({
             !range.from && !range.to && 'text-muted-foreground'
           )}
         >
-          <CalendarIcon className='mr-2 h-4 w-4' />
+          <CalendarIcon className='mr-2 size-4' />
           {displayText}
         </Button>
       </PopoverTrigger>
@@ -101,7 +92,6 @@ export function DateRangePicker ({
           variant='outline'
           className='w-full rounded-none'
           onClick={() => {
-            setRange({ from: undefined, to: undefined })
             onFromChange(undefined)
             onToChange(undefined)
           }}

@@ -34,7 +34,7 @@ export function DataTable<TData extends Document, TValue> ({
         <div className='flex gap-2 items-center justify-between sm:justify-start md:justify-between w-full'>
           <div className='flex items-center gap-2'>
             <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-              <FileIcon className='w-6 h-6' />
+              <FileIcon className='size-6' />
             </span>
             <h3>Documentos relacionados</h3>
           </div>

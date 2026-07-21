@@ -3,7 +3,7 @@ import { FieldSeparator } from '@/components/ui/field.tsx'
 import type { Investor } from '@/types/User'
 import { HistoryIcon } from 'lucide-react'
 
-export function UserChangeHistory ({investor}: {investor: Investor | undefined}) {
+export function UserChangeHistory ({ investor }: {investor: Investor | undefined}) {
   const createdAt = investor
     ? investor.createdAt
       ? new Date(investor.createdAt).toLocaleString('es-ES')
@@ -33,13 +33,13 @@ export function UserChangeHistory ({investor}: {investor: Investor | undefined})
     <Card >
       <CardHeader className='flex items-center gap-2'>
         <span className='rounded-md p-1 bg-primary/20 text-primary'>
-          <HistoryIcon className='w-4 h-4' />
+          <HistoryIcon className='size-4' />
         </span>
         <h4>Historial de cambios</h4>
       </CardHeader>
       <CardContent>
         <ul className='list-disc list-inside space-y-2'>
-          <li>Más cambios...</li>
+          <li>Más cambios…</li>
           <FieldSeparator className='my-1'>
             {getDateLabel()}
           </FieldSeparator>

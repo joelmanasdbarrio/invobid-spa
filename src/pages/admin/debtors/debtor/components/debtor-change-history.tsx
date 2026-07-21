@@ -3,7 +3,7 @@ import { FieldSeparator } from '@/components/ui/field.tsx'
 import type { Debtor } from '@/types/Debtor'
 import { HistoryIcon } from 'lucide-react'
 
-export function DebtorChangeHistory ({debtor}: {debtor: Debtor | undefined}) {
+export function DebtorChangeHistory ({ debtor }: {debtor: Debtor | undefined}) {
   const createdAt = debtor
     ? debtor.createdAt
       ? new Date(debtor.createdAt).toLocaleString('es-ES')
@@ -33,13 +33,13 @@ export function DebtorChangeHistory ({debtor}: {debtor: Debtor | undefined}) {
     <Card >
       <CardHeader className='flex items-center gap-2'>
         <span className='rounded-md p-1 bg-primary/20 text-primary'>
-          <HistoryIcon className='w-4 h-4' />
+          <HistoryIcon className='size-4' />
         </span>
         <h4>Historial de cambios</h4>
       </CardHeader>
       <CardContent>
         <ul className='list-disc list-inside space-y-2'>
-          <li>Más cambios...</li>
+          <li>Más cambios…</li>
           <FieldSeparator className='my-1'>
             {getDateLabel()}
           </FieldSeparator>

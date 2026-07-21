@@ -16,24 +16,24 @@ export function useInvoiceColumns (): ColumnDef<Invoice>[] {
       accessorKey: 'id',
       header: '',
       enableHiding: false,
-      cell: ({row}) => (
+      cell: ({ row }) => (
         <Link to={`/admin/invoices/${row.original.id}`}>
-          <ExternalLinkIcon className='w-4 h-4' />
+          <ExternalLinkIcon className='size-4' />
         </Link>
       )
     },
     {
       header: 'Deudor',
-      cell: ({row}) => row.original.debtor.companyName
+      cell: ({ row }) => row.original.debtor.companyName
     },
     {
       accessorKey: 'amount',
       header: 'Importe',
-      cell: ({row}) => formatCurrency(row.original.amount, locale, row.original.currency)
+      cell: ({ row }) => formatCurrency(row.original.amount, locale, row.original.currency)
     },
     {
       header: 'Vendido',
-      cell: ({row}) => row.original.buyerInvestor ? (
+      cell: ({ row }) => row.original.buyerInvestor ? (
         row.original.buyerInvestor.companyName
       ) : (
         <span className='text-sm text-gray-500'>No vendido</span>
@@ -42,12 +42,12 @@ export function useInvoiceColumns (): ColumnDef<Invoice>[] {
     {
       accessorKey: 'dueDate',
       header: 'Fecha de vencimiento',
-      cell: ({row}) => formatDate(row.original.dueDate, locale)
+      cell: ({ row }) => formatDate(row.original.dueDate, locale)
     },
     {
       accessorKey: 'status',
       header: 'Estado',
-      cell: ({row}) => {
+      cell: ({ row }) => {
         const status = row.original.status
         switch (status) {
           case InvoiceStatus.PENDING:

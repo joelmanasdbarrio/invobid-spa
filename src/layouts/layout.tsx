@@ -1,4 +1,3 @@
-import { AppSidebar } from '@/components/sidebar/app-sidebar.tsx'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -7,10 +6,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader
 } from '@/components/ui/alert-dialog'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator
+} from '@/components/ui/breadcrumb'
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '@/components/ui/item'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
+import { AppSidebar } from '@/layouts/components/app-sidebar'
 import { type Investor, InvestorStatus, UserType } from '@/types/User'
 import { AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import { CircleAlertIcon, ClockIcon, OctagonXIcon } from 'lucide-react'
@@ -24,7 +30,7 @@ export default function MainLayout ({
   breadcrumbs?: { label: string; href: string }[],
   children: React.ReactNode;
 }>) {
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   const investorStatusTextMap: {
     pending: { title: string; icon: React.JSX.Element };
@@ -46,7 +52,7 @@ export default function MainLayout ({
   }
 
   return (
-    <SidebarProvider className='w-dvw h-dvh'>
+    <SidebarProvider className='w-dvw min-w-dvw h-dvh min-h-dvh'>
       <AppSidebar />
       <div className='grow flex flex-col bg-background text-foreground md:m-2 md:rounded-lg md:shadow-md'>
         <div className='flex items-center gap-2 border-b p-2'>
@@ -72,7 +78,7 @@ export default function MainLayout ({
             </Breadcrumb>
           )}
         </div>
-        <section className='grow p-4 overflow-scroll max-w-dvw'>
+        <section className='grow p-4 h-full max-w-dvw overflow-scroll'>
           {children}
         </section>
       </div>

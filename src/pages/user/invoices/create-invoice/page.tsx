@@ -13,23 +13,16 @@ import { getDebtors } from '@/services/debtor.api.ts'
 import { createInvoice } from '@/services/invoice.api'
 import { type Debtor, DebtorStatus } from '@/types/Debtor.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  CircleQuestionMarkIcon,
-  FileIcon,
-  FileTextIcon,
-  KeyRoundIcon,
-  SaveIcon,
-  SearchIcon
-} from 'lucide-react'
+import { CircleQuestionMarkIcon, FileIcon, FileTextIcon, KeyRoundIcon, SaveIcon, SearchIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import z from 'zod'
 
 const formSchema = z.object({
-  debtorId: z.uuid('El deudor no es válido'),
+  debtorId: z.uuid({ error: 'El deudor no es válido' }),
   amount: z.coerce.number<number>(),
-  dueDate: z.date('La fecha de vencimiento no es válida').refine((date) => {
+  dueDate: z.date({ error: 'La fecha de vencimiento no es válida' }).refine((date) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const selectedDate = new Date(date)
@@ -57,9 +50,10 @@ const formSchema = z.object({
 })
 
 export default function CreateInvoicePage () {
-  const [verifiedDebtors, setVerifiedDebtors] = useState<Debtor[]>()
+  const [debtorState, setDebtorState] = useState<{ debtors: Debtor[] | undefined; isLoading: boolean }>({ debtors: undefined, isLoading: false })
+  const verifiedDebtors = debtorState.debtors
+  const isLoadingDebtors = debtorState.isLoading
   const [debtorSearch, setDebtorSearch] = useState('')
-  const [isLoadingDebtors, setIsLoadingDebtors] = useState(false)
 
   const minDueDate = (() => {
     const d = new Date()
@@ -81,20 +75,19 @@ export default function CreateInvoicePage () {
     }
   })
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
   useEffect(() => {
     if (!loggedInUser) return
 
     const timer = setTimeout(() => {
-      setIsLoadingDebtors(true)
       getDebtors({
         investorId: loggedInUser.id,
         companyName: debtorSearch ?? undefined,
         status: DebtorStatus.VERIFIED
       })
         .then(res => res.data)
-        .then(debtors => setVerifiedDebtors(debtors))
-        .finally(() => setIsLoadingDebtors(false))
+        .then(debtors => setDebtorState({ debtors, isLoading: false }))
+        .catch(() => setDebtorState(prev => ({ ...prev, isLoading: false })))
     }, 300)
 
     return () => clearTimeout(timer)
@@ -115,7 +108,7 @@ export default function CreateInvoicePage () {
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <FileTextIcon className='w-6 h-6' />
+          <FileTextIcon className='size-6' />
         </span>
         <h2>Publicar factura</h2>
       </div>
@@ -160,7 +153,7 @@ export default function CreateInvoicePage () {
                               <InputGroupAddon align={'inline-end'}>
                                 <Tooltip>
                                   <TooltipTrigger className='leading-1'>
-                                    <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                    <CircleQuestionMarkIcon className='size-4'/>
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p className='text-center'>Solo deudores verificados</p>
@@ -267,7 +260,7 @@ export default function CreateInvoicePage () {
                           <InputGroupAddon align={'inline-end'}>
                             <Tooltip>
                               <TooltipTrigger className='leading-1'>
-                                <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                <CircleQuestionMarkIcon className='size-4'/>
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p className='text-center'>Identificador del Registro de Facturación:<br />NIF/CIF/DNI del emisor + Serie + Número factura<br />+ Fecha + Código de verificación</p>
@@ -304,7 +297,7 @@ export default function CreateInvoicePage () {
                           <InputGroupAddon align={'inline-end'}>
                             <Tooltip>
                               <TooltipTrigger className='leading-1'>
-                                <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                <CircleQuestionMarkIcon className='size-4'/>
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p className='text-center'>Fotocopia que permita visualizar el documento completo</p>
@@ -326,7 +319,7 @@ export default function CreateInvoicePage () {
           <Button
             className='w-min self-end justify-self-end'
             disabled={!baseForm.formState.isDirty}
-            title='Crear deudor'
+            title='Subir factura'
           >
             <SaveIcon />
             Subir factura

@@ -16,9 +16,9 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
       accessorKey: 'id',
       header: '',
       enableHiding: false,
-      cell: ({row}) => (
+      cell: ({ row }) => (
         <Link to={`/auctions/${row.original.id}`}>
-          <ExternalLinkIcon className='w-4 h-4' />
+          <ExternalLinkIcon className='size-4' />
         </Link>
       )
     },
@@ -29,7 +29,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
     {
       accessorKey: 'invoice.buyerInvestor.companyName',
       header: 'Inversor',
-      cell: ({row}) => row.original.invoice.buyerInvestor ? (
+      cell: ({ row }) => row.original.invoice.buyerInvestor ? (
         row.original.invoice.buyerInvestor.companyName
       ) : (
         <span className='text-sm text-gray-500'>Pendiente</span>
@@ -38,11 +38,11 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
     {
       accessorKey: 'price.start',
       header: 'Precio de salida',
-      cell: ({row}) => formatCurrency(row.original.price.start, locale, row.original.invoice.currency)
+      cell: ({ row }) => formatCurrency(row.original.price.start, locale, row.original.invoice.currency)
     },
     {
       header: 'Fecha de inicio',
-      cell: ({row}) => row.original.date.start ? (
+      cell: ({ row }) => row.original.date.start ? (
         formatDateTime(row.original.date.start, locale)
       ) : (
         <span className='text-sm text-gray-500'>Pendiente</span>
@@ -50,11 +50,11 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
     },
     {
       header: 'Fecha de finalización',
-      cell: ({row}) => formatDateTime(row.original.date.end, locale)
+      cell: ({ row }) => formatDateTime(row.original.date.end, locale)
     },
     {
       header: 'Estado',
-      cell: ({row}) => {
+      cell: ({ row }) => {
         const status = row.original.status
 
         switch (status) {

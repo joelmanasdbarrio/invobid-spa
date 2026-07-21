@@ -15,7 +15,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
   return useMemo(() => [
     {
       header: 'invoice',
-      cell: ({row}) => (
+      cell: ({ row }) => (
         <div className='flex gap-2 items-center'>
           <FileTextIcon className='size-4 text-accent-foreground' />
           <h4 title={`Factura ${row.original.invoice.svc}`}>{row.original.invoice.svc}</h4>
@@ -56,7 +56,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
     },
     {
       header: 'auction',
-      cell: ({row}) => (
+      cell: ({ row }) => (
         <div className='grow flex justify-between gap-4'>
           <div className='flex flex-col text-sm'>
             <span className='text-muted-foreground flex items-center gap-2'>
@@ -102,7 +102,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
     },
     {
       header: 'datetime',
-      cell: ({row}) => (
+      cell: ({ row }) => (
         <div className='grid grid-cols-[auto_1fr] gap-2 text-xs text-muted-foreground items-end'>
           {row.original.date.start &&
           // ? (
@@ -119,7 +119,7 @@ export function useAuctionColumns (): ColumnDef<Auction>[] {
             //   <>
             //     <span className='flex gap-2 items-center'>
             //       <CalendarIcon className='size-4 inline-block' />
-            //       {formatDateTime(row.original.date.start, locale)} <MoveRightIcon className='w-2 h-2' /> {formatDateTime(row.original.date.end, locale)}
+            //       {formatDateTime(row.original.date.start, locale)} <MoveRightIcon className='size-2' /> {formatDateTime(row.original.date.end, locale)}
             //     </span>
             //     <span className='text-xs text-muted-foreground flex items-center gap-2 justify-end'>
             //       <CalendarXIcon className='size-4 inline-block' />

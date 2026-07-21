@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { getDebtors } from '@/services/debtor.api'
-import { DebtorStatus, type Debtor } from '@/types/Debtor'
+import { type Debtor, DebtorStatus } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeftIcon, ChevronRightIcon, HandCoinsIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -65,7 +65,7 @@ export default function DebtorsPage () {
     setSearchParams(newParams)
   }
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   useEffect(() => {
     if (!loggedInUser) return
@@ -125,7 +125,7 @@ export default function DebtorsPage () {
     <div className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <HandCoinsIcon className='w-6 h-6' />
+          <HandCoinsIcon className='size-6' />
         </span>
         <h2>Consultar deudores</h2>
       </div>

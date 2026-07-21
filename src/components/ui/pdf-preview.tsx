@@ -9,24 +9,28 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString()
 
+const LOADING_CONTENT = (
+  <div className='flex justify-center p-4'><Spinner /></div>
+)
+
 interface PdfPreviewProps {
   blobUrl: string
 }
 
 export function PdfPreview ({ blobUrl }: PdfPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [width, setWidth] = useState<number | undefined>()
+  const [width, setWidth] = useState<number | undefined>(undefined)
   const [numPages, setNumPages] = useState(0)
   const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
+    setWidth(el.clientWidth)
     const observer = new ResizeObserver(([entry]) => {
       setWidth(entry.contentRect.width)
     })
     observer.observe(el)
-    setWidth(el.clientWidth)
     return () => observer.disconnect()
   }, [])
 
@@ -50,7 +54,7 @@ export function PdfPreview ({ blobUrl }: PdfPreviewProps) {
     <div ref={containerRef} className='w-full overflow-y-auto max-h-[75vh]'>
       <Document
         file={blobUrl}
-        loading={<div className='flex justify-center p-4'><Spinner /></div>}
+        loading={LOADING_CONTENT}
         onLoadError={() => setLoadError(true)}
         onLoadSuccess={(pdf) => setNumPages(pdf.numPages)}
       >
@@ -62,7 +66,7 @@ export function PdfPreview ({ blobUrl }: PdfPreviewProps) {
               width={width}
               renderTextLayer={false}
               renderAnnotationLayer={false}
-              loading={<div className='flex justify-center p-4'><Spinner /></div>}
+              loading={LOADING_CONTENT}
             />
           ))}
         </div>

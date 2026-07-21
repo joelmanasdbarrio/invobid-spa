@@ -217,7 +217,7 @@ export default function MarketplaceInvoiceFilters (
                         step={0.01}
                       />
                       <InputGroupAddon>
-                        <ShieldCheckIcon className='w-4 h-4' />
+                        <ShieldCheckIcon className='size-4' />
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>/5</InputGroupAddon>
                     </InputGroup>

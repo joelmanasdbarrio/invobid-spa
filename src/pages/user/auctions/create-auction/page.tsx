@@ -11,6 +11,8 @@ import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLocale } from '@/hooks/use-locale'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
+import { calculateMaxAllowedPrice } from '@/lib/calculate-max-price'
+import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { formatCurrency } from '@/lib/format-currency'
 import { parseLocalDate } from '@/lib/format-date'
 import { createAuction } from '@/services/auction.api'
@@ -22,11 +24,12 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import z from 'zod'
+import { formatPercentage } from '@/lib/format-percentage.ts'
 
 const formSchema = z.object({
   svc: z.string().min(1, 'La factura es obligatoria'),
   startingPrice: z.number().positive('El precio inicial debe ser mayor que 0'),
-  auctionDateEnd: z.date('La fecha de fin no es válida').refine((date) => {
+  auctionDateEnd: z.date({ error: 'La fecha de fin no es válida' }).refine((date) => {
     const minDate = new Date()
     minDate.setDate(minDate.getDate() + 2)
     minDate.setHours(0, 0, 0, 0)
@@ -38,10 +41,24 @@ const formSchema = z.object({
   })
 })
 
+function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
+  e.preventDefault()
+  const button = e.currentTarget
+  performCopyToClipboard(text).then(success => {
+    if (success) {
+      button.setAttribute('data-copied', 'true')
+      setTimeout(() => {
+        button.removeAttribute('data-copied')
+      }, 2000)
+    }
+  })
+}
+
 export default function CreateAuctionPage () {
-  const [verifiedInvoices, setVerifiedInvoices] = useState<Invoice[]>()
+  const [invoiceState, setInvoiceState] = useState<{ invoices: Invoice[] | undefined; isLoading: boolean }>({ invoices: undefined, isLoading: false })
+  const verifiedInvoices = invoiceState.invoices
+  const isLoadingInvoices = invoiceState.isLoading
   const [invoiceSearch, setInvoiceSearch] = useState('')
-  const [isLoadingInvoices, setIsLoadingInvoices] = useState(false)
   const { locale } = useLocale()
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,11 +71,22 @@ export default function CreateAuctionPage () {
     }
   })
 
+  const watchedStartingPrice = useWatch({ control: form.control, name: 'startingPrice' })
   const watchedsvc = useWatch({ control: form.control, name: 'svc' })
   const watchedDateEnd = useWatch({ control: form.control, name: 'auctionDateEnd' })
 
   const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedsvc)
+  const selectedInvoceSellerFee = selectedInvoice?.transactionFee.sellerPercentage ?? 0
   const invoiceDueDate = selectedInvoice?.dueDate
+
+  const maxAllowedPrice = selectedInvoice
+    ? calculateMaxAllowedPrice(
+      selectedInvoice.amount,
+      selectedInvoice.transactionFee.buyerPercentage,
+      selectedInvoice.transactionFee.sellerPercentage,
+      Number(import.meta.env.VITE_MINIMUM_INVOICE_DISCOUNT)
+    )
+    : null
 
   const auctionEndMaxDate = invoiceDueDate
     ? (() => { const d = parseLocalDate(invoiceDueDate); d.setMonth(d.getMonth() - 1); return d.toISOString() })()
@@ -66,26 +94,37 @@ export default function CreateAuctionPage () {
 
   const auctionEndMinDate = (() => { const d = new Date(); d.setDate(d.getDate() + 2); d.setHours(0, 0, 0, 0); return d.toISOString() })()
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
   const navigate = useNavigate()
 
   useEffect(() => {
     if (!loggedInUser) return
 
     const timer = setTimeout(() => {
-      setIsLoadingInvoices(true)
       getInvoices({
         sellerInvestorId: loggedInUser.id,
         ...(invoiceSearch ? { svc: invoiceSearch } : {}),
         status: InvoiceStatus.VERIFIED
       })
         .then(res => res.data)
-        .then(invoices => setVerifiedInvoices(invoices))
-        .finally(() => setIsLoadingInvoices(false))
+        .then(invoices => setInvoiceState({ invoices, isLoading: false }))
+        .catch(() => setInvoiceState(prev => ({ ...prev, isLoading: false })))
     }, 300)
 
     return () => clearTimeout(timer)
   }, [loggedInUser, invoiceSearch])
+
+  useEffect(() => {
+    if (!maxAllowedPrice || !watchedStartingPrice || watchedStartingPrice <= 0) return
+    if (watchedStartingPrice > maxAllowedPrice) {
+      form.setError('startingPrice', {
+        type: 'max',
+        message: 'El precio inicial supera el máximo permitido para esta factura'
+      })
+    } else if (form.formState.errors.startingPrice?.type === 'max') {
+      form.clearErrors('startingPrice')
+    }
+  }, [watchedStartingPrice, maxAllowedPrice, form])
 
   function onSubmit (data: z.infer<typeof formSchema>) {
     createAuction(JSON.stringify({
@@ -93,30 +132,21 @@ export default function CreateAuctionPage () {
       startingPrice: data.startingPrice,
       auctionDateEnd: data.auctionDateEnd.toISOString()
     }))
-      .then(res => navigate(`/user/auctions/${res.data.id}`))
+      .then(res => navigate(`/auctions/${res.data.id}`))
   }
 
   function applyDiscount (discountPercent: number) {
     if (!selectedInvoice?.amount) return
     const discountedPrice = Math.round(selectedInvoice.amount * (1 - discountPercent / 100) * 100) / 100
-    form.setValue('startingPrice', discountedPrice, { shouldDirty: true, shouldTouch: true })
-  }
-
-  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
-    e.preventDefault()
-    navigator.clipboard.writeText(String(text))
-    const button = e.currentTarget
-    button.setAttribute('data-copied', 'true')
-    setTimeout(() => {
-      button.removeAttribute('data-copied')
-    }, 2000)
+    const cappedPrice = maxAllowedPrice !== null ? Math.min(discountedPrice, maxAllowedPrice) : discountedPrice
+    form.setValue('startingPrice', cappedPrice, { shouldDirty: true, shouldTouch: true })
   }
 
   return (
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <GavelIcon className='w-6 h-6' />
+          <GavelIcon className='size-6' />
         </span>
         <h2>Crear subasta</h2>
       </div>
@@ -161,7 +191,7 @@ export default function CreateAuctionPage () {
                               <InputGroupAddon align={'inline-end'}>
                                 <Tooltip>
                                   <TooltipTrigger className='leading-1'>
-                                    <CircleQuestionMarkIcon className='w-4 h-4'/>
+                                    <CircleQuestionMarkIcon className='size-4'/>
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p className='text-center'>Solo facturas verificadas</p>
@@ -190,7 +220,7 @@ export default function CreateAuctionPage () {
                   <Field>
                     <FieldLabel htmlFor='invoiceRating'>Rating:</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput id='invoiceRating' value={selectedInvoice?.rating} type='text' placeholder='ACME S.L.' required disabled />
+                      <InputGroupInput id='invoiceRating' value={selectedInvoice?.rating ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                       <InputGroupAddon>
                         %
                       </InputGroupAddon>
@@ -207,13 +237,13 @@ export default function CreateAuctionPage () {
                       </InputGroupAddon>
                       {selectedInvoice?.amount && (
                         <InputGroupAddon align='inline-end'>
-                          <button onClick={(e) => copyToClipboard(e, selectedInvoice?.amount ?? '')} className='group'>
-                            <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                          <button type='button' onClick={(e) => copyToClipboard(e, selectedInvoice?.amount ?? '')} className='group'>
+                            <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span>
-                                  <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                  <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent className='relative -top-2 right-3'>
@@ -263,7 +293,7 @@ export default function CreateAuctionPage () {
                             <InputGroupAddon align='inline-end'>
                               {selectedInvoice?.amount && field.value !== undefined && !isNaN(field.value) && field.value > 0 &&(
                                 <span className='text-sm text-muted-foreground'>
-                                  {`${new Intl.NumberFormat(locale, { maximumFractionDigits: 2, signDisplay: 'always' }).format((field.value / selectedInvoice.amount - 1) * 100)}%`}
+                                  {`${formatPercentage((field.value / selectedInvoice.amount - 1) * 100)}`}
                                 </span>
                               )}
                             </InputGroupAddon>
@@ -274,16 +304,21 @@ export default function CreateAuctionPage () {
                         </Field>
                       )}
                     />
-                    <div className='flex gap-2'>
-                      <ButtonGroup>
-                        <Button
-                          variant='outline'
-                          type='button'
-                          onClick={() => applyDiscount(3)}
-                          disabled={!watchedsvc}
-                        >
-                          -3%
-                        </Button>
+                    <div className='flex items-center justify-between flex-wrap'>
+                      {maxAllowedPrice !== null && (
+                        <p className='text-xs text-muted-foreground text-right'>
+                          Máximo: {formatCurrency(maxAllowedPrice, locale, selectedInvoice?.currency)}
+                        </p>
+                      )}
+                      {watchedStartingPrice > 0 && selectedInvoceSellerFee > 0 && (
+                        <div className='text-xs text-muted-foreground flex items-center justify-end gap-4'>
+                          <span>Comisión ({Number(selectedInvoceSellerFee).toFixed(2)}%):</span>
+                          <span>-{(Number(selectedInvoceSellerFee) / 100 * Number(watchedStartingPrice)).toFixed(2)}€</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className='flex flex-col sm:flex-row gap-2'>
+                      <ButtonGroup className='w-full sm:w-auto [&_button]:flex-1 sm:[&_button]:flex-0'>
                         <Button
                           variant='outline'
                           type='button'
@@ -291,6 +326,14 @@ export default function CreateAuctionPage () {
                           disabled={!watchedsvc}
                         >
                           -5%
+                        </Button>
+                        <Button
+                          variant='outline'
+                          type='button'
+                          onClick={() => applyDiscount(7.5)}
+                          disabled={!watchedsvc}
+                        >
+                          -7.5%
                         </Button>
                         <Button
                           variant='outline'
@@ -309,7 +352,7 @@ export default function CreateAuctionPage () {
                           -20%
                         </Button>
                       </ButtonGroup>
-                      <InputGroup className='w-40'>
+                      <InputGroup className='w-40 sm:w-full'>
                         <InputGroupInput
                           type='number'
                           placeholder='Descuento...'

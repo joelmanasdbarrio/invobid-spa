@@ -4,10 +4,13 @@ import type { PaginatedResponse, ResponseOK } from '@/types/Response'
 
 const base_url = import.meta.env.VITE_BASE_URL
 
-export const createDebtor = async (body: FormData) => {
+export const createDebtor = async (body: { companyName: string; taxId: string; email: string; phoneNumber: string }) => {
   return fetchApi<ResponseOK<Debtor>>(`${base_url}/debtors`, {
     method: 'POST',
-    body
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
   }, {
     promise: 'Creando deudor...',
     resolve: 'Deudor creado con éxito',

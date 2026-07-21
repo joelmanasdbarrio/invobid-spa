@@ -86,7 +86,7 @@ export default function MarketplaceInvoicesPage () {
     setSearchParams(newParams)
   }
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   useEffect(() => {
     if (!loggedInUser) return
@@ -145,7 +145,7 @@ export default function MarketplaceInvoicesPage () {
     <div className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <FileTextIcon className='w-6 h-6' />
+          <FileTextIcon className='size-6' />
         </span>
         <h2>Facturas adquiridas</h2>
       </div>

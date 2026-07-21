@@ -84,7 +84,7 @@ export function DataTable<TData extends Bid, TValue> ({
               {hasMore && (
                 <TableRow ref={sentinelRef}>
                   <TableCell colSpan={columns.length} className='p-2 text-center'>
-                    Cargando más pujas...
+                    Cargando más pujas…
                   </TableCell>
                 </TableRow>
               )}

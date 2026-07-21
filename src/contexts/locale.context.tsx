@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { LocaleContext } from './locale.context'
 
 const LOCALE_STORAGE_KEY = 'locale'
@@ -14,8 +14,10 @@ export function LocaleProvider ({ children }: { children: React.ReactNode }) {
     setLocaleState(newLocale)
   }
 
+  const contextValue = useMemo(() => ({ locale, setLocale }), [locale])
+
   return (
-    <LocaleContext.Provider value={{ locale, setLocale }}>
+    <LocaleContext.Provider value={contextValue}>
       {children}
     </LocaleContext.Provider>
   )

@@ -2,7 +2,7 @@ import type { User } from '@/types/User'
 import { createContext } from 'react'
 
 export type AuthContextType = {
-  loggedInUser?: User
+  loggedInUser?: User | null
   setLoggedInUser: React.Dispatch<React.SetStateAction<User | null>>
   isLoading: boolean
 }

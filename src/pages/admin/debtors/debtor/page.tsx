@@ -17,6 +17,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegen
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from '@/components/ui/input-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { getDebtorById, updateDebtorById } from '@/services/debtor.api'
 import { type Debtor, DebtorStatus } from '@/types/Debtor'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -53,10 +54,31 @@ const formSchema = z.object({
   lastCommunication: z.string().optional()
 })
 
+function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
+  e.preventDefault()
+  const button = e.currentTarget
+  performCopyToClipboard(text).then(success => {
+    if (success) {
+      button.setAttribute('data-copied', 'true')
+      setTimeout(() => {
+        button.removeAttribute('data-copied')
+      }, 2000)
+    }
+  })
+}
+
+const UPDATE_NOTES_MAP: Record<string, string> = {
+  correctVerification: 'Deudor verificado correctamente',
+  updatedCompanyName: 'Se ha actualizado la razón social',
+  insolvent: 'El deudor se ha declarado insolvente'
+}
+
 export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {debtorId} = useParams()
-  const [debtor, setDebtor] = useState<Debtor | undefined>()
-  const [originalDebtor, setOriginalDebtor] = useState<Debtor | undefined>(debtor)
+  const { debtorId } = useParams()
+  const [debtorState, setDebtorState] = useState<{ debtor: Debtor | undefined; originalDebtor: Debtor | undefined }>({ debtor: undefined, originalDebtor: undefined })
+  const debtor = debtorState.debtor
+  const originalDebtor = debtorState.originalDebtor
+  const setDebtor = (d: Debtor | undefined) => setDebtorState(prev => ({ ...prev, debtor: d }))
   const [isFormDisabled, setIsFormDisabled] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -66,8 +88,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
       getDebtorById(debtorId)
         .then(res => res.data)
         .then(debtor => {
-          setDebtor(debtor)
-          setOriginalDebtor(debtor)
+          setDebtorState({ debtor, originalDebtor: debtor })
           setLastBreadcrumb(debtor.companyName)
         })
         .catch(() => {
@@ -117,8 +138,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
     updateDebtorById(debtor.id, JSON.stringify(updateData))
       .then(res => res.data)
       .then(updatedDebtor => {
-        setDebtor(updatedDebtor)
-        setOriginalDebtor(updatedDebtor)
+        setDebtorState({ debtor: updatedDebtor, originalDebtor: updatedDebtor })
         form.reset({
           status: updatedDebtor.status ?? undefined,
           email: updatedDebtor.email,
@@ -138,29 +158,11 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
     setDebtor(originalDebtor)
   }
 
-  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
-    e.preventDefault()
-    navigator.clipboard.writeText(String(text))
-    const button = e.currentTarget
-    button.setAttribute('data-copied', 'true')
-    setTimeout(() => {
-      button.removeAttribute('data-copied')
-    }, 2000)
-  }
-
-  const updateNotesMap: Record<string, string> = {
-    correctVerification: 'Deudor verificado correctamente',
-    updatedCompanyName: 'Se ha actualizado la razón social',
-    incorrect111Document: 'El modelo 111 de hacienda es incorrecto o no es legible',
-    incorrect303Document: 'El modelo 303 de hacienda es incorrecto o no es legible',
-    incorrectBothDocuments: 'Los modelos 111 & 303 de hacienda son incorrectos o no legibles'
-  }
-
   return (
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <HandCoinsIcon className='w-6 h-6' />
+          <HandCoinsIcon className='size-6' />
         </span>
         <h2>Gestionar deudor</h2>
       </div>
@@ -190,15 +192,15 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                       {watchedStatus === DebtorStatus.DENIED && 'Denegado'}
                     </Button>
                     <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/25' onClick={() => form.setValue('status', DebtorStatus.CORRECTION, { shouldDirty: true })}>
-                      <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
+                      <CircleAlertIcon className='size-5 rounded-full text-red-600'/>
                       {watchedStatus === DebtorStatus.CORRECTION && 'Corrección'}
                     </Button>
                     <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/25' onClick={() => form.setValue('status', DebtorStatus.PENDING, { shouldDirty: true })}>
-                      <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
+                      <ClockIcon className='size-5 rounded-full text-yellow-600'/>
                       {watchedStatus === DebtorStatus.PENDING && 'Por verificar'}
                     </Button>
                     <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/25' onClick={() => form.setValue('status', DebtorStatus.VERIFIED, { shouldDirty: true })}>
-                      <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
+                      <CheckCheckIcon className='size-5 rounded-full text-green-600'/>
                       {watchedStatus === DebtorStatus.VERIFIED && 'Verificado'}
                     </Button>
                   </ButtonGroup>
@@ -220,13 +222,13 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                               <IdCardIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, debtor?.taxId ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, debtor?.taxId ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -254,13 +256,13 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                               <BuildingIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, debtor?.companyName ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, debtor?.companyName ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -288,13 +290,13 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                               <MailIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, debtor?.email ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, debtor?.email ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -322,13 +324,13 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                               <PhoneIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, debtor?.phoneNumber ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, debtor?.phoneNumber ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -360,18 +362,18 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                           <Field>
                             <FieldLabel htmlFor='investorTaxId'>CIF/NIF:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='investorTaxId' value={debtor?.investor?.taxId} type='text' placeholder='12345678A' required disabled />
+                              <InputGroupInput id='investorTaxId' value={debtor?.investor?.taxId ?? ''} type='text' placeholder='12345678A' required disabled />
                               <InputGroupAddon>
                                 <IdCardIcon />
                               </InputGroupAddon>
                               <InputGroupAddon align='inline-end'>
-                                <button onClick={(e) => copyToClipboard(e, debtor?.investor?.taxId ?? '')} className='group'>
-                                  <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                <button type='button' onClick={(e) => copyToClipboard(e, debtor?.investor?.taxId ?? '')} className='group'>
+                                  <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <span>
-                                        <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                        <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                       </span>
                                     </TooltipTrigger>
                                     <TooltipContent className='relative -top-2 right-3'>
@@ -385,18 +387,18 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                           <Field>
                             <FieldLabel htmlFor='investorCompanyName'>Razón social:</FieldLabel>
                             <InputGroup>
-                              <InputGroupInput id='investorCompanyName' value={debtor?.investor?.companyName} type='text' placeholder='ACME S.L.' required disabled />
+                              <InputGroupInput id='investorCompanyName' value={debtor?.investor?.companyName ?? ''} type='text' placeholder='ACME S.L.' required disabled />
                               <InputGroupAddon>
                                 <BuildingIcon />
                               </InputGroupAddon>
                               <InputGroupAddon align='inline-end'>
-                                <button onClick={(e) => copyToClipboard(e, debtor?.investor?.companyName ?? '')} className='group'>
-                                  <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                                <button type='button' onClick={(e) => copyToClipboard(e, debtor?.investor?.companyName ?? '')} className='group'>
+                                  <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <span>
-                                        <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                        <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                       </span>
                                     </TooltipTrigger>
                                     <TooltipContent className='relative -top-2 right-3'>
@@ -410,7 +412,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                           <FieldDescription>
                             <Link to={`/admin/users/${debtor?.investor.id}`} className='text-xs'>
                               Consultar cedente
-                              <ExternalLinkIcon className='w-3 h-3 inline-block ml-1' />
+                              <ExternalLinkIcon className='size-3 inline-block ml-1' />
                             </Link>
                           </FieldDescription>
                         </FieldGroup>
@@ -447,7 +449,7 @@ export default function AdminDebtorPage ({ setLastBreadcrumb }: { setLastBreadcr
                                 <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
                               </InputGroup>
                               <div className='flex flex-wrap gap-1'>
-                                {Object.entries(updateNotesMap).map(([key, note]) => (
+                                {Object.entries(UPDATE_NOTES_MAP).map(([key, note]) => (
                                   <Badge
                                     key={key}
                                     variant='outline'

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { getInvoices } from '@/services/invoice.api'
-import { InvoiceStatus, type Invoice } from '@/types/Invoice'
+import { type Invoice, InvoiceStatus } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeftIcon, ChevronRightIcon, FileTextIcon } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -89,7 +89,7 @@ export default function InvoicesPage () {
     setSearchParams(newParams)
   }
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   useEffect(() => {
     if (!loggedInUser) return
@@ -141,7 +141,7 @@ export default function InvoicesPage () {
     <div className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <FileTextIcon className='w-6 h-6' />
+          <FileTextIcon className='size-6' />
         </span>
         <h2>Consultar facturas</h2>
       </div>

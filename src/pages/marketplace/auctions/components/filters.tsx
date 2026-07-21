@@ -7,6 +7,7 @@ import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
 import { ShieldCheckIcon } from 'lucide-react'
+import { useMemo } from 'react'
 import { Controller, type UseFormReturn } from 'react-hook-form'
 
 export default function AuctionFilters (
@@ -34,6 +35,8 @@ export default function AuctionFilters (
     handleClear: () => void;
   }
 ) {
+  const nowIso = useMemo(() => new Date().toISOString(), [])
+
   return (
     <Card>
       <CardContent>
@@ -47,7 +50,7 @@ export default function AuctionFilters (
                   toValue={form.watch('auctionDateEnd')}
                   onFromChange={(isoStr) => form.setValue('auctionDateStart', isoStr, { shouldValidate: true })}
                   onToChange={(isoStr) => form.setValue('auctionDateEnd', isoStr, { shouldValidate: true })}
-                  minDate={new Date().toISOString()}
+                  minDate={nowIso}
                 />
               </Field>
               <Controller
@@ -122,7 +125,7 @@ export default function AuctionFilters (
                         step={0.01}
                       />
                       <InputGroupAddon>
-                        <ShieldCheckIcon className='w-4 h-4' />
+                        <ShieldCheckIcon className='size-4' />
                       </InputGroupAddon>
                       <InputGroupAddon align='inline-end'>
                         /5

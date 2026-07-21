@@ -1,19 +1,28 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox.tsx'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
 import { Form } from '@/components/ui/form'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { AuthContext } from '@/contexts/auth.context'
 import { login } from '@/services/auth.api'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Cookies from 'js-cookie'
 import { EllipsisIcon, MailIcon } from 'lucide-react'
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router'
 import { z } from 'zod'
+import useLoggedInUser from '@/hooks/use-loggedInUser.ts'
 
 const formSchema = z.object({
   email: z.email(),
@@ -34,13 +43,8 @@ export default function LoginForm () {
     }
   })
 
-  const authContext = useContext(AuthContext)
-  if (!authContext) {
-    throw new Error('AuthContext must be used within AuthProvider')
-  }
-
   const [isAccountDisabledDialogOpen, setIsAccountDisabledDialogOpen] = useState(false)
-  const { setLoggedInUser } = authContext
+  const { setLoggedInUser } = useLoggedInUser()
   const navigate = useNavigate()
   function onSubmit (formData: z.infer<typeof formSchema>) {
     const body = JSON.stringify(formData)
@@ -50,7 +54,7 @@ export default function LoginForm () {
         Cookies.set('logged-in-user', JSON.stringify(res.data), { expires: formData.rememberMe ? 30 : 1 })
         setLoggedInUser(res.data)
 
-        return navigate('/')
+        return navigate('/dashboard')
       },
       () => {},
       formData.activateAccount).catch(err => {
@@ -73,7 +77,7 @@ export default function LoginForm () {
                 <Controller
                   name='email'
                   control={form.control}
-                  render={({ field, fieldState}) => (
+                  render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor={field.name}>Correo</FieldLabel>
                       <InputGroup>
@@ -91,7 +95,7 @@ export default function LoginForm () {
                 <Controller
                   name='password'
                   control={form.control}
-                  render={({field, fieldState})=> (
+                  render={({ field, fieldState })=> (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor={field.name}>Contraseña</FieldLabel>
                       <InputGroup>
@@ -123,12 +127,11 @@ export default function LoginForm () {
                     </Field>
                   )}
                 />
-                <a
-                  href='#'
-                  className='ml-auto text-sm underline-offset-4 hover:underline'
+                <span
+                  className='ml-auto text-sm underline-offset-4 cursor-not-allowed text-muted-foreground'
                 >
                   ¿Has olvidado tu contraseña?
-                </a>
+                </span>
               </FieldGroup>
               <FieldGroup>
                 <Field>
@@ -157,7 +160,7 @@ export default function LoginForm () {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => onSubmit({...form.getValues(), activateAccount: true})}>Aceptar</AlertDialogAction>
+            <AlertDialogAction onClick={() => onSubmit({ ...form.getValues(), activateAccount: true })}>Aceptar</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -18,6 +18,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupTextarea } from
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select.tsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip.tsx'
+import { copyToClipboard as performCopyToClipboard } from '@/lib/copy-to-clipboard'
 import { UserChangeHistory } from '@/pages/admin/users/user/components/user-change-history'
 import UserDocuments from '@/pages/admin/users/user/components/user-documents/user-documents'
 import { getInvestorById, updateInvestorById } from '@/services/investor.api.ts'
@@ -64,10 +65,31 @@ const formSchema = z.object({
   lastCommunication: z.string().optional()
 })
 
+function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
+  e.preventDefault()
+  const button = e.currentTarget
+  performCopyToClipboard(text).then(success => {
+    if (success) {
+      button.setAttribute('data-copied', 'true')
+      setTimeout(() => {
+        button.removeAttribute('data-copied')
+      }, 2000)
+    }
+  })
+}
+
+const UPDATE_NOTES_MAP: Record<string, string> = {
+  correctVerification: 'Usuario verificado correctamente',
+  incorrectIdentificationDocument: 'El documento de identificación es incorrecto o no es legible',
+  updatedCompanyName: 'Se ha actualizado la razón social'
+}
+
 export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
-  const {investorId} = useParams()
-  const [investor, setInvestor] = useState<Investor | undefined>()
-  const [originalInvestor, setOriginalInvestor] = useState<Investor | undefined>(investor)
+  const { investorId } = useParams()
+  const [investorState, setInvestorState] = useState<{ investor: Investor | undefined; originalInvestor: Investor | undefined }>({ investor: undefined, originalInvestor: undefined })
+  const investor = investorState.investor
+  const originalInvestor = investorState.originalInvestor
+  const setInvestor = (i: Investor | undefined) => setInvestorState(prev => ({ ...prev, investor: i }))
   const [isFormDisabled, setIsFormDisabled] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -77,8 +99,7 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
       getInvestorById(investorId)
         .then(res => res.data)
         .then(user => {
-          setInvestor(user)
-          setOriginalInvestor(user)
+          setInvestorState({ investor: user, originalInvestor: user })
           setLastBreadcrumb(user.companyName)
         })
         .catch(() => {
@@ -134,8 +155,7 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
     updateInvestorById(investor.id, JSON.stringify(updateData))
       .then(res => res.data)
       .then(updatedInvestor => {
-        setInvestor(updatedInvestor)
-        setOriginalInvestor(updatedInvestor)
+        setInvestorState({ investor: updatedInvestor, originalInvestor: updatedInvestor })
         form.reset({
           status: updatedInvestor.status ?? undefined,
           name: updatedInvestor.name,
@@ -157,27 +177,11 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
     setInvestor(originalInvestor)
   }
 
-  function copyToClipboard (e: React.MouseEvent<HTMLButtonElement>, text: string | number) {
-    e.preventDefault()
-    navigator.clipboard.writeText(String(text))
-    const button = e.currentTarget
-    button.setAttribute('data-copied', 'true')
-    setTimeout(() => {
-      button.removeAttribute('data-copied')
-    }, 2000)
-  }
-
-  const updateNotesMap: Record<string, string> = {
-    correctVerification: 'Usuario verificado correctamente',
-    incorrectIdentificationDocument: 'El documento de identificación es incorrecto o no es legible',
-    updatedCompanyName: 'Se ha actualizado la razón social'
-  }
-
   return (
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <UserIcon className='w-6 h-6' />
+          <UserIcon className='size-6' />
         </span>
         <h2>Gestionar usuario</h2>
       </div>
@@ -207,15 +211,15 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                       {watchedStatus === InvestorStatus.DENIED && 'Denegado'}
                     </Button>
                     <Button type='button' variant='outline' className='bg-red-300/25 dark:bg-red-300/15' onClick={() => form.setValue('status', InvestorStatus.CORRECTION, { shouldDirty: true })}>
-                      <CircleAlertIcon className='w-5 h-5 rounded-full text-red-600'/>
+                      <CircleAlertIcon className='size-5 rounded-full text-red-600'/>
                       {watchedStatus === InvestorStatus.CORRECTION && 'Corrección'}
                     </Button>
                     <Button type='button' variant='outline' className='bg-yellow-300/25 dark:bg-yellow-300/15' onClick={() => form.setValue('status', InvestorStatus.PENDING, { shouldDirty: true })}>
-                      <ClockIcon className='w-5 h-5 rounded-full text-yellow-600'/>
+                      <ClockIcon className='size-5 rounded-full text-yellow-600'/>
                       {watchedStatus === InvestorStatus.PENDING && 'Por verificar'}
                     </Button>
                     <Button type='button' variant='outline' className='bg-green-300/25 dark:bg-green-300/15' onClick={() => form.setValue('status', InvestorStatus.VERIFIED, { shouldDirty: true })}>
-                      <CheckCheckIcon className='w-5 h-5 rounded-full text-green-600'/>
+                      <CheckCheckIcon className='size-5 rounded-full text-green-600'/>
                       {watchedStatus === InvestorStatus.VERIFIED && 'Verificado'}
                     </Button>
                   </ButtonGroup>
@@ -237,13 +241,13 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                               <IdCardIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, investor?.taxId ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, investor?.taxId ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -272,12 +276,12 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                                   field.value === InvestorType.INDIVIDUAL
                                     ? (
                                       <span className='flex items-center gap-2'>
-                                        <UserIcon className='w-4 h-4' />
+                                        <UserIcon className='size-4' />
                                         Particular
                                       </span>
                                     ) : field.value === InvestorType.COMPANY ? (
                                       <span className='flex items-center gap-2'>
-                                        <BuildingIcon className='w-4 h-4' />
+                                        <BuildingIcon className='size-4' />
                                         Empresa
                                       </span>
                                     ) : (
@@ -292,13 +296,13 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                             <SelectContent>
                               <SelectItem value={InvestorType.INDIVIDUAL}>
                                 <span className='flex items-center gap-2'>
-                                  <UserIcon className='w-4 h-4' />
+                                  <UserIcon className='size-4' />
                                   Particular
                                 </span>
                               </SelectItem>
                               <SelectItem value={InvestorType.COMPANY}>
                                 <span className='flex items-center gap-2'>
-                                  <BuildingIcon className='w-4 h-4' />
+                                  <BuildingIcon className='size-4' />
                                   Empresa
                                 </span>
                               </SelectItem>
@@ -321,13 +325,13 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                               <BuildingIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, investor?.companyName ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, investor?.companyName ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -362,13 +366,13 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                                 : <UserIcon />}
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, investor?.name ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, investor?.name ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -396,13 +400,13 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                               <MailIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, investor?.email ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, investor?.email ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -430,13 +434,13 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                               <PhoneIcon />
                             </InputGroupAddon>
                             <InputGroupAddon align='inline-end'>
-                              <button onClick={(e) => copyToClipboard(e, investor?.phoneNumber ?? '')} className='group'>
-                                <CopyIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
+                              <button type='button' onClick={(e) => copyToClipboard(e, investor?.phoneNumber ?? '')} className='group'>
+                                <CopyIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-0 scale-100 group-data-[copied=true]:-rotate-90 group-data-[copied=true]:scale-0' />
 
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span>
-                                      <CheckIcon className='w-4 h-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
+                                      <CheckIcon className='size-4 hover:cursor-pointer transition-all absolute top-1/2 right-2 -translate-y-1/2 rotate-90 scale-0 group-data-[copied=true]:rotate-0 group-data-[copied=true]:scale-100' />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent className='relative -top-2 right-3'>
@@ -483,7 +487,7 @@ export default function AdminUserPage ({ setLastBreadcrumb }: { setLastBreadcrum
                                 <InputGroupTextarea {...field} id={field.name} placeholder='Se requiere una correción a razón de...' />
                               </InputGroup>
                               <div className='flex flex-wrap gap-1'>
-                                {Object.entries(updateNotesMap).map(([key, note]) => (
+                                {Object.entries(UPDATE_NOTES_MAP).map(([key, note]) => (
                                   <Badge
                                     key={key}
                                     variant='outline'

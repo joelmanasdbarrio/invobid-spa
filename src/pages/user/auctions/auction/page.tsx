@@ -16,16 +16,26 @@ import { formatCurrency } from '@/lib/format-currency'
 import { parseLocalDate } from '@/lib/format-date'
 import { getAuctionById, updateAuctionById } from '@/services/auction.api'
 import { getInvoices } from '@/services/invoice.api'
-import { AuctionStatus, type Auction } from '@/types/Auction'
-import { InvoiceStatus, type Invoice } from '@/types/Invoice'
+import { type Auction, AuctionStatus } from '@/types/Auction'
+import { type Invoice, InvoiceStatus } from '@/types/Invoice'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CircleCheckIcon, CircleDashedIcon, CircleGaugeIcon, CircleSlashIcon, GavelIcon, SaveIcon, SearchIcon } from 'lucide-react'
+import {
+  CircleCheckIcon,
+  CircleDashedIcon,
+  CircleGaugeIcon,
+  CircleSlashIcon,
+  GavelIcon,
+  SaveIcon,
+  SearchIcon
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router'
 import z from 'zod'
 import { AuctionBids } from './components/auction-bids/auction-bids'
 import { AuctionInvoices } from './components/auction-invoices/auction-invoices'
+import { calculateMaxAllowedPrice } from '@/lib/calculate-max-price.ts'
+import { formatPercentage } from '@/lib/format-percentage.ts'
 
 const validateFormSchema = z.object({
   status: z.enum(AuctionStatus)
@@ -34,7 +44,7 @@ const validateFormSchema = z.object({
 const baseFormSchema = z.object({
   svc: z.string(),
   startingPrice: z.number().positive(),
-  auctionDateEnd: z.date('La fecha de vencimiento no es válida').refine((date) => {
+  auctionDateEnd: z.date({ error: 'La fecha de vencimiento no es válida' }).refine((date) => {
     const minDate = new Date()
     minDate.setDate(minDate.getDate() + 2)
     minDate.setHours(0, 0, 0, 0)
@@ -48,11 +58,15 @@ const baseFormSchema = z.object({
 
 export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb: (breadcrumb: string) => void }) {
   const { auctionId } = useParams<{ auctionId: string }>()
-  const [auction, setAuction] = useState<Auction | undefined>()
-  const [originalAuction, setOriginalAuction] = useState<Auction | undefined>()
-  const [verifiedInvoices, setVerifiedInvoices] = useState<Invoice[]>()
+  const [auctionState, setAuctionState] = useState<{ auction: Auction | undefined; originalAuction: Auction | undefined }>({ auction: undefined, originalAuction: undefined })
+  const auction = auctionState.auction
+  const originalAuction = auctionState.originalAuction
+  const setAuction = (a: Auction | undefined) => setAuctionState(prev => ({ ...prev, auction: a }))
+
+  const [invoiceState, setInvoiceState] = useState<{ invoices: Invoice[] | undefined; isLoading: boolean }>({ invoices: undefined, isLoading: false })
+  const verifiedInvoices = invoiceState.invoices
+  const isLoadingInvoices = invoiceState.isLoading
   const [invoiceSearch, setInvoiceSearch] = useState('')
-  const [isLoadingInvoices, setIsLoadingInvoices] = useState(false)
   const { locale } = useLocale()
 
   const isFormDisabled = !auction || auction.status !== AuctionStatus.DRAFT
@@ -83,11 +97,22 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     })
   }, [auction, baseForm])
 
+  const watchedStartingPrice = useWatch({ control: baseForm.control, name: 'startingPrice' })
   const watchedsvc = useWatch({ control: baseForm.control, name: 'svc' })
   const watchedDateEnd = useWatch({ control: baseForm.control, name: 'auctionDateEnd' })
 
   const selectedInvoice = verifiedInvoices?.find(inv => inv.id === watchedsvc) ?? auction?.invoice
+  const selectedInvoceSellerFee = selectedInvoice?.transactionFee.sellerPercentage ?? 0
   const invoiceDueDate = selectedInvoice?.dueDate
+
+  const maxAllowedPrice = selectedInvoice
+    ? calculateMaxAllowedPrice(
+      selectedInvoice.amount,
+      selectedInvoice.transactionFee.buyerPercentage,
+      selectedInvoice.transactionFee.sellerPercentage,
+      Number(import.meta.env.VITE_MINIMUM_INVOICE_DISCOUNT)
+    )
+    : null
 
   const auctionEndMaxDate = invoiceDueDate
     ? (() => { const d = parseLocalDate(invoiceDueDate); d.setMonth(d.getMonth() - 1); return d.toISOString() })()
@@ -95,7 +120,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
 
   const auctionEndMinDate = (() => { const d = new Date(); d.setDate(d.getDate() + 2); d.setHours(0, 0, 0, 0); return d.toISOString() })()
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -103,8 +128,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     getAuctionById(auctionId)
       .then(res => res.data)
       .then(auction => {
-        setAuction(auction)
-        setOriginalAuction(auction)
+        setAuctionState({ auction, originalAuction: auction })
         setLastBreadcrumb(`Subasta de factura ${auction.invoice.svc}`)
       })
       .catch(() => {
@@ -116,25 +140,18 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     if (!loggedInUser) return
 
     const timer = setTimeout(() => {
-      setIsLoadingInvoices(true)
       getInvoices({
         sellerInvestorId: loggedInUser.id,
         ...(invoiceSearch ? { svc: invoiceSearch } : {}),
         status: InvoiceStatus.VERIFIED
       })
         .then(res => res.data)
-        .then(invoices => setVerifiedInvoices(invoices))
-        .finally(() => setIsLoadingInvoices(false))
+        .then(invoices => setInvoiceState({ invoices, isLoading: false }))
+        .catch(() => setInvoiceState(prev => ({ ...prev, isLoading: false })))
     }, 300)
 
     return () => clearTimeout(timer)
   }, [loggedInUser, invoiceSearch])
-
-  function applyDiscount (discountPercent: number) {
-    if (!selectedInvoice?.amount) return
-    const discountedPrice = Math.round(selectedInvoice.amount * (1 - discountPercent / 100) * 100) / 100
-    baseForm.setValue('startingPrice', discountedPrice, { shouldDirty: true, shouldTouch: true })
-  }
 
   function onSubmitBase (data: z.infer<typeof baseFormSchema>) {
     if (!auctionId) return
@@ -144,10 +161,9 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       auctionDateEnd: data.auctionDateEnd.toISOString()
     }))
       .then(res => {
-        setAuction(res.data)
-        setOriginalAuction(res.data)
+        setAuctionState({ auction: res.data, originalAuction: res.data })
       })
-      .then(() => navigate(`/user/auctions/${auctionId}`))
+      .then(() => navigate(`/auctions/${auctionId}`))
   }
 
   function onSubmitValidate (data: z.infer<typeof validateFormSchema>) {
@@ -156,14 +172,21 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
       status: data.status
     }))
       .then(res => setAuction(res.data))
-      .then(() => navigate(`/user/auctions/${auctionId}`))
+      .then(() => navigate(`/auctions/${auctionId}`))
+  }
+
+  function applyDiscount (discountPercent: number) {
+    if (!selectedInvoice?.amount) return
+    const discountedPrice = Math.round(selectedInvoice.amount * (1 - discountPercent / 100) * 100) / 100
+    const cappedPrice = maxAllowedPrice !== null ? Math.min(discountedPrice, maxAllowedPrice) : discountedPrice
+    baseForm.setValue('startingPrice', cappedPrice, { shouldDirty: true, shouldTouch: true })
   }
 
   return (
     <section className='flex flex-col gap-4'>
       <div className='flex items-center gap-2'>
         <span className='rounded-lg p-1 bg-primary/20 text-primary'>
-          <GavelIcon className='w-6 h-6' />
+          <GavelIcon className='size-6' />
         </span>
         <h2>Gestionar subasta</h2>
         {auction?.status === AuctionStatus.DRAFT && (
@@ -277,7 +300,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                   <Field>
                     <FieldLabel htmlFor='invoiceRating'>Rating:</FieldLabel>
                     <InputGroup>
-                      <InputGroupInput id='invoiceRating' value={selectedInvoice?.rating} type='text' required disabled />
+                      <InputGroupInput id='invoiceRating' value={selectedInvoice?.rating ?? ''} type='text' required disabled />
                       <InputGroupAddon>%</InputGroupAddon>
                     </InputGroup>
                   </Field>
@@ -312,7 +335,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                               step='0.01'
                               placeholder='1000'
                               disabled={isFormDisabled}
-                              value={field.value}
+                              value={field.value ?? ''}
                               onChange={e => field.onChange(e.target.valueAsNumber)}
                               onBlur={() => {
                                 if (field.value !== undefined && !isNaN(field.value)) {
@@ -326,7 +349,7 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                             <InputGroupAddon align='inline-end'>
                               {field.value !== undefined && selectedInvoice?.amount && (
                                 <span className='text-sm text-muted-foreground'>
-                                  {`${new Intl.NumberFormat(locale, { maximumFractionDigits: 2, signDisplay: 'always' }).format((field.value / selectedInvoice.amount - 1) * 100)}%`}
+                                  {`${formatPercentage((field.value / selectedInvoice.amount - 1) * 100)}`}
                                 </span>
                               )}
                             </InputGroupAddon>
@@ -337,16 +360,21 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                         </Field>
                       )}
                     />
-                    <div className='flex gap-2'>
-                      <ButtonGroup>
-                        <Button
-                          variant='outline'
-                          type='button'
-                          onClick={() => applyDiscount(3)}
-                          disabled={isFormDisabled}
-                        >
-                          -3%
-                        </Button>
+                    <div className='flex items-center justify-between flex-wrap'>
+                      {maxAllowedPrice !== null && (
+                        <p className='text-xs text-muted-foreground text-right'>
+                          Máximo: {formatCurrency(maxAllowedPrice, locale, selectedInvoice?.currency)}
+                        </p>
+                      )}
+                      {watchedStartingPrice > 0 && selectedInvoceSellerFee > 0 && (
+                        <div className='text-xs text-muted-foreground flex items-center justify-end gap-4'>
+                          <span>Comisión ({Number(selectedInvoceSellerFee).toFixed(2)}%):</span>
+                          <span>-{(Number(selectedInvoceSellerFee) / 100 * Number(watchedStartingPrice)).toFixed(2)}€</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className='flex flex-col sm:flex-row gap-2'>
+                      <ButtonGroup className='w-full sm:w-auto [&_button]:flex-1 sm:[&_button]:flex-0'>
                         <Button
                           variant='outline'
                           type='button'
@@ -354,6 +382,14 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                           disabled={isFormDisabled}
                         >
                           -5%
+                        </Button>
+                        <Button
+                          variant='outline'
+                          type='button'
+                          onClick={() => applyDiscount(7.5)}
+                          disabled={isFormDisabled}
+                        >
+                          -7.5%
                         </Button>
                         <Button
                           variant='outline'
@@ -372,11 +408,11 @@ export default function AuctionPage ({ setLastBreadcrumb }: { setLastBreadcrumb:
                           -20%
                         </Button>
                       </ButtonGroup>
-                      <InputGroup className='w-full'>
+                      <InputGroup className='w-40 sm:w-full'>
                         <InputGroupInput
                           type='number'
                           placeholder='Descuento...'
-                          disabled={isFormDisabled}
+                          disabled={!watchedsvc}
                           onChange={(e) => {
                             const discountPercent = parseFloat(e.target.value) || 0
                             applyDiscount(discountPercent)

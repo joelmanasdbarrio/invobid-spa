@@ -9,9 +9,9 @@ export const debtorColumns: ColumnDef<Debtor>[] = [
     accessorKey: 'id',
     header: '',
     enableHiding: false,
-    cell: ({row}) => (
+    cell: ({ row }) => (
       <Link to={`/debtors/${row.original.id}`}>
-        <ExternalLinkIcon className='w-4 h-4' />
+        <ExternalLinkIcon className='size-4' />
       </Link>
     )
   },
@@ -34,7 +34,7 @@ export const debtorColumns: ColumnDef<Debtor>[] = [
   {
     accessorKey: 'status',
     header: 'Estado',
-    cell: ({row}) => {
+    cell: ({ row }) => {
       const status = row.original.status
       switch (status) {
         case DebtorStatus.PENDING:

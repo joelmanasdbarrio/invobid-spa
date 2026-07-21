@@ -15,14 +15,14 @@ export function useDocumentColumns (): ColumnDef<Document>[] {
     {
       accessorKey: 'id',
       header: '',
-      cell: ({row}) => {
+      cell: ({ row }) => {
         const extension = row.original.filename.split('.').pop()
         const filename = `${row.original.title}.${extension}`
         return (
           <div className='flex items-center gap-1'>
             <DocumentPreview document={row.original} triggerOnly />
             <Button variant='ghost' onClick={() => downloadDocument(row.original.id, filename)}>
-              <DownloadIcon className='w-4 h-4' />
+              <DownloadIcon className='size-4' />
             </Button>
           </div>
         )
@@ -74,7 +74,7 @@ export function useDocumentColumns (): ColumnDef<Document>[] {
     {
       accessorKey: 'createdAt',
       header: 'Fecha de subida',
-      cell: ({row}) => formatDateTime(row.original.createdAt, locale)
+      cell: ({ row }) => formatDateTime(row.original.createdAt, locale)
     }
   ], [locale])
 }

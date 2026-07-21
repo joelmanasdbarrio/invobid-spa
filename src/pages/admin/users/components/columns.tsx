@@ -17,9 +17,9 @@ export const investorColumns: ColumnDef<Investor>[] = [
     accessorKey: 'id',
     header: '',
     enableHiding: false,
-    cell: ({row}) => (
+    cell: ({ row }) => (
       <Link to={`/admin/users/${row.original.id}`}>
-        <ExternalLinkIcon className='w-4 h-4' />
+        <ExternalLinkIcon className='size-4' />
       </Link>
     )
   },
@@ -30,7 +30,7 @@ export const investorColumns: ColumnDef<Investor>[] = [
   {
     accessorKey: 'documents',
     header: 'CIF/NIF',
-    cell: ({row}) => row.original.documents[0].value || 'N/A'
+    cell: ({ row }) => row.original.documents[0].value || 'N/A'
   },
   {
     accessorKey: 'name',
@@ -47,20 +47,20 @@ export const investorColumns: ColumnDef<Investor>[] = [
   {
     accessorKey: 'investorType',
     header: 'Tipo de inversor',
-    cell: ({row}) => {
+    cell: ({ row }) => {
       const type = row.original.investorType
       switch (type) {
         case InvestorType.INDIVIDUAL:
           return (
             <span className='flex items-center gap-2'>
-              <UserIcon className='w-4 h-4' />
+              <UserIcon className='size-4' />
               Particular
             </span>
           )
         case InvestorType.COMPANY:
           return (
             <span className='flex items-center gap-2'>
-              <BuildingIcon className='w-4 h-4' />
+              <BuildingIcon className='size-4' />
               Empresa
             </span>
           )
@@ -72,7 +72,7 @@ export const investorColumns: ColumnDef<Investor>[] = [
   {
     accessorKey: 'status',
     header: 'Estado',
-    cell: ({row}) => {
+    cell: ({ row }) => {
       const status = row.original.status
       switch (status) {
         case InvestorStatus.PENDING:
