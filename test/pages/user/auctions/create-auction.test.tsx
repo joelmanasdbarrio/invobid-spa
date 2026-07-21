@@ -15,7 +15,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const MAX_ALLOWED_PRICE = 4635
 
 vi.mock('@/hooks/use-loggedInUser', () => ({
-  default: () => ({ id: 'user-1', type: 'INVESTOR' })
+  default: () => ({ loggedInUser: { id: 'user-1', type: 'INVESTOR' }, setLoggedInUser: vi.fn() })
 }))
 
 vi.mock('@/hooks/use-locale', () => ({
@@ -72,10 +72,9 @@ async function selectTestInvoice () {
   fireEvent.keyDown(trigger, { key: 'ArrowDown', code: 'ArrowDown' })
   await act(async () => {})
 
-  const option = screen.queryByRole('option', { name: /FAC-001/i })
-  if (option) {
-    await act(async () => { fireEvent.click(option) })
-  }
+  // findByRole retries until the option appears (invoices may still be loading)
+  const option = await screen.findByRole('option', { name: /FAC-001/i })
+  await act(async () => { fireEvent.click(option) })
 }
 
 beforeEach(() => {

@@ -23,7 +23,7 @@ export function AppSidebar () {
   const appName = import.meta.env.VITE_APP_NAME
   const location = useLocation()
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   return (
     <Sidebar variant='inset' className='divide-y'>

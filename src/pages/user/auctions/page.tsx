@@ -72,7 +72,7 @@ export default function AuctionsPage () {
     setSearchParams(newParams)
   }
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   useEffect(() => {
     if (!loggedInUser) return

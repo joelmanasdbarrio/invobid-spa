@@ -15,14 +15,14 @@ import { countDebtors } from '@/services/debtor.api'
 import { countInvoices } from '@/services/invoice.api'
 import { DebtorStatus } from '@/types/Debtor'
 import { InvoiceStatus } from '@/types/Invoice'
-import { InvestorStatus, InvestorType, type Investor } from '@/types/User'
+import { type Investor, InvestorStatus, InvestorType } from '@/types/User'
 import { ChevronRight, ChevronRightIcon, FileText, Gavel, HandCoinsIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 
 export function InvestorSidebarContent () {
   const location = useLocation()
-  const loggedInUser = useLoggedInUser() as Investor
+  const { loggedInUser } = useLoggedInUser() as {loggedInUser: Investor | null}
   const [isDisabled] = useState(!loggedInUser?.status.includes(InvestorStatus.VERIFIED))
 
   const [correctionDebtorsCount, setCorrectionDebtorsCount] = useState(0)

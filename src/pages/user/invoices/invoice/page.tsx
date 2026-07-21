@@ -149,7 +149,7 @@ export default function InvoicePage ({ setLastBreadcrumb }: { setLastBreadcrumb:
     })
   }, [invoice, baseForm])
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
   const navigate = useNavigate()
 
   useEffect(() => {

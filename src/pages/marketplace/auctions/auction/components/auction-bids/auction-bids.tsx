@@ -9,7 +9,7 @@ import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { calcDiscount, calcProfitability, invertProfitability } from '@/lib/auction-metrics'
 import { formatCurrency } from '@/lib/format-currency'
 import { connectBidSocket, getBid, getBids, placeBid } from '@/services/bid.api'
-import { AuctionStatus, type Auction } from '@/types/Auction'
+import { type Auction, AuctionStatus } from '@/types/Auction'
 import type { Bid } from '@/types/Bid'
 import { EyeIcon, HistoryIcon, PercentIcon, ShieldCheckIcon, TrendingUpIcon, XIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -22,7 +22,7 @@ const PAGE_LIMIT = 10
 
 export function MarketplaceAuctionBids ({ auction, onAuctionExtended }: { auction: Auction | undefined; onAuctionExtended?: (newEndDate: string) => void }) {
   const { locale } = useLocale()
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   const isAuctionActive = auction?.status === AuctionStatus.PUBLISHED
   const isDisabled = !isAuctionActive || !auction || auction.invoice.sellerInvestor.id === loggedInUser?.id

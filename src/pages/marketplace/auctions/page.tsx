@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/u
 import useLoggedInUser from '@/hooks/use-loggedInUser'
 import { connectAuctionSocket, getAuctions } from '@/services/auction.api'
 import { getBids } from '@/services/bid.api'
-import { AuctionStatus, type Auction } from '@/types/Auction'
+import { type Auction, AuctionStatus } from '@/types/Auction'
 import type { Bid } from '@/types/Bid'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeftIcon, ChevronRightIcon, GavelIcon } from 'lucide-react'
@@ -72,7 +72,7 @@ export default function MarketplaceAuctionsPage () {
     setSearchParams(newParams)
   }
 
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
   useEffect(() => {
     if (!loggedInUser) return
     const filters: Record<string, string> = {}

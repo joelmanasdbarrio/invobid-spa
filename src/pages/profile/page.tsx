@@ -5,7 +5,7 @@ import AdminProfileForm from './components/admin-form'
 import InvestorProfileForm from './components/investor-form'
 
 export default function ProfilePage () {
-  const loggedInUser = useLoggedInUser()
+  const { loggedInUser } = useLoggedInUser()
 
   return (
     <>
