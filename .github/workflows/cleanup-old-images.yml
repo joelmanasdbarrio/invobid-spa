@@ -29,7 +29,7 @@ jobs:
             console.log(`Using RC retention window: ${retentionDays} day(s)`);
 
             const owner = context.repo.owner;
-            const packageName = 'invobid-api';
+            const packageName = 'invobid-spa';
 
             let page = 1;
             let deletedCount = 0;
