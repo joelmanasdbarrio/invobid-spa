@@ -1,132 +1,76 @@
 # AI Agent Guidelines for Invobid SPA
 
-React + TypeScript + Vite front-end for the Invobid invoice bidding platform.
+React + TypeScript + Vite frontend for the Invobid invoice bidding platform.
 
 ## Quick Navigation
 
-- **Setup & Environment**: See [README.md](README.md)
-- **Backend contract**: See [invobid-api/test/e2e-spec.md](../invobid-api/test/e2e-spec.md)
+- Setup, environment, and deployment: [README.md](README.md)
+- Form implementation workflow: [.github/skills/add-form/SKILL.md](.github/skills/add-form/SKILL.md)
+- React diagnostics workflow: [.github/skills/react-doctor/SKILL.md](.github/skills/react-doctor/SKILL.md)
 
-## Build & Test Commands
+## Build and Test Commands
 
 ```bash
-npm run dev          # Dev server with HMR (http://localhost:5173)
-npm run build        # TypeScript check + production bundle
-npm run test         # Run all tests once (Vitest)
-npm run test:watch   # Watch mode
-npm run lint         # ESLint (no auto-fix)
-npm run lint-fix     # ESLint with auto-fix
+npm install
+npm run dev
+npm run build
+npm run test
+npm run lint
+npm run doctor
 ```
 
-**Requires `.env`** — copy from `.env.template`. Must have `VITE_BASE_URL`, `VITE_SOCKET_URL`, `VITE_APP_NAME`.
+Use `npm run lint-fix` for autofixable lint issues and `npm run test:watch` for local test loops.
 
-## Architecture
+## Architecture Boundaries
 
-```
-src/
-├── App.tsx           # All route definitions
-├── main.tsx          # Provider tree: BrowserRouter > LocaleProvider > AuthProvider > App
-├── pages/            # One folder per route (admin/, user/, marketplace/, etc.)
-├── components/ui/    # shadcn-style Radix UI primitives (CVA variants)
-├── services/         # One file per API domain (auction.api.ts, bid.api.ts, …)
-├── lib/              # Pure utilities (fetchApi.ts, format-date.ts, auction-metrics.ts)
-├── contexts/         # Auth + Locale (each split into .ts and .tsx — see pitfalls)
-├── hooks/            # use-loggedInUser.ts, use-logout.ts, use-locale.ts
-└── types/            # Domain types (Auction.ts, User.ts, Response.ts, …)
+```text
+src/pages/       Route-level UI (admin, user, marketplace, dashboard, profile)
+src/services/    API client functions by domain
+src/lib/         Shared client primitives (fetchApi, socket, formatters, metrics)
+src/components/  App components + shadcn/ui primitives
+src/contexts/    Auth and locale global state
+src/hooks/       Context access + cross-cutting hooks
+src/types/       Shared domain and API response types
 ```
 
-**Tests** live in `test/` (outside `src/`) — see [Testing Patterns](#testing-patterns).
+Prefer extending the existing layer instead of introducing a parallel abstraction.
 
-## Stack
+## Core Conventions
 
-| Category | Library |
-|---|---|
-| Framework | React 19 |
-| Build | Vite 7 + SWC |
-| Styling | Tailwind CSS 4 |
-| UI | Radix UI + shadcn-style wrappers in `src/components/ui/` |
-| Routing | react-router v7 (declarative `<Routes>/<Route>`) |
-| Forms | react-hook-form 7 + zod 4 + `@hookform/resolvers` |
-| Tables | @tanstack/react-table 8 |
-| Notifications | sonner 2 (`toast`) |
-| Real-time | socket.io-client 4 |
-| Testing | Vitest 4 + @testing-library/react + jsdom |
+### Data access and networking
 
-## Core Patterns
+- Always use `fetchApi` from `src/lib/fetchApi.ts` for HTTP requests.
+- Do not call `fetch` directly in pages/components/services.
+- Use Socket.IO only where already established for bid placement (`src/services/bid.api.ts` + `src/lib/socket.io.ts`).
 
-### API Calls
+### UI and forms
 
-All HTTP calls use `fetchApi<T>()` from [src/lib/fetchApi.ts](src/lib/fetchApi.ts):
+- Use existing shadcn/ui primitives in `src/components/ui`; do not add a second component library.
+- For new forms, follow `.github/skills/add-form/SKILL.md` (react-hook-form + zod + Controller + Field patterns).
 
-```ts
-fetchApi<ResponseOK<Auction>>(url, { method: 'GET' }, {
-  promise: 'Loading...', resolve: 'Done!', reject: 'Error message: '
-})
-```
+### Routing, auth, and state
 
-- Always sends `credentials: 'include'` (JWT via HTTP-only cookie)
-- Non-2xx throws the parsed JSON body
-- Pass a `notification` object to show `toast.promise()` feedback
-- Never set `Content-Type` manually for `FormData` — the browser sets the multipart boundary
+- Keep protected routes wrapped with `ProtectedRoute` and role checks (`userType`) in route definitions.
+- Access auth state through `useLoggedInUser()` / `useLogout()` and locale via `useLocale()`.
 
-Service files (`src/services/*.api.ts`) call `fetchApi` directly. Add new service functions there, not inline in components.
+### Imports and type contracts
 
-### Authentication
+- Use the `@/` alias for internal imports (configured in `vite.config.ts` and `tsconfig.json`).
+- Keep frontend formulas in `src/lib/auction-metrics.ts` aligned with backend behavior when auction calculations change.
 
-- JWT stored as HTTP-only cookie (set by API); user profile in `logged-in-user` cookie (JSON)
-- `AuthProvider` ([src/contexts/auth.context.tsx](src/contexts/auth.context.tsx)) reads the cookie on mount and refreshes from the API
-- `useLoggedInUser()` returns `User | undefined` — check `undefined`, not `null`
-- `useLogout()` clears state, removes cookie, navigates to `/login`
+## Testing and Diagnostics
 
-**Route protection**: Wrap routes with `<ProtectedRoute userType={…}>`. Accepts `UserType` (`ADMIN`, `INVESTOR`) and `InvestorType` (`INDIVIDUAL`, `COMPANY`). Passing `UserType.INVESTOR` allows all investors regardless of sub-type.
-
-### Forms
-
-```ts
-const formSchema = z.object({ field: z.string() })
-
-const form = useForm<z.infer<typeof formSchema>>({
-  resolver: zodResolver(formSchema),
-  mode: 'onTouched',
-  defaultValues: { field: '' }
-})
-```
-
-Use `<Controller>` + the custom `<Field data-invalid={fieldState.invalid}>` component from [src/components/ui/field.tsx](src/components/ui/field.tsx) for consistent styling and error display.
-
-### Types
-
-Response types are in [src/types/Response.ts](src/types/Response.ts):
-- `ResponseOK<T>` — `{ status: 'success', data: T }`
-- `PaginatedResponse<T>` — includes `_metadata` with `total`, `page`, `limit`
-- `ResponseKO` — error body thrown by `fetchApi`
-
-User types in [src/types/User.ts](src/types/User.ts) — `User = Admin | Investor`, all enums live here.
-
-### Breadcrumbs for Detail Pages
-
-`lastBreadcrumb` state lives in `App.tsx` and is passed as `setLastBreadcrumb` prop to detail pages. Always call `setLastBreadcrumb(entity.name)` in detail page components or the breadcrumb will show a stale label.
-
-## Testing Patterns
-
-Tests in `test/` use Vitest globals (no imports needed for `describe`/`it`/`expect`). Use the `@` alias (`@/lib/...`) to import from `src/`.
-
-**Unit tests**: Pure function tests in `test/lib/`. Example: [test/lib/format-date.test.ts](test/lib/format-date.test.ts)
-
-**Component tests**: Use `@testing-library/react` in `test/components/ui/`. `ResizeObserver` and `matchMedia` are mocked in [test/setup.ts](test/setup.ts) — required for Radix UI and react-day-picker.
+- Unit tests: Vitest under `test/**`.
+- For final checks or triage, use `.github/skills/react-doctor/SKILL.md` and run `npm run doctor`.
+- When changing behavior, update or add tests close to the affected area (`test/lib`, `test/components`, `test/pages`).
 
 ## Common Pitfalls
 
-| Issue | Solution |
-|---|---|
-| Auth context split files | `AuthContext` (no JSX) in `auth.context.ts`, `AuthProvider` in `auth.context.tsx` — import from the correct file |
-| Date off-by-one | Date-only fields (e.g. invoice due date) must use `parseDateOnly()` / `toDateOnlyString()` from [src/lib/format-date.ts](src/lib/format-date.ts) with `timeZone: 'UTC'`; never use `new Date('YYYY-MM-DD')` directly |
-| FormData Content-Type | Never set `Content-Type` for `FormData` — the browser must set it with the multipart boundary |
-| Missing `.env` | Copy `.env.template` → `.env`; all `VITE_*` vars are baked in at build time |
-| Error messages not visible | Server errors surface only via `toast.error` (sonner) — no inline form errors from API responses |
-| Stale breadcrumb | Call `setLastBreadcrumb` in every detail page component |
-| Locale for formatting | Pass the `locale` from `useLocale()` explicitly to all `format-currency` / `format-date` helpers |
+- Bypassing `fetchApi` breaks shared auth/error/toast behavior.
+- Mixing direct state with context state causes auth/locale inconsistencies.
+- Editing auction metric formulas without backend parity causes UI drift.
+- Introducing non-shadcn UI primitives creates style and maintenance inconsistency.
 
----
+## Session History Note
 
-**Last Updated**: April 2026 | **Stack**: React 19 + Vite 7 + TypeScript 5
+Current session-history data for this workspace is sparse. These instructions are based on repository conventions and existing docs. Run `/chronicle improve` after a few SPA coding sessions to refine this file from real friction patterns.
